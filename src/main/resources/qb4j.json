@@ -1,0 +1,30 @@
+{
+  "dev": {
+    "targetDataSources": [
+      {
+        "name": "querybuilder4j",
+        "url": "jdbc:sqlite:./data/querybuilder4j.db",
+        "driverClassName": "org.sqlite.JDBC",
+        "databaseType": "Sqlite"
+      }
+    ],
+    "queryTemplateDataSource": {
+      "url": "jdbc:sqlite:./data/query_templates.db",
+      "driverClassName": "org.sqlite.JDBC"
+    }
+  },
+  "prod": {
+    "targetDataSources": [
+      {
+        "name": "querybuilder4j",
+        "url": "jdbc:sqlite:/qb4j/data/querybuilder4j.db",
+        "driverClassName": "org.sqlite.JDBC",
+        "databaseType": "Sqlite"
+      }
+    ],
+    "queryTemplateDataSource": {
+      "url": "jdbc:sqlite:/qb4j/data/query_templates.db",
+      "driverClassName": "org.sqlite.JDBC"
+    }
+  }
+}

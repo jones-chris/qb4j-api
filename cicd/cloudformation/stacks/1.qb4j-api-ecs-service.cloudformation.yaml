@@ -1,0 +1,530 @@
+---
+Resources:
+  TaskDefinitionExecutionRole3138A4FF:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ''
+            - - 'arn:'
+              - Ref: AWS::Partition
+              - ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - elasticloadbalancing:DeregisterInstancesFromLoadBalancer
+                  - elasticloadbalancing:DeregisterTargets
+                  - elasticloadbalancing:Describe*
+                  - elasticloadbalancing:RegisterInstancesWithLoadBalancer
+                  - elasticloadbalancing:RegisterTargets
+                  - ec2:Describe*
+                  - ec2:AuthorizeSecurityGroupIngress
+                Effect: Allow
+                Resource: "*"
+            Version: '2012-10-17'
+          PolicyName: policy_0
+    Metadata:
+      aws:cdk:path: EcsServiceStack/TaskDefinitionExecutionRole/Resource
+  TaskDefinitionExecutionRoleDefaultPolicyFBB0C586:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - LoadBalancedFargateServiceTaskDefwebLogGroup8A3DD153
+                - Arn
+        Version: '2012-10-17'
+      PolicyName: TaskDefinitionExecutionRoleDefaultPolicyFBB0C586
+      Roles:
+        - Ref: TaskDefinitionExecutionRole3138A4FF
+    Metadata:
+      aws:cdk:path: EcsServiceStack/TaskDefinitionExecutionRole/DefaultPolicy/Resource
+  Vpc8378EB38:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/Resource
+  VpcPublicSubnet1Subnet5C2D37C4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.0/18
+      VpcId:
+        Ref: Vpc8378EB38
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ''
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet1
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet1/Subnet
+  VpcPublicSubnet1RouteTable6C95E38E:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc8378EB38
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet1
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet1/RouteTable
+  VpcPublicSubnet1RouteTableAssociation97140677:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: VpcPublicSubnet1RouteTable6C95E38E
+      SubnetId:
+        Ref: VpcPublicSubnet1Subnet5C2D37C4
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet1/RouteTableAssociation
+  VpcPublicSubnet1DefaultRoute3DA9E72A:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: VpcPublicSubnet1RouteTable6C95E38E
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: VpcIGWD7BA715C
+    DependsOn:
+      - VpcVPCGWBF912B6E
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet1/DefaultRoute
+  VpcPublicSubnet1EIPD7E02669:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet1
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet1/EIP
+  VpcPublicSubnet1NATGateway4D7517AA:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - VpcPublicSubnet1EIPD7E02669
+          - AllocationId
+      SubnetId:
+        Ref: VpcPublicSubnet1Subnet5C2D37C4
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet1
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet1/NATGateway
+  VpcPublicSubnet2Subnet691E08A3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.64.0/18
+      VpcId:
+        Ref: Vpc8378EB38
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ''
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet2
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet2/Subnet
+  VpcPublicSubnet2RouteTable94F7E489:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc8378EB38
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet2
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet2/RouteTable
+  VpcPublicSubnet2RouteTableAssociationDD5762D8:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: VpcPublicSubnet2RouteTable94F7E489
+      SubnetId:
+        Ref: VpcPublicSubnet2Subnet691E08A3
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet2/RouteTableAssociation
+  VpcPublicSubnet2DefaultRoute97F91067:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: VpcPublicSubnet2RouteTable94F7E489
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: VpcIGWD7BA715C
+    DependsOn:
+      - VpcVPCGWBF912B6E
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet2/DefaultRoute
+  VpcPublicSubnet2EIP3C605A87:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet2
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet2/EIP
+  VpcPublicSubnet2NATGateway9182C01D:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - VpcPublicSubnet2EIP3C605A87
+          - AllocationId
+      SubnetId:
+        Ref: VpcPublicSubnet2Subnet691E08A3
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PublicSubnet2
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PublicSubnet2/NATGateway
+  VpcPrivateSubnet1Subnet536B997A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.128.0/18
+      VpcId:
+        Ref: Vpc8378EB38
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ''
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PrivateSubnet1
+        - Key: aws-cdk:subnet-name
+          Value: Private
+        - Key: aws-cdk:subnet-type
+          Value: Private
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet1/Subnet
+  VpcPrivateSubnet1RouteTableB2C5B500:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc8378EB38
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PrivateSubnet1
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet1/RouteTable
+  VpcPrivateSubnet1RouteTableAssociation70C59FA6:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: VpcPrivateSubnet1RouteTableB2C5B500
+      SubnetId:
+        Ref: VpcPrivateSubnet1Subnet536B997A
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet1/RouteTableAssociation
+  VpcPrivateSubnet1DefaultRouteBE02A9ED:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: VpcPrivateSubnet1RouteTableB2C5B500
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: VpcPublicSubnet1NATGateway4D7517AA
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet1/DefaultRoute
+  VpcPrivateSubnet2Subnet3788AAA1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.192.0/18
+      VpcId:
+        Ref: Vpc8378EB38
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ''
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PrivateSubnet2
+        - Key: aws-cdk:subnet-name
+          Value: Private
+        - Key: aws-cdk:subnet-type
+          Value: Private
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet2/Subnet
+  VpcPrivateSubnet2RouteTableA678073B:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Vpc8378EB38
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc/PrivateSubnet2
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet2/RouteTable
+  VpcPrivateSubnet2RouteTableAssociationA89CAD56:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: VpcPrivateSubnet2RouteTableA678073B
+      SubnetId:
+        Ref: VpcPrivateSubnet2Subnet3788AAA1
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet2/RouteTableAssociation
+  VpcPrivateSubnet2DefaultRoute060D2087:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: VpcPrivateSubnet2RouteTableA678073B
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: VpcPublicSubnet2NATGateway9182C01D
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/PrivateSubnet2/DefaultRoute
+  VpcIGWD7BA715C:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: EcsServiceStack/Vpc
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/IGW
+  VpcVPCGWBF912B6E:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: Vpc8378EB38
+      InternetGatewayId:
+        Ref: VpcIGWD7BA715C
+    Metadata:
+      aws:cdk:path: EcsServiceStack/Vpc/VPCGW
+  LoadBalancedFargateServiceLB454B0F67:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internet-facing
+      SecurityGroups:
+        - Fn::GetAtt:
+            - LoadBalancedFargateServiceLBSecurityGroupD490C37A
+            - GroupId
+      Subnets:
+        - Ref: VpcPublicSubnet1Subnet5C2D37C4
+        - Ref: VpcPublicSubnet2Subnet691E08A3
+      Type: application
+    DependsOn:
+      - VpcPublicSubnet1DefaultRoute3DA9E72A
+      - VpcPublicSubnet2DefaultRoute97F91067
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/LB/Resource
+  LoadBalancedFargateServiceLBSecurityGroupD490C37A:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Automatically created Security Group for ELB EcsServiceStackLoadBalancedFargateServiceLB964400F6
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 80
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId:
+        Ref: Vpc8378EB38
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/LB/SecurityGroup/Resource
+  LoadBalancedFargateServiceLBSecurityGrouptoEcsServiceStackLoadBalancedFargateServiceSecurityGroupAAD1E9CC8080AECBAB9C:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Fn::GetAtt:
+          - LoadBalancedFargateServiceLBSecurityGroupD490C37A
+          - GroupId
+      IpProtocol: tcp
+      Description: Load balancer to target
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+          - LoadBalancedFargateServiceSecurityGroup886FFD49
+          - GroupId
+      FromPort: 8080
+      ToPort: 8080
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/LB/SecurityGroup/to
+        EcsServiceStackLoadBalancedFargateServiceSecurityGroupAAD1E9CC:8080
+  LoadBalancedFargateServiceLBPublicListenerF2E6CEBE:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn:
+            Ref: LoadBalancedFargateServiceLBPublicListenerECSGroupA24AD192
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancedFargateServiceLB454B0F67
+      Port: 80
+      Protocol: HTTP
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/LB/PublicListener/Resource
+  LoadBalancedFargateServiceLBPublicListenerECSGroupA24AD192:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Ref: Vpc8378EB38
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/LB/PublicListener/ECSGroup/Resource
+  LoadBalancedFargateServiceTaskDef16FE5251:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Essential: true
+          Image: joneschris/qb4j-mvc:1
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LoadBalancedFargateServiceTaskDefwebLogGroup8A3DD153
+              awslogs-stream-prefix: LoadBalancedFargateService
+              awslogs-region:
+                Ref: AWS::Region
+          Name: web
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+      Cpu: '256'
+      ExecutionRoleArn:
+        Fn::GetAtt:
+          - TaskDefinitionExecutionRole3138A4FF
+          - Arn
+      Family: EcsServiceStackLoadBalancedFargateServiceTaskDef55A885EA
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn:
+        Fn::GetAtt:
+          - TaskDefinitionExecutionRole3138A4FF
+          - Arn
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/TaskDef/Resource
+  LoadBalancedFargateServiceTaskDefwebLogGroup8A3DD153:
+    Type: AWS::Logs::LogGroup
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/TaskDef/web/LogGroup/Resource
+  LoadBalancedFargateServiceCB95839D:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Ref: EcsDefaultClusterMnL3mNNYNVpc18E0451A
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      DesiredCount: 1
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: web
+          ContainerPort: 8080
+          TargetGroupArn:
+            Ref: LoadBalancedFargateServiceLBPublicListenerECSGroupA24AD192
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - Fn::GetAtt:
+                - LoadBalancedFargateServiceSecurityGroup886FFD49
+                - GroupId
+          Subnets:
+            - Ref: VpcPrivateSubnet1Subnet536B997A
+            - Ref: VpcPrivateSubnet2Subnet3788AAA1
+      TaskDefinition:
+        Ref: LoadBalancedFargateServiceTaskDef16FE5251
+    DependsOn:
+      - LoadBalancedFargateServiceLBPublicListenerECSGroupA24AD192
+      - LoadBalancedFargateServiceLBPublicListenerF2E6CEBE
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/Service/Service
+  LoadBalancedFargateServiceSecurityGroup886FFD49:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EcsServiceStack/LoadBalancedFargateService/Service/SecurityGroup
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId:
+        Ref: Vpc8378EB38
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/Service/SecurityGroup/Resource
+  LoadBalancedFargateServiceSecurityGroupfromEcsServiceStackLoadBalancedFargateServiceLBSecurityGroup187B980A8080D004565B:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      Description: Load balancer to target
+      FromPort: 8080
+      GroupId:
+        Fn::GetAtt:
+          - LoadBalancedFargateServiceSecurityGroup886FFD49
+          - GroupId
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - LoadBalancedFargateServiceLBSecurityGroupD490C37A
+          - GroupId
+      ToPort: 8080
+    Metadata:
+      aws:cdk:path: EcsServiceStack/LoadBalancedFargateService/Service/SecurityGroup/from
+        EcsServiceStackLoadBalancedFargateServiceLBSecurityGroup187B980A:8080
+  EcsDefaultClusterMnL3mNNYNVpc18E0451A:
+    Type: AWS::ECS::Cluster
+    Metadata:
+      aws:cdk:path: EcsServiceStack/EcsDefaultClusterMnL3mNNYNVpc/Resource
+Outputs:
+  LoadBalancedFargateServiceLoadBalancerDNSF3B6333A:
+    Value:
+      Fn::GetAtt:
+        - LoadBalancedFargateServiceLB454B0F67
+        - DNSName
+  LoadBalancedFargateServiceServiceURLA3D7F0DD:
+    Value:
+      Fn::Join:
+        - ''
+        - - http://
+          - Fn::GetAtt:
+              - LoadBalancedFargateServiceLB454B0F67
+              - DNSName
