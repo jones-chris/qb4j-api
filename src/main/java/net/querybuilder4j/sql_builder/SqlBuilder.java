@@ -163,14 +163,10 @@ public abstract class SqlBuilder {
         List<Criterion> criteria = this.selectStatement.getCriteria();
 
         if (! criteria.isEmpty()) {
-            CriteriaSqlStringHolder criteriaSqlStringHolder = new CriteriaSqlStringHolder();
-
-            this.selectStatement.getCriteria().forEach(criterion -> {
-                criterion.toSqlDeep(this.beginningDelimiter, this.endingDelimiter, criteriaSqlStringHolder);
-            });
+            CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(criteria);
 
             this.stringBuilder.append(" WHERE ");
-            String joinedCriteriaSqlStrings = criteriaSqlStringHolder.getSqlStringRepresentation();
+            String joinedCriteriaSqlStrings = criteriaTreeFlattener.getSqlStringRepresentation(beginningDelimiter, endingDelimiter);
             this.stringBuilder.append(joinedCriteriaSqlStrings);
         }
     }

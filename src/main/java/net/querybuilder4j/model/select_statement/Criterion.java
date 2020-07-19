@@ -48,6 +48,10 @@ public class Criterion implements SqlRepresentation, Validator {
         return ofNullable(this.openingParenthesis).orElse(Parenthesis.Empty);
     }
 
+    public void setOpeningParenthesis(Parenthesis parenthesis) {
+        this.openingParenthesis = parenthesis;
+    }
+
     public Conjunction getConjunction() {
         return ofNullable(this.conjunction).orElse(Conjunction.Empty);
     }
@@ -86,10 +90,6 @@ public class Criterion implements SqlRepresentation, Validator {
         }
     }
 
-    public boolean isRoot() {
-        return this.parentCriterion == null;
-    }
-
     public List<String> getFilterItems() {
         return Arrays.asList(this.filter.split(","));
     }
@@ -100,22 +100,6 @@ public class Criterion implements SqlRepresentation, Validator {
 
     public boolean isParent() {
         return this.childCriteria != null && ! this.childCriteria.isEmpty();
-    }
-
-    public boolean hasParent() {
-        return this.parentCriterion != null;
-    }
-
-    public boolean isLastChildInBranch() {
-        return ! this.isParent() && this.hasParent();
-    }
-
-    public boolean hasOpeningParenthesis() {
-        return this.openingParenthesis.equals(Parenthesis.FrontParenthesis);
-    }
-
-    public boolean hasClosingParenthesis() {
-        return this.closingParenthesis != null && ! this.closingParenthesis.isEmpty();
     }
 
     @Override
@@ -179,49 +163,6 @@ public class Criterion implements SqlRepresentation, Validator {
                     this.getOperator(),
                     this.getFilter(),
                     closingParenthesisString);
-        }
-    }
-
-    /**
-     * Walks the criteria tree and returns a SQL string representation of this criterion and all it's childCriteria.  Use
-     * this method when you want this criterion's SQL string representation AND it's childCriteria's SQL string
-     * representations.
-     *
-     * @param beginningDelimiter The beginning delimiter based on the SQL dialect.
-     * @param endingDelimiter The ending delimiter based on the SQL dialect.
-     * @param criteriaSqlStringHolder An object that encapsulates the list of crtierion SQL string representations that
-     *                                acts as a holder/container for the criterion and it's children as it's passed through
-     *                                the tree.
-     * @return The SQL string representation of the criteria tree.
-     */
-    public void toSqlDeep(char beginningDelimiter, char endingDelimiter, CriteriaSqlStringHolder criteriaSqlStringHolder) throws IllegalArgumentException {
-        // If this criterion is a root criterion (meaning, it has no parent), then reset the criteriaSqlStringHolder.
-        if (this.isRoot()) {
-            this.openingParenthesis = Parenthesis.Empty;
-            criteriaSqlStringHolder.resetNumOfOpeningAndClosingParenthesis();
-        }
-
-        // If the criterion is somewhere in the middle of the tree - it is not a root criterion, but it is a parent of child
-        // criteria.
-        if (! this.isRoot() && this.isParent()) {
-            this.openingParenthesis = Parenthesis.FrontParenthesis;
-        }
-
-        // If criterion is the last child in this branch of the tree, add the necessary number of closing parenthesis.
-        if (this.isLastChildInBranch()) {
-            int numClosingParenthesisToAdd = criteriaSqlStringHolder.getDiffOfOpeningAndClosingParenthesis();
-
-            for (int i=0; i<numClosingParenthesisToAdd; i++) {
-                this.closingParenthesis.add(Parenthesis.EndParenthesis);
-            }
-        }
-
-        // Get this criterion's SQL string representation.
-        criteriaSqlStringHolder.addSqlString(this, beginningDelimiter, endingDelimiter);
-
-        // Call this method for each of this criterion's childCriteria (if it has any).
-        for (Criterion childCriterion : this.childCriteria) {
-            childCriterion.toSqlDeep(beginningDelimiter, endingDelimiter, criteriaSqlStringHolder);
         }
     }
 
