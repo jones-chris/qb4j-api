@@ -17,7 +17,6 @@ public class CriterionTest {
         Column column = createMockColumn("test", false);
         Criterion criterion = new Criterion(null, null, column, Operator.like, "hello%", null);
 
-
         assertTrue(criterion.hasSearchOperator());
     }
 

@@ -1,4 +1,4 @@
-# QueryBuilder4J-API
+# qb4j-api
 
 ## Deployment
 
