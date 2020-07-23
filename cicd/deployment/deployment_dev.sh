@@ -14,7 +14,7 @@ echo "$PRIVATE_KEY" > private_key.txt
 chmod 600 private_key.txt
 
 # ssh into the lightsail instance, pull the docker image, stop the existing docker container, start a container from the
-# new image.
+# new image, and remove all unused images (so that the lightsail instance doesn't run out of disk space).
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" "/bin/bash -s $1" << "EOF"
   DOCKER_IMAGE_TAG=$1
 
@@ -27,6 +27,8 @@ ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" 
   sudo docker container stop "$DOCKER_CONTAINER_ID_TO_STOP"
 
   sudo nohup docker container run --publish 8080:8080 --detach joneschris/qb4j-mvc:"$DOCKER_IMAGE_TAG"
+
+  sudo docker image prune -a
 
   exit
 EOF
