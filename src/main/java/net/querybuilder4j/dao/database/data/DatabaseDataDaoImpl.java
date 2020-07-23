@@ -61,7 +61,7 @@ public class DatabaseDataDaoImpl implements DatabaseDataDao {
         selectStatement.getColumns().add(column);
         selectStatement.setTable(new Table(databaseName, schemaName, tableName));
         if (search != null) {
-            Criterion criterion = new Criterion(null, null, column, Operator.like, search, null);
+            Criterion criterion = new Criterion(0, null, null, column, Operator.like, search, null);
             selectStatement.getCriteria().add(criterion);
         }
         selectStatement.setLimit(Integer.toUnsignedLong(limit));

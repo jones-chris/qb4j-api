@@ -18,6 +18,7 @@ import static net.querybuilder4j.sql_builder.SqlCleanser.sqlIsClean;
 
 public class Criterion implements SqlRepresentation, Validator {
 
+    private int id;
     private Criterion parentCriterion;
     private Parenthesis openingParenthesis = Parenthesis.Empty;
     private Conjunction conjunction;
@@ -27,8 +28,9 @@ public class Criterion implements SqlRepresentation, Validator {
     private List<Parenthesis> closingParenthesis = new ArrayList<>();
     private List<Criterion> childCriteria = new ArrayList<>();
 
-    public Criterion(Criterion parentCriterion, Conjunction conjunction, Column column, Operator operator, String filter,
+    public Criterion(int id, Criterion parentCriterion, Conjunction conjunction, Column column, Operator operator, String filter,
                      List<Criterion> childCriteria) {
+        this.id = id;
         this.parentCriterion = parentCriterion;
         this.conjunction = conjunction;
         this.column = column;
@@ -38,6 +40,10 @@ public class Criterion implements SqlRepresentation, Validator {
         if (childCriteria != null) {
             this.childCriteria = childCriteria;
         }
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Criterion getParentCriterion() {
@@ -88,6 +94,10 @@ public class Criterion implements SqlRepresentation, Validator {
         if (childCriteria != null) {
             this.childCriteria = childCriteria;
         }
+    }
+
+    public boolean isRoot() {
+        return this.parentCriterion == null;
     }
 
     public List<String> getFilterItems() {

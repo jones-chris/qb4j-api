@@ -2,6 +2,8 @@ package net.querybuilder4j.model.select_statement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import net.querybuilder4j.converter.CriteriaDeserializer;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Join;
@@ -38,6 +40,7 @@ public class SelectStatement {
     /**
      * The criteria in the WHERE SQL clause.
      */
+    @JsonDeserialize(using = CriteriaDeserializer.class)
     private List<Criterion> criteria = new ArrayList<>();
 
     /**

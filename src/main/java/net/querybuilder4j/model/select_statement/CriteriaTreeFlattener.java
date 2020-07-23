@@ -1,7 +1,6 @@
 package net.querybuilder4j.model.select_statement;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class CriteriaTreeFlattener {
@@ -23,7 +22,7 @@ public class CriteriaTreeFlattener {
     private int numOfClosingParenthesisInBranch = 0;
 
     public CriteriaTreeFlattener(List<Criterion> criteria) {
-        this.setFlattenedCriteria(criteria);
+        this.flattenedCriteria = flattenCriteria(criteria, new HashMap<>());
         this.addParenthesis();
     }
 
@@ -56,6 +55,11 @@ public class CriteriaTreeFlattener {
             this.resetNumOfOpeningAndClosingParenthesis();
 
             criteria.forEach(criterion -> {
+                // If the criterion is first root, then set conjunction to empty.
+                if (rootIndex == 0 && criterion.isRoot()) {
+                    criterion.setConjunction(Conjunction.Empty);
+                }
+
                 // If the criterion is a parent, then add an opening/front parenthesis.
                 if (criterion.isParent()) {
                     this.addOpeningParenthesis(criterion);
@@ -138,25 +142,27 @@ public class CriteriaTreeFlattener {
      *
      * @param criteria The criteria tree to walk.
      */
-    private void setFlattenedCriteria(List<Criterion> criteria) {
+    public static Map<Integer, List<Criterion>> flattenCriteria(List<Criterion> criteria, Map<Integer, List<Criterion>> flattenedCriteriaHolder) {
         for (Criterion criterion : criteria) {
             // If the criterion is a root, then create a new entry pair in the `flattenedCriteria` map.
             if (criterion.getParentCriterion() == null) {
-                this.flattenedCriteria.put(
-                        this.flattenedCriteria.size(),
+                flattenedCriteriaHolder.put(
+                        flattenedCriteriaHolder.size(),
                         new ArrayList<>(Collections.singletonList(criterion)) // Has to be wrapped so that the list is mutable.
                 );
             } else {
                 // If the criterion is a child, then add it to the current entry pair value because it must be under the
                 // same root criterion.
-                this.flattenedCriteria.get(
-                        this.flattenedCriteria.size() - 1 // Always assume we're on the latest root criterion while walking the tree.
+                flattenedCriteriaHolder.get(
+                        flattenedCriteriaHolder.size() - 1 // Always assume we're on the latest root criterion while walking the tree.
                 ).add(criterion);
             }
 
             // Continue to walk the tree's depth.
-            setFlattenedCriteria(criterion.getChildCriteria());
+            flattenCriteria(criterion.getChildCriteria(), flattenedCriteriaHolder);
         }
+
+        return flattenedCriteriaHolder;
     }
 
     /**

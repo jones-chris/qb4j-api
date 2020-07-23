@@ -278,14 +278,14 @@ public abstract class SqlBuilder {
     private void addCriterionForExcludingJoin(List<Column> columns) {
         // Create parent criterion.
         Column firstColumn = columns.get(0);
-        Criterion parentCriterion = new Criterion(null, Conjunction.And, firstColumn, Operator.isNull, null, null);
+        Criterion parentCriterion = new Criterion(0,null, Conjunction.And, firstColumn, Operator.isNull, null, null);
 
         // Create child criteria, if there is more than one column.
         List<Criterion> childCriteria = new ArrayList<>();
         if (columns.size() > 1) {
             for (int i=1; i<columns.size(); i++) {
                 Column column = columns.get(i);
-                Criterion childCriterion = new Criterion(parentCriterion, Conjunction.Or, column, Operator.isNull, null, null);
+                Criterion childCriterion = new Criterion(0, parentCriterion, Conjunction.Or, column, Operator.isNull, null, null);
                 childCriteria.add(childCriterion);
             }
 
@@ -306,13 +306,13 @@ public abstract class SqlBuilder {
             boolean addAndConjunction = ! this.selectStatement.getCriteria().isEmpty();
             Conjunction conjunction = (addAndConjunction) ? Conjunction.And : Conjunction.Empty;
             Column firstColumn = this.selectStatement.getColumns().get(0);
-            Criterion parentCriterion = new Criterion(null, conjunction, firstColumn, Operator.isNotNull, null, null);
+            Criterion parentCriterion = new Criterion(0, null, conjunction, firstColumn, Operator.isNotNull, null, null);
 
             // Create list of children criteria, which are all columns except for the first column.
             List<Criterion> childCriteria = new ArrayList<>();
             for (int i=1; i<this.selectStatement.getColumns().size(); i++) {
                 Column column = this.selectStatement.getColumns().get(i);
-                Criterion childCriterion = new Criterion(parentCriterion, Conjunction.Or, column, Operator.isNotNull, null, null);
+                Criterion childCriterion = new Criterion(0, parentCriterion, Conjunction.Or, column, Operator.isNotNull, null, null);
                 childCriteria.add(childCriterion);
             }
 
