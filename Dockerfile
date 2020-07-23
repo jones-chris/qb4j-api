@@ -15,4 +15,4 @@ COPY /data /qb4j/data
 
 EXPOSE 8080
 
-CMD java -jar /qb4j/querybuilder4jmvc-${project_version}.jar
+CMD java -jar /qb4j/qb4j-api-${project_version}.jar
