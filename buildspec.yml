@@ -55,7 +55,7 @@ phases:
 
 artifacts:
   files:
-    - target/querybuilder4jmvc-$PROJECT_VERSION.jar
+    - target/qb4j-api-$PROJECT_VERSION.jar
   discard-paths: yes
 #  secondary-artifacts:
 #    code_coverage:

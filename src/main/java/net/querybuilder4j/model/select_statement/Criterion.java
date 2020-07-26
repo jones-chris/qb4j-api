@@ -7,10 +7,7 @@ import net.querybuilder4j.model.SqlRepresentation;
 import net.querybuilder4j.model.select_statement.validator.Validator;
 import net.querybuilder4j.sql_builder.SqlCleanser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -161,7 +158,9 @@ public class Criterion implements SqlRepresentation, Validator {
                     beginningDelimiter, table, endingDelimiter,
                     beginningDelimiter, columnName, endingDelimiter,
                     this.getOperator(),
-                    this.getFilter(),
+                    (this.getOperator().equals(Operator.isNull) || this.getOperator().equals(Operator.isNotNull))
+                            ? ""
+                            : "(" + this.getFilter() + ")",
                     closingParenthesisString);
         } else {
             return String.format(" %s %s%s%s%s.%s%s%s.%s%s%s %s %s%s ",
@@ -171,7 +170,9 @@ public class Criterion implements SqlRepresentation, Validator {
                     beginningDelimiter, table, endingDelimiter,
                     beginningDelimiter, columnName, endingDelimiter,
                     this.getOperator(),
-                    this.getFilter(),
+                    (this.getOperator().equals(Operator.isNull) || this.getOperator().equals(Operator.isNotNull))
+                            ? ""
+                            : "(" + this.getFilter() + ")",
                     closingParenthesisString);
         }
     }
@@ -194,6 +195,10 @@ public class Criterion implements SqlRepresentation, Validator {
 
     public boolean hasSearchOperator() {
         return this.operator != null && (this.operator.equals(Operator.like) || this.operator.equals(Operator.notLike));
+    }
+
+    public boolean hasMultipleValuesOperator() {
+        return this.operator != null && (this.operator.equals(Operator.in) || this.operator.equals(Operator.notIn));
     }
 
 }

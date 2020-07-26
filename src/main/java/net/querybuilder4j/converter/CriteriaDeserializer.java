@@ -19,11 +19,6 @@ import java.util.List;
 
 public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
 
-    /**
-     * Holds the criteria as they are deserialized.
-     */
-    private List<Criterion> deserializedCriteria = new ArrayList<>();
-
     public CriteriaDeserializer() {
         this(null);
     }
@@ -33,23 +28,24 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
     }
 
     @Override
-    public List<Criterion> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public List<Criterion> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         ArrayNode node = jsonParser.getCodec().readTree(jsonParser);
+        List<Criterion> deserializedCriteria = new ArrayList<>();
         node.forEach(jsonNode -> {
-            Criterion newCriterion = buildCriterion(jsonNode);
+            Criterion newCriterion = buildCriterion(jsonNode, deserializedCriteria);
 
             // Only add root criterion directly to the `deserializedCriteria` list.  Non-root/child criterion will be
             // added to the list by being added to non-root/child criterions' child criteria in the `buildCriterion`
             // method.
             if (newCriterion.isRoot()) {
-                this.deserializedCriteria.add(newCriterion);
+                deserializedCriteria.add(newCriterion);
             }
         });
 
-        return this.deserializedCriteria;
+        return deserializedCriteria;
     }
 
-    private Criterion buildCriterion(JsonNode criterionJson) {
+    private Criterion buildCriterion(JsonNode criterionJson, List<Criterion> deserializedCriteria) {
         Conjunction conjunction = Conjunction.valueOf(criterionJson.get("conjunction").asText());
         Column column = new Column(
                 criterionJson.get("column").get("databaseName").asText(),
@@ -71,7 +67,7 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
 
             List<Criterion> flattenedCriteria = new ArrayList<>();
 
-            CriteriaTreeFlattener.flattenCriteria(this.deserializedCriteria, new HashMap<>())
+            CriteriaTreeFlattener.flattenCriteria(deserializedCriteria, new HashMap<>())
                     .forEach((rootIndex, criteria) -> flattenedCriteria.addAll(criteria));
 
             parentCriterion = flattenedCriteria.stream()
