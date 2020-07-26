@@ -43,7 +43,7 @@ sudo apt install docker-ce -y
 sudo docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
 
 # Pull docker image.
-sudo docker pull joneschris/qb4j-mvc:"$DOCKER_IMAGE_TAG"
+sudo docker pull joneschris/qb4j-api:"$DOCKER_IMAGE_TAG"
 
 # Run docker image in a container
-sudo nohup docker container run --publish 8080:8080 --detach joneschris/qb4j-mvc:$"DOCKER_IMAGE_TAG"
+sudo nohup docker container run --publish 8080:8080 --detach joneschris/qb4j-api:$"DOCKER_IMAGE_TAG"

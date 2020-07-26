@@ -64,7 +64,7 @@ public class CriterionTest {
     public void toSql_nullSchema() {
         Column column = createMockColumn(null, true);
         Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, "test", null);
-        String expectedSql = " AND `test`.`test` = test ";
+        String expectedSql = " AND `test`.`test` = (test) ";
 
         String actualSql = criterion.toSql('`', '`');
 
@@ -75,7 +75,7 @@ public class CriterionTest {
     public void toSql_nullStringSchema() {
         Column column = createMockColumn("null", true);
         Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, "test", null);
-        String expectedSql = " AND `test`.`test` = test ";
+        String expectedSql = " AND `test`.`test` = (test) ";
 
         String actualSql = criterion.toSql('`', '`');
 
@@ -86,7 +86,7 @@ public class CriterionTest {
     public void toSql_nonNullSchema() {
         Column column = createMockColumn("my_schema", true);
         Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, "test", null);
-        String expectedSql = " AND `my_schema`.`test`.`test` = test ";
+        String expectedSql = " AND `my_schema`.`test`.`test` = (test) ";
 
         String actualSql = criterion.toSql('`', '`');
 
@@ -105,7 +105,7 @@ public class CriterionTest {
         Criterion rootCriterion = createMockCriterion(null, column, null);
         Criterion childCriterion = createMockCriterion(rootCriterion, column, null);
         rootCriterion.getChildCriteria().add(childCriterion);
-        String expectedSql = "  (`test`.`test` = test   AND `test`.`test` = test) ";
+        String expectedSql = "  (`test`.`test` = (test)   AND `test`.`test` = (test)) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
                 Collections.singletonList(rootCriterion)
@@ -128,7 +128,7 @@ public class CriterionTest {
         Criterion childCriterion1 = createMockCriterion(rootCriterion, column, null);
         Criterion childCriterion2 = createMockCriterion(rootCriterion, column, null);
         rootCriterion.setChildCriteria(Arrays.asList(childCriterion1, childCriterion2));
-        String expectedSql = "  (`test`.`test` = test   AND `test`.`test` = test   AND `test`.`test` = test) ";
+        String expectedSql = "  (`test`.`test` = (test)   AND `test`.`test` = (test)   AND `test`.`test` = (test)) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
                 Collections.singletonList(rootCriterion)
@@ -152,7 +152,7 @@ public class CriterionTest {
         Criterion childCriterion1_1 = createMockCriterion(childCriterion1, column, null);
         childCriterion1.setChildCriteria(Collections.singletonList(childCriterion1_1));
         rootCriterion.setChildCriteria(Collections.singletonList(childCriterion1));
-        String expectedSql = "  (`test`.`test` = test   AND (`test`.`test` = test   AND `test`.`test` = test)) ";
+        String expectedSql = "  (`test`.`test` = (test)   AND (`test`.`test` = (test)   AND `test`.`test` = (test))) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
                 Collections.singletonList(rootCriterion)
@@ -181,7 +181,7 @@ public class CriterionTest {
         Criterion childCriterion2_1 = createMockCriterion(childCriterion2, column, null);
         childCriterion2.setChildCriteria(Collections.singletonList(childCriterion2_1));
         rootCriterion.setChildCriteria(Arrays.asList(childCriterion1, childCriterion2));
-        String expectedSql = "  (`test`.`test` = test   AND (`test`.`test` = test   AND `test`.`test` = test)   AND (`test`.`test` = test   AND `test`.`test` = test)) ";
+        String expectedSql = "  (`test`.`test` = (test)   AND (`test`.`test` = (test)   AND `test`.`test` = (test))   AND (`test`.`test` = (test)   AND `test`.`test` = (test))) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
                 Collections.singletonList(rootCriterion)
@@ -211,7 +211,7 @@ public class CriterionTest {
         rootCriterion1.setChildCriteria(Collections.singletonList(childCriterion1_1));
         rootCriterion2.setChildCriteria(Collections.singletonList(childCriterion2_1));
         List<Criterion> rootCriteria = Arrays.asList(rootCriterion1, rootCriterion2);
-        String expectedSql = "  (`test`.`test` = test   AND `test`.`test` = test)   AND (`test`.`test` = test   AND (`test`.`test` = test   AND `test`.`test` = test)) ";
+        String expectedSql = "  (`test`.`test` = (test)   AND `test`.`test` = (test))   AND (`test`.`test` = (test)   AND (`test`.`test` = (test)   AND `test`.`test` = (test))) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(rootCriteria);
 

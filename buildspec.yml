@@ -30,7 +30,7 @@ phases:
 
       # Check if the image exists in docker hub already.  If the image tag matches the project's version from the POM,
       # then exit/fail the build.
-      - IMAGE_EXISTS=$(docker pull joneschris/qb4j-mvc:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
+      - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
       - echo "Does the image exist?  $IMAGE_EXISTS"
       - |
         if [ "$IMAGE_EXISTS" == "true" ]; then
@@ -47,7 +47,7 @@ phases:
       - mvn clean install
 
       # Build docker image
-      - docker image build -t joneschris/qb4j-mvc:"$PROJECT_VERSION" --build-arg environment=prod --build-arg project_version="$PROJECT_VERSION" .
+      - docker image build -t joneschris/qb4j-api:"$PROJECT_VERSION" --build-arg environment=prod --build-arg project_version="$PROJECT_VERSION" .
 
   post_build:
     commands:

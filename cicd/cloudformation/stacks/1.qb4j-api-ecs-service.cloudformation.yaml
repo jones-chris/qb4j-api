@@ -411,7 +411,7 @@ Resources:
     Properties:
       ContainerDefinitions:
         - Essential: true
-          Image: joneschris/qb4j-mvc:1
+          Image: joneschris/qb4j-api:1
           LogConfiguration:
             LogDriver: awslogs
             Options:

@@ -20,13 +20,13 @@ ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" 
 
   echo "DOCKER_IMAGE_TAG is $DOCKER_IMAGE_TAG"
 
-  sudo docker pull joneschris/qb4j-mvc:"$DOCKER_IMAGE_TAG"
+  sudo docker pull joneschris/qb4j-api:"$DOCKER_IMAGE_TAG"
 
-  DOCKER_CONTAINER_ID_TO_STOP=$(sudo docker ps | grep 'qb4j-mvc' | awk '{ print $1 }')
+  DOCKER_CONTAINER_ID_TO_STOP=$(sudo docker ps | grep 'qb4j-api' | awk '{ print $1 }')
 
   sudo docker container stop "$DOCKER_CONTAINER_ID_TO_STOP"
 
-  sudo nohup docker container run --publish 8080:8080 --detach joneschris/qb4j-mvc:"$DOCKER_IMAGE_TAG"
+  sudo nohup docker container run --publish 8080:8080 --detach joneschris/qb4j-api:"$DOCKER_IMAGE_TAG"
 
   sudo docker image prune -a
 
