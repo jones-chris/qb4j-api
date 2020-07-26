@@ -8,7 +8,7 @@ DOCKERHUB_TOKEN=$1
 PROJECT_VERSION=$2
 
 echo "$DOCKERHUB_TOKEN" | docker login --username joneschris --password-stdin
-docker push joneschris/qb4j-mvc:"$PROJECT_VERSION"
+docker push joneschris/qb4j-api:"$PROJECT_VERSION"
 
 echo "ENV environment variable is $ENV"
 
