@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.HashMap;
 
 @RestController
@@ -75,7 +76,7 @@ public class DatabaseDataController {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<?> handleException(HttpServletRequest request, Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new HashMap<>().put("message", ex.getMessage()));
+                .body(Collections.singletonMap("message", ex.getMessage()));
     }
 
 }
