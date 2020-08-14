@@ -1,5 +1,8 @@
 # qb4j-api
 
+## Local Development
+The URL for the `finance_databas.mv.db` H2 database is `jdbc:h2:./data/finance_database;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false`.
+
 ## Deployment
 
 #### One Time Set Up
