@@ -53,17 +53,17 @@ public class DatabaseMetadataCache {
 
         for (Database database : databases) {
             // Get schemas
-            List<Schema> schemas = this.getSchemas();
+            List<Schema> schemas = this.getSchemas(database.getDatabaseName());
             database.setSchemas(schemas);
 
             // Get tables
             for (Schema schema : database.getSchemas()) {
-                List<Table> tables = this.getTablesAndViews(schema.getSchemaName());
+                List<Table> tables = this.getTablesAndViews(database.getDatabaseName(), schema.getSchemaName());
                 schema.setTables(tables);
 
                 // Get columns
                 for (Table table : schema.getTables()) {
-                    List<Column> columns = this.getColumns(table.getSchemaName(), table.getTableName());
+                    List<Column> columns = this.getColumns(database.getDatabaseName(), table.getSchemaName(), table.getTableName());
                     table.setColumns(columns);
                 }
             }
@@ -138,26 +138,23 @@ public class DatabaseMetadataCache {
                 .orElseThrow(Exception::new);
     }
 
-    private List<Schema> getSchemas() throws Exception {
+    private List<Schema> getSchemas(String databaseName) throws Exception {
         List<Schema> schemas = new ArrayList<>();
-        for (Qb4jConfig.TargetDataSource targetDataSource : qb4jConfig.getTargetDataSources()) {
+        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
-            try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-                ResultSet rs = conn.getMetaData().getSchemas();
+        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
+            ResultSet rs = conn.getMetaData().getSchemas();
 
-                String databaseName = targetDataSource.getName();
-                while (rs.next()) {
-                    String schemaName = rs.getString("TABLE_SCHEM");
-                    Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
-                    schemas.add(schema);
-                }
+            while (rs.next()) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
+                schemas.add(schema);
+            }
 
-                // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
-                // the schema name.
-                if (schemas.isEmpty()) {
-                    schemas.add(new Schema(databaseName, "null"));
-                }
-
+            // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
+            // the schema name.
+            if (schemas.isEmpty()) {
+                schemas.add(new Schema(databaseName, "null"));
             }
 
         }
@@ -165,21 +162,18 @@ public class DatabaseMetadataCache {
         return schemas;
     }
 
-    private List<Table> getTablesAndViews(String schema) throws Exception {
+    private List<Table> getTablesAndViews(String databaseName, String schema) throws Exception {
         List<Table> tables = new ArrayList<>();
-        for (Qb4jConfig.TargetDataSource targetDataSource : qb4jConfig.getTargetDataSources()) {
+        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
-            try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-                ResultSet rs = conn.getMetaData().getTables(null, schema, null, null);
+        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
+            ResultSet rs = conn.getMetaData().getTables(null, schema, null, null);
 
-                String databaseName = targetDataSource.getName();
-                while (rs.next()) {
-                    String schemaName = rs.getString("TABLE_SCHEM");
-                    String tableName = rs.getString("TABLE_NAME");
-                    Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
-                    tables.add(table);
-                }
-
+            while (rs.next()) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                String tableName = rs.getString("TABLE_NAME");
+                Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
+                tables.add(table);
             }
 
         }
@@ -187,25 +181,22 @@ public class DatabaseMetadataCache {
         return tables;
     }
 
-    private List<Column> getColumns(String schema, String table) throws Exception {
+    private List<Column> getColumns(String databaseName, String schema, String table) throws Exception {
         List<Column> columns = new ArrayList<>();
-        for (Qb4jConfig.TargetDataSource targetDataSource : qb4jConfig.getTargetDataSources()) {
+        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
-            try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-                ResultSet rs = conn.getMetaData().getColumns(null, schema, table, "%");
+        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
+            ResultSet rs = conn.getMetaData().getColumns(null, schema, table, "%");
 
-                String databaseName = targetDataSource.getName();
-                while (rs.next()) {
-                    String schemaName = rs.getString("TABLE_SCHEM");
-                    String tableName = rs.getString("TABLE_NAME");
-                    String columnName = rs.getString("COLUMN_NAME");
-                    int dataType = rs.getInt("DATA_TYPE");
+            while (rs.next()) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                String tableName = rs.getString("TABLE_NAME");
+                String columnName = rs.getString("COLUMN_NAME");
+                int dataType = rs.getInt("DATA_TYPE");
 
-                    Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
+                Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
 
-                    columns.add(column);
-                }
-
+                columns.add(column);
             }
 
         }
