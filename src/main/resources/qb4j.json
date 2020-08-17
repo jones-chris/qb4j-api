@@ -2,10 +2,17 @@
   "dev": {
     "targetDataSources": [
       {
-        "name": "querybuilder4j",
-        "url": "jdbc:sqlite:./data/querybuilder4j.db",
+        "name": "hr_database",
+        "url": "jdbc:sqlite:./data/hr_database.db",
         "driverClassName": "org.sqlite.JDBC",
         "databaseType": "Sqlite"
+      },
+      {
+        "name": "finance_database",
+        "url": "jdbc:h2:./data/finance_database;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false",
+        "driverClassName": "org.h2.Driver",
+        "databaseType": "H2",
+        "username": "sa"
       }
     ],
     "queryTemplateDataSource": {

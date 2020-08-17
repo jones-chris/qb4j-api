@@ -6,6 +6,7 @@ public enum DatabaseType {
     Oracle,
     PostgreSQL,
     Sqlite,
-    SqlServer
+    SqlServer,
+    H2
 
 }
