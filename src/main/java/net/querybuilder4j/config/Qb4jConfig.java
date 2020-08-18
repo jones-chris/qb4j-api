@@ -4,6 +4,7 @@ import net.querybuilder4j.constants.DatabaseType;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -70,6 +71,7 @@ public class Qb4jConfig {
         private DatabaseType databaseType;
         private String username;
         private String password;
+        private ExcludeObjects excludeObjects;
         private DataSource dataSource;
 
         public TargetDataSource() {}
@@ -122,6 +124,14 @@ public class Qb4jConfig {
             this.password = password;
         }
 
+        public ExcludeObjects getExcludeObjects() {
+            return excludeObjects;
+        }
+
+        public void setExcludeObjects(ExcludeObjects excludeObjects) {
+            this.excludeObjects = excludeObjects;
+        }
+
         public DataSource getDataSource() {
             if (this.dataSource == null) {
                 BasicDataSource ds = new BasicDataSource();
@@ -148,6 +158,48 @@ public class Qb4jConfig {
             properties.setProperty("databaseType", databaseType.toString());
 
             return properties;
+        }
+
+        public static class ExcludeObjects {
+
+            /**
+             * A list of the names of the schemas to exclude (case-sensitive).
+             */
+            private List<String> schemas = new ArrayList<>();
+
+            /**
+             * A list of the fully qualified names of the tables to exclude (case-sensitive).
+             */
+            private List<String> tables = new ArrayList<>();
+
+            /**
+             * A list of the fully qualified names of the columns to exclude (case-sensitive).
+             */
+            private List<String> columns = new ArrayList<>();
+
+            public List<String> getSchemas() {
+                return schemas;
+            }
+
+            public void setSchemas(List<String> schemas) {
+                this.schemas = schemas;
+            }
+
+            public List<String> getTables() {
+                return tables;
+            }
+
+            public void setTables(List<String> tables) {
+                this.tables = tables;
+            }
+
+            public List<String> getColumns() {
+                return columns;
+            }
+
+            public void setColumns(List<String> columns) {
+                this.columns = columns;
+            }
         }
     }
 

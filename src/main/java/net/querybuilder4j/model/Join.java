@@ -122,10 +122,19 @@ public class Join implements SqlRepresentation {
 
         // Build the SQL string representation starting with something like this:  " LEFT JOIN `schema`.`table`.`column` ",
         // assuming the target table has a schema - otherwise the string will be like this:  " LEFT JOIN `table`.`column` ".
-        StringBuilder sb = new StringBuilder()
-                .append(this.getJoinType().toString())
-                .append(String.format(" %s%s%s ",
-                        beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getTableName()), endingDelimiter));
+        StringBuilder sb = new StringBuilder();
+        if (this.targetTable.getSchemaName().equals("null")) {
+            sb.append(this.getJoinType().toString())
+                    .append(String.format(" %s%s%s ",
+                            beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getTableName()), endingDelimiter)
+                    );
+        } else {
+            sb.append(this.getJoinType().toString())
+                    .append(String.format(" %s%s%s.%s%s%s ",
+                            beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getSchemaName()), endingDelimiter,
+                            beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getTableName()), endingDelimiter)
+                    );
+        }
 
         // For each of the parentJoinColumns, find the same index in targetJoinColumns and create a SQL string representation
         // like this:  " AND/ON `schema`.`parentTable`.`column` = `schema`.`targetTable`.`column` ", assuming the target

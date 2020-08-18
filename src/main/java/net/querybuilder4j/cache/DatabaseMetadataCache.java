@@ -53,17 +53,17 @@ public class DatabaseMetadataCache {
 
         for (Database database : databases) {
             // Get schemas
-            List<Schema> schemas = this.getSchemas();
+            List<Schema> schemas = this.getSchemas(database.getDatabaseName());
             database.setSchemas(schemas);
 
             // Get tables
             for (Schema schema : database.getSchemas()) {
-                List<Table> tables = this.getTablesAndViews(schema.getSchemaName());
+                List<Table> tables = this.getTablesAndViews(database.getDatabaseName(), schema.getSchemaName());
                 schema.setTables(tables);
 
                 // Get columns
                 for (Table table : schema.getTables()) {
-                    List<Column> columns = this.getColumns(table.getSchemaName(), table.getTableName());
+                    List<Column> columns = this.getColumns(database.getDatabaseName(), table.getSchemaName(), table.getTableName());
                     table.setColumns(columns);
                 }
             }
@@ -75,34 +75,34 @@ public class DatabaseMetadataCache {
         cache.addAll(databases);
     }
 
-    public Database findDatabases(String databaseName) throws Exception {
+    public Database findDatabases(String databaseName) {
         return this.cache.stream()
                 .filter(database -> database.getDatabaseName().equals(databaseName))
                 .findAny()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
-    public List<Schema> findSchemas(String databaseName) throws Exception {
+    public List<Schema> findSchemas(String databaseName) {
         return this.findDatabases(databaseName).getSchemas();
     }
 
-    public List<Table> findTables(String databaseName, String schemaName) throws Exception {
+    public List<Table> findTables(String databaseName, String schemaName) {
         return this.findSchemas(databaseName).stream()
                 .filter(schema -> schema.getSchemaName().equals(schemaName))
                 .map(Schema::getTables)
                 .findAny()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
-    public List<Column> findColumns(String databaseName, String schemaName, String tableName) throws Exception {
+    public List<Column> findColumns(String databaseName, String schemaName, String tableName) {
         return this.findTables(databaseName, schemaName).stream()
                 .filter(table -> table.getTableName().equals(tableName))
                 .map(Table::getColumns) // todo: sort alphabetically.
                 .findAny()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
-    public int getColumnDataType(Column column) throws Exception {
+    public int getColumnDataType(Column column) {
         String databaseName = column.getDatabaseName();
         String schemaName = column.getSchemaName();
         String tableName = column.getTableName();
@@ -112,7 +112,7 @@ public class DatabaseMetadataCache {
                 .filter(col -> col.getColumnName().equals(columnName))
                 .map(Column::getDataType)
                 .findFirst()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
     public boolean columnExists(Column column) {
@@ -138,26 +138,27 @@ public class DatabaseMetadataCache {
                 .orElseThrow(Exception::new);
     }
 
-    private List<Schema> getSchemas() throws Exception {
+    private List<Schema> getSchemas(String databaseName) throws Exception {
         List<Schema> schemas = new ArrayList<>();
-        for (Qb4jConfig.TargetDataSource targetDataSource : qb4jConfig.getTargetDataSources()) {
+        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
-            try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-                ResultSet rs = conn.getMetaData().getSchemas();
+        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
+            ResultSet rs = conn.getMetaData().getSchemas();
 
-                String databaseName = targetDataSource.getName();
-                while (rs.next()) {
-                    String schemaName = rs.getString("TABLE_SCHEM");
-                    Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
+            while (rs.next()) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
+
+                // Add the schema if it is not an excluded schema.
+                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName())) {
                     schemas.add(schema);
                 }
+            }
 
-                // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
-                // the schema name.
-                if (schemas.isEmpty()) {
-                    schemas.add(new Schema(databaseName, "null"));
-                }
-
+            // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
+            // the schema name.
+            if (schemas.isEmpty()) {
+                schemas.add(new Schema(databaseName, "null"));
             }
 
         }
@@ -165,21 +166,22 @@ public class DatabaseMetadataCache {
         return schemas;
     }
 
-    private List<Table> getTablesAndViews(String schema) throws Exception {
+    private List<Table> getTablesAndViews(String databaseName, String schema) throws Exception {
         List<Table> tables = new ArrayList<>();
-        for (Qb4jConfig.TargetDataSource targetDataSource : qb4jConfig.getTargetDataSources()) {
+        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
-            try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-                ResultSet rs = conn.getMetaData().getTables(null, schema, null, null);
+        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
+            ResultSet rs = conn.getMetaData().getTables(null, schema, null, null);
 
-                String databaseName = targetDataSource.getName();
-                while (rs.next()) {
-                    String schemaName = rs.getString("TABLE_SCHEM");
-                    String tableName = rs.getString("TABLE_NAME");
-                    Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
+            while (rs.next()) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                String tableName = rs.getString("TABLE_NAME");
+                Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
+
+                // Add the table if it is not an excluded table.
+                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName())) {
                     tables.add(table);
                 }
-
             }
 
         }
@@ -187,25 +189,25 @@ public class DatabaseMetadataCache {
         return tables;
     }
 
-    private List<Column> getColumns(String schema, String table) throws Exception {
+    private List<Column> getColumns(String databaseName, String schema, String table) throws Exception {
         List<Column> columns = new ArrayList<>();
-        for (Qb4jConfig.TargetDataSource targetDataSource : qb4jConfig.getTargetDataSources()) {
+        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
-            try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-                ResultSet rs = conn.getMetaData().getColumns(null, schema, table, "%");
+        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
+            ResultSet rs = conn.getMetaData().getColumns(null, schema, table, "%");
 
-                String databaseName = targetDataSource.getName();
-                while (rs.next()) {
-                    String schemaName = rs.getString("TABLE_SCHEM");
-                    String tableName = rs.getString("TABLE_NAME");
-                    String columnName = rs.getString("COLUMN_NAME");
-                    int dataType = rs.getInt("DATA_TYPE");
+            while (rs.next()) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                String tableName = rs.getString("TABLE_NAME");
+                String columnName = rs.getString("COLUMN_NAME");
+                int dataType = rs.getInt("DATA_TYPE");
 
-                    Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
+                Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
 
+                // Add the column if it is not an excluded column.
+                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName())) {
                     columns.add(column);
                 }
-
             }
 
         }

@@ -46,14 +46,14 @@ public abstract class SqlBuilder {
     protected SelectStatement selectStatement;
 
     /**
-     * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
-     */
-    protected DatabaseMetadataCache databaseMetadataCache;
-
-    /**
      * The class responsible for parsing sub queries.
      */
     protected SubQueryParser subQueryParser;
+
+    /**
+     * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
+     */
+    protected DatabaseMetadataCache databaseMetadataCache;
 
     /**
      * The class responsible for validating the various fields in the `selectStatement`.
@@ -69,7 +69,6 @@ public abstract class SqlBuilder {
         this.selectStatement = selectStatement;
         this.subQueryParser = new SubQueryParser(this.selectStatement, this);
 
-
         // Prepare the SelectStatement.
         this.addExcludingJoinCriteria();
         this.addSuppressNullsCriteria();
@@ -82,7 +81,6 @@ public abstract class SqlBuilder {
         }
 
         this.replaceParameters();
-        this.quoteCriteriaFilterItems();
 
         return this;
     }
@@ -163,7 +161,11 @@ public abstract class SqlBuilder {
         List<Criterion> criteria = this.selectStatement.getCriteria();
 
         if (! criteria.isEmpty()) {
-            CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(criteria);
+            CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
+                    criteria,
+                    this.databaseMetadataCache,
+                    this.databaseMetadataCacheValidator
+            );
 
             this.stringBuilder.append(" WHERE ");
             String joinedCriteriaSqlStrings = criteriaTreeFlattener.getSqlStringRepresentation(beginningDelimiter, endingDelimiter);
@@ -382,43 +384,6 @@ public abstract class SqlBuilder {
                     criterion.setFilter(joinedResultFilters);
                 }
             }
-        }
-    }
-
-    /**
-     * Wrap each column's filter items (after splitting on ",") in quotes based on the column's data type.
-     *
-     * @throws Exception
-     */
-    private void quoteCriteriaFilterItems() throws Exception {
-        for (Criterion criterion : this.selectStatement.getCriteria()) {
-            String[] filterItems = criterion.getFilter().split(",");
-            String[] newFilterItems = filterItems.clone();
-            for (int i=0; i<filterItems.length; i++) {
-                String filterItem = filterItems[i];
-
-                filterItem = escape(filterItem);
-
-                // If the criterion's operator is a "search" operator (LIKE or NOT LIKE), then wrap the filter in single
-                // quotes so that the database will treat it as a string search regardless of whether the column type
-                // should be wrapped or not.
-                if (criterion.hasSearchOperator()) {
-                    filterItem = String.format("'%s'", filterItem);
-                } else {
-                    // If the criterion's filter does not contain a search character, then proceed as normal but getting
-                    // the column's data type from the cache, because we don't trust the column's data type that the client
-                    // sent.
-                    int columnDataType = this.databaseMetadataCache.getColumnDataType(criterion.getColumn());
-                    boolean shouldHaveQuotes = this.databaseMetadataCacheValidator.isColumnQuoted(columnDataType);
-                    if (shouldHaveQuotes) {
-                        filterItem = String.format("'%s'", filterItem);
-                    }
-                }
-
-                newFilterItems[i] = filterItem;
-            }
-
-            criterion.setFilter(String.join(",", newFilterItems));
         }
     }
 

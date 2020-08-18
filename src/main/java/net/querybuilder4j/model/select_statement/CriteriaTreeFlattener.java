@@ -1,9 +1,19 @@
 package net.querybuilder4j.model.select_statement;
 
+import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.querybuilder4j.sql_builder.SqlCleanser.escape;
+
 public class CriteriaTreeFlattener {
+
+    /**
+     * The original, un-flattened criteria.
+     */
+    private List<Criterion> unflattenedCriteria = new ArrayList<>();
 
     /**
      * The flattened criteria that are written here as the tree is walked.
@@ -21,9 +31,25 @@ public class CriteriaTreeFlattener {
      */
     private int numOfClosingParenthesisInBranch = 0;
 
-    public CriteriaTreeFlattener(List<Criterion> criteria) {
+    /**
+     * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
+     */
+    protected DatabaseMetadataCache databaseMetadataCache;
+
+    /**
+     * The class responsible for validating the various fields in the `selectStatement`.
+     */
+    protected DatabaseMetadataCacheValidator databaseMetadataCacheValidator;
+
+    public CriteriaTreeFlattener(List<Criterion> criteria,
+                                 DatabaseMetadataCache databaseMetadataCache,
+                                 DatabaseMetadataCacheValidator databaseMetadataCacheValidator) {
+        this.unflattenedCriteria = criteria;
+        this.databaseMetadataCache = databaseMetadataCache;
+        this.databaseMetadataCacheValidator = databaseMetadataCacheValidator;
         this.flattenedCriteria = flattenCriteria(criteria, new HashMap<>());
         this.addParenthesis();
+        this.quoteCriteriaFilterItems();
     }
 
     /**
@@ -220,6 +246,45 @@ public class CriteriaTreeFlattener {
     private boolean isEndOfTree(int rootIndex, Criterion criterion) {
         List<Criterion> criteria = this.flattenedCriteria.get(rootIndex);
         return criteria.get(criteria.size() - 1).equals(criterion);
+    }
+
+    /**
+     * Wrap each column's filter items (after splitting on ",") in quotes based on the column's data type.
+     *
+     * @throws Exception
+     */
+    private void quoteCriteriaFilterItems() {
+        for (Map.Entry<Integer, List<Criterion>> entry : this.flattenedCriteria.entrySet()) {
+            for (Criterion criterion : entry.getValue()) {
+                String[] filterItems = criterion.getFilter().split(",");
+                String[] newFilterItems = filterItems.clone();
+                for (int i=0; i<filterItems.length; i++) {
+                    String filterItem = filterItems[i];
+
+                    filterItem = escape(filterItem);
+
+                    // If the criterion's operator is a "search" operator (LIKE or NOT LIKE), then wrap the filter in single
+                    // quotes so that the database will treat it as a string search regardless of whether the column type
+                    // should be wrapped or not.
+                    if (criterion.hasSearchOperator()) {
+                        filterItem = String.format("'%s'", filterItem);
+                    } else {
+                        // If the criterion's filter does not contain a search character, then proceed as normal but getting
+                        // the column's data type from the cache, because we don't trust the column's data type that the client
+                        // sent.
+                        int columnDataType = this.databaseMetadataCache.getColumnDataType(criterion.getColumn());
+                        boolean shouldHaveQuotes = this.databaseMetadataCacheValidator.isColumnQuoted(columnDataType);
+                        if (shouldHaveQuotes) {
+                            filterItem = String.format("'%s'", filterItem);
+                        }
+                    }
+
+                    newFilterItems[i] = filterItem;
+                }
+
+                criterion.setFilter(String.join(",", newFilterItems));
+            }
+        }
     }
 
 }

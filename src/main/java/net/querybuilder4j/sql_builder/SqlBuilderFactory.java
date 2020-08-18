@@ -2,6 +2,7 @@ package net.querybuilder4j.sql_builder;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
 import net.querybuilder4j.constants.DatabaseType;
+import net.querybuilder4j.model.select_statement.CriteriaTreeFlattener;
 import net.querybuilder4j.model.select_statement.SelectStatement;
 import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,10 @@ public class SqlBuilderFactory {
                 break;
             case Sqlite:
                 sqlBuilder = new SqliteSqlBuilder(this.databaseMetadataCache, this.databaseMetadataCacheValidator)
+                        .setStatement(selectStatement);
+                break;
+            case H2:
+                sqlBuilder = new H2SqlBuilder(this.databaseMetadataCache, this.databaseMetadataCacheValidator)
                         .setStatement(selectStatement);
                 break;
             default:
