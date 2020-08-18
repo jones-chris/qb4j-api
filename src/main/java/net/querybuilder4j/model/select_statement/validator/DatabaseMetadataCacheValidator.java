@@ -130,11 +130,11 @@ public class DatabaseMetadataCacheValidator {
      * @return boolean
      * @throws Exception If the data type is not supported.
      */
-    public boolean isColumnQuoted(int dataType) throws Exception {
+    public boolean isColumnQuoted(int dataType) throws RuntimeException {
         Boolean isQuoted = Constants.TYPE_MAPPINGS.get(dataType); //todo:  make typeMappings a public static field in SelectStatementValidator so that it can be called?  Maybe even put it in Constants class because it's called by SelectStatementValidator and SqlBuilder?
 
         if (isQuoted == null) {
-            throw new Exception(String.format("Data type, %s, is not recognized", dataType));
+            throw new RuntimeException(String.format("Data type, %s, is not recognized", dataType));
         }
 
         return isQuoted;

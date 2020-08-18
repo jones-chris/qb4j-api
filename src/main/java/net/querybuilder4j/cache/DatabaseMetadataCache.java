@@ -75,34 +75,34 @@ public class DatabaseMetadataCache {
         cache.addAll(databases);
     }
 
-    public Database findDatabases(String databaseName) throws Exception {
+    public Database findDatabases(String databaseName) {
         return this.cache.stream()
                 .filter(database -> database.getDatabaseName().equals(databaseName))
                 .findAny()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
-    public List<Schema> findSchemas(String databaseName) throws Exception {
+    public List<Schema> findSchemas(String databaseName) {
         return this.findDatabases(databaseName).getSchemas();
     }
 
-    public List<Table> findTables(String databaseName, String schemaName) throws Exception {
+    public List<Table> findTables(String databaseName, String schemaName) {
         return this.findSchemas(databaseName).stream()
                 .filter(schema -> schema.getSchemaName().equals(schemaName))
                 .map(Schema::getTables)
                 .findAny()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
-    public List<Column> findColumns(String databaseName, String schemaName, String tableName) throws Exception {
+    public List<Column> findColumns(String databaseName, String schemaName, String tableName) {
         return this.findTables(databaseName, schemaName).stream()
                 .filter(table -> table.getTableName().equals(tableName))
                 .map(Table::getColumns) // todo: sort alphabetically.
                 .findAny()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
-    public int getColumnDataType(Column column) throws Exception {
+    public int getColumnDataType(Column column) {
         String databaseName = column.getDatabaseName();
         String schemaName = column.getSchemaName();
         String tableName = column.getTableName();
@@ -112,7 +112,7 @@ public class DatabaseMetadataCache {
                 .filter(col -> col.getColumnName().equals(columnName))
                 .map(Column::getDataType)
                 .findFirst()
-                .orElseThrow(Exception::new);
+                .orElseThrow(RuntimeException::new);
     }
 
     public boolean columnExists(Column column) {
@@ -148,7 +148,11 @@ public class DatabaseMetadataCache {
             while (rs.next()) {
                 String schemaName = rs.getString("TABLE_SCHEM");
                 Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
-                schemas.add(schema);
+
+                // Add the schema if it is not an excluded schema.
+                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName())) {
+                    schemas.add(schema);
+                }
             }
 
             // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
@@ -173,7 +177,11 @@ public class DatabaseMetadataCache {
                 String schemaName = rs.getString("TABLE_SCHEM");
                 String tableName = rs.getString("TABLE_NAME");
                 Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
-                tables.add(table);
+
+                // Add the table if it is not an excluded table.
+                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName())) {
+                    tables.add(table);
+                }
             }
 
         }
@@ -196,7 +204,10 @@ public class DatabaseMetadataCache {
 
                 Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
 
-                columns.add(column);
+                // Add the column if it is not an excluded column.
+                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName())) {
+                    columns.add(column);
+                }
             }
 
         }

@@ -1,8 +1,14 @@
 package net.querybuilder4j.model.select_statement;
 
+import net.querybuilder4j.cache.DatabaseMetadataCache;
 import net.querybuilder4j.model.Column;
+import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.inject.Inject;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +16,14 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CriterionTest {
+
+    @Mock
+    private DatabaseMetadataCache databaseMetadataCache;
+
+    @Mock
+    private DatabaseMetadataCacheValidator databaseMetadataCacheValidator;
 
     @Test
     public void hasSearchOperator_trueForLikeOperator() {
@@ -108,7 +121,9 @@ public class CriterionTest {
         String expectedSql = "  (`test`.`test` = (test)   AND `test`.`test` = (test)) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
-                Collections.singletonList(rootCriterion)
+                Collections.singletonList(rootCriterion),
+                this.databaseMetadataCache,
+                this.databaseMetadataCacheValidator
         );
 
         assertEquals(expectedSql, criteriaTreeFlattener.getSqlStringRepresentation('`', '`'));
@@ -131,7 +146,9 @@ public class CriterionTest {
         String expectedSql = "  (`test`.`test` = (test)   AND `test`.`test` = (test)   AND `test`.`test` = (test)) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
-                Collections.singletonList(rootCriterion)
+                Collections.singletonList(rootCriterion),
+                this.databaseMetadataCache,
+                this.databaseMetadataCacheValidator
         );
 
         assertEquals(expectedSql, criteriaTreeFlattener.getSqlStringRepresentation('`', '`'));
@@ -155,7 +172,9 @@ public class CriterionTest {
         String expectedSql = "  (`test`.`test` = (test)   AND (`test`.`test` = (test)   AND `test`.`test` = (test))) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
-                Collections.singletonList(rootCriterion)
+                Collections.singletonList(rootCriterion),
+                this.databaseMetadataCache,
+                this.databaseMetadataCacheValidator
         );
 
         assertEquals(expectedSql, criteriaTreeFlattener.getSqlStringRepresentation('`', '`'));
@@ -184,7 +203,9 @@ public class CriterionTest {
         String expectedSql = "  (`test`.`test` = (test)   AND (`test`.`test` = (test)   AND `test`.`test` = (test))   AND (`test`.`test` = (test)   AND `test`.`test` = (test))) ";
 
         CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
-                Collections.singletonList(rootCriterion)
+                Collections.singletonList(rootCriterion),
+                this.databaseMetadataCache,
+                this.databaseMetadataCacheValidator
         );
 
         assertEquals(expectedSql, criteriaTreeFlattener.getSqlStringRepresentation('`', '`'));
@@ -213,7 +234,11 @@ public class CriterionTest {
         List<Criterion> rootCriteria = Arrays.asList(rootCriterion1, rootCriterion2);
         String expectedSql = "  (`test`.`test` = (test)   AND `test`.`test` = (test))   AND (`test`.`test` = (test)   AND (`test`.`test` = (test)   AND `test`.`test` = (test))) ";
 
-        CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(rootCriteria);
+        CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
+                rootCriteria,
+                this.databaseMetadataCache,
+                this.databaseMetadataCacheValidator
+        );
 
         assertEquals(expectedSql, criteriaTreeFlattener.getSqlStringRepresentation('`', '`'));
     }
