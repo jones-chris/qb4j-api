@@ -1,4 +1,9 @@
 ---
+Parameters:
+  DockerImage:
+    Type: String
+    Description: The name of the docker image to deploy to ECS
+
 Resources:
   TaskDefinitionExecutionRole3138A4FF:
     Type: AWS::IAM::Role
@@ -411,7 +416,7 @@ Resources:
     Properties:
       ContainerDefinitions:
         - Essential: true
-          Image: joneschris/qb4j-api:1
+          Image: !Ref DockerImage
           LogConfiguration:
             LogDriver: awslogs
             Options:
