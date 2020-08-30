@@ -6,9 +6,10 @@
 
 DOCKERHUB_TOKEN=$1
 PROJECT_VERSION=$2
+DOCKER_IMAGE_NAME="joneschris/qb4j-api:$PROJECT_VERSION"
 
 echo "$DOCKERHUB_TOKEN" | docker login --username joneschris --password-stdin
-docker push joneschris/qb4j-api:"$PROJECT_VERSION"
+docker push "$DOCKER_IMAGE_NAME"
 
 echo "ENV environment variable is $ENV"
 
@@ -21,7 +22,7 @@ if [ "$ENV" == "dev" ]; then
 elif [ "$ENV" == "prod" ]; then
     echo "Deploying to PROD"
     chmod +x ./cicd/deployment/deployment_prod.sh
-    sh ./cicd/deployment/deployment_prod.sh
+    sh ./cicd/deployment/deployment_prod.sh "$DOCKER_IMAGE_NAME"
 else
     echo "Did not recognize the ENV, $ENV.  Not deploying."
 fi
