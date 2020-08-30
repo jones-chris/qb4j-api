@@ -28,7 +28,7 @@ ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" 
 
   sudo nohup docker container run --publish 8080:8080 --detach joneschris/qb4j-api:"$DOCKER_IMAGE_TAG" &
 
-  sudo docker image prune -a --force --filter "label!=qb4j-api:$DOCKER_IMAGE_TAG"
+  sudo docker image prune -a --force
 
   exit
 EOF
