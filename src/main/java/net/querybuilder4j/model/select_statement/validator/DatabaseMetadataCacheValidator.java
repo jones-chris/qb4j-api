@@ -29,7 +29,7 @@ public class DatabaseMetadataCacheValidator {
      * @return boolean
      * @throws IllegalArgumentException If the selectStatement does not pass validation.
      */
-    public boolean passesBasicValidation(SelectStatement selectStatement) throws Exception {
+    public boolean passesBasicValidation(SelectStatement selectStatement) throws IllegalArgumentException {
         // Validate columns.
         if (selectStatement.getColumns() == null) {
             throw new IllegalArgumentException("Columns cannot be null");
@@ -51,7 +51,7 @@ public class DatabaseMetadataCacheValidator {
 
         // Validate criteria.
         if (selectStatement.getCriteria() == null) {
-            throw new Exception("The Criteria cannot be null");
+            throw new IllegalArgumentException("The Criteria cannot be null");
         }
 
         for (Criterion criterion : selectStatement.getCriteria()) {
@@ -66,7 +66,7 @@ public class DatabaseMetadataCacheValidator {
         return true;
     }
 
-    public boolean passesDatabaseValidation(SelectStatement selectStatement) throws Exception {
+    public boolean passesDatabaseValidation(SelectStatement selectStatement) throws IllegalArgumentException {
         // Validate selectStatement's columns and selectStatement's criteria's columns.
         boolean columnsExist = selectStatement.getCriteria().stream()
                 .map(Criterion::getColumn)
@@ -87,14 +87,14 @@ public class DatabaseMetadataCacheValidator {
      * @return boolean
      * @throws Exception If the criteria is not valid or if the criteria is not clean SQL.
      */
-    private boolean areCriteriaValid(SelectStatement selectStatement) throws Exception {
+    private boolean areCriteriaValid(SelectStatement selectStatement) throws IllegalArgumentException {
         for (Criterion criterion : selectStatement.getCriteria()) {
             if (! criterion.isValid()) {
-                throw new Exception("This criteria is not valid:  " + criterion);
+                throw new IllegalArgumentException("This criteria is not valid:  " + criterion);
             }
 
             if (! sqlIsClean(criterion)) {
-                throw new Exception("This criterion failed to be clean SQL:  " + criterion);
+                throw new IllegalArgumentException("This criterion failed to be clean SQL:  " + criterion);
             }
 
             // Now that we know that the criteria's operator is not 'isNull' or 'isNotNull', we can assume that the

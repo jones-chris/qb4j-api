@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.querybuilder4j.model.Join.JoinType.*;
-import static net.querybuilder4j.sql_builder.SqlCleanser.escape;
 
 /**
  * This class uses a SelectStatement to generate a SELECT SQL string.
@@ -81,6 +80,14 @@ public abstract class SqlBuilder {
         }
 
         this.replaceParameters();
+
+        // Validate selectStatement.
+        try {
+            this.databaseMetadataCacheValidator.passesBasicValidation(this.selectStatement);
+            this.databaseMetadataCacheValidator.passesDatabaseValidation(this.selectStatement);
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException(ex);
+        }
 
         return this;
     }
