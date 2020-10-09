@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
-import java.util.HashMap;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })

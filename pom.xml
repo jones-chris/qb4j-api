@@ -9,7 +9,7 @@
     <version>0.0.8</version>
     <packaging>jar</packaging>
 
-    <name>querybuilder4jmvc</name>
+    <name>qb4j-api</name>
     <description>A REST API to serve database meta data and create and run SQL statements</description>
 
     <!--This article below helps explain why this parent pom is needed in order for Spring Boot to work-->
@@ -167,6 +167,19 @@
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.11.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.5</version>
         </dependency>
 
     </dependencies>

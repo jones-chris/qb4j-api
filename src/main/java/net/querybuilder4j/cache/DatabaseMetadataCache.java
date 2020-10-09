@@ -75,6 +75,14 @@ public class DatabaseMetadataCache {
         cache.addAll(databases);
     }
 
+    /**
+     * A convenience method that makes it clearer that the cache is a {@link Set<Database>}.
+     * @return {@link Set<Database>} The databases in the cache.
+     */
+    public Set<Database> getDatabases() {
+        return this.getCache();
+    }
+
     public Database findDatabases(String databaseName) {
         return this.cache.stream()
                 .filter(database -> database.getDatabaseName().equals(databaseName))
