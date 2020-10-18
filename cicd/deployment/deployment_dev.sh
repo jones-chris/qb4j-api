@@ -21,6 +21,7 @@ ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" 
   QB4J_CONFIG=$2
 
   echo "DOCKER_IMAGE_TAG is $DOCKER_IMAGE_TAG"
+  echo "$QB4J_CONFIG"
 
   sudo docker pull joneschris/qb4j-api:"$DOCKER_IMAGE_TAG"
 

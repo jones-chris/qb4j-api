@@ -18,6 +18,7 @@ echo "ENV environment variable is $ENV"
 # If PROD env variable, then deploy CloudFormation.
 if [ "$ENV" == "dev" ]; then
     QB4J_CONFIG="$(cat ./qb4j.yml)"
+    echo "$QB4J_CONFIG"
 
     echo "Deploying to DEV"
     chmod +x ./cicd/deployment/deployment_dev.sh
