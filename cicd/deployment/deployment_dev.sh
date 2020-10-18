@@ -16,8 +16,9 @@ chmod 600 private_key.txt
 # ssh into the lightsail instance, pull the docker image, stop the existing docker container, start a container from the
 # new image, sleep for 10 seconds (so the container can start so that the prune command can accurately tell which images
 # are being used by containrs), and remove all unused images (so that the lightsail instance doesn't run out of disk space).
-ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" "/bin/bash -s $1" << "EOF"
+ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" "/bin/bash -s $1 $2" << "EOF"
   DOCKER_IMAGE_TAG=$1
+  QB4J_CONFIG=$2
 
   echo "DOCKER_IMAGE_TAG is $DOCKER_IMAGE_TAG"
 
@@ -27,7 +28,7 @@ ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" 
 
   sudo docker container stop "$DOCKER_CONTAINER_ID_TO_STOP"
 
-  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config="$(cat qb4j.yml)" joneschris/qb4j-api:"$DOCKER_IMAGE_TAG" &
+  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config="$$QB4J_CONFIG" joneschris/qb4j-api:"$DOCKER_IMAGE_TAG" &
 
   sleep 10s
 

@@ -3,6 +3,13 @@
 ## Local Development
 The URL for the `finance_databas.mv.db` H2 database is `jdbc:h2:./data/finance_database;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false`.
 
+To run the API locally, first build the project with:
+
+1) `mvn clean install`
+2) `java -Dqb4jConfig="$(cat qb4j.yml)" -jar "./target/qb4j-api-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout).jar" `.
+The command, `$(cat qb4j.yml)`, reads the `qb4j.yml` file contents into the `qb4jConfig` parameter which will be used for API configuration.
+The command, `$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)`, reads the version from the `pom.xml` file.
+
 ## Deployment
 
 #### One Time Set Up
