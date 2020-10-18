@@ -15,19 +15,43 @@ phases:
       docker: 18
       java: openjdk8
     commands:
-      - bash ./cicd/buildspec_steps/0_install.bash
+      # Get information about this image, the current directory, maven version, docker version, then update apt-get.
+      - lsb_release -a
+      - pwd
+      - mvn --version
+      - docker --version
+      - docker info
+      - apt-get update
 
   pre_build:
     commands:
-      - bash ./cicd/buildspec_steps/1_pre_build.bash
+      # Get project's version from pom.xml.
+      - PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+
+      # Check if the image exists in docker hub already.  If the image tag matches the project's version from the POM,
+      # then exit/fail the build.
+      - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
+      - echo "Does the image exist?  $IMAGE_EXISTS"
+      - |
+        if [ "$IMAGE_EXISTS" == "true" ]; then
+          echo "The image, $PROJECT_VERSION, already exists.  You probably need to bump the project's version in the pom.xml."
+          exit 1
+        fi
+
+      # Copy custom maven settings from S3 bucket.
+      - aws s3 cp s3://maven-build-settings/qb4j_settings.xml /root/.m2/settings.xml
 
   build:
     commands:
-      - bash ./cicd/buildspec_steps/2_build.bash "$PROJECT_VERSION" "$ENV"
+      # Build the uber jar and run unit tests.
+      - mvn clean install
+
+      # Build docker image
+      - docker image build -t joneschris/qb4j-api:"$PROJECT_VERSION" --build-arg environment="$ENV" --build-arg project_version="$PROJECT_VERSION" .
 
   post_build:
     commands:
-      - bash ./cicd/buildspec_steps/3_post_build.bash "$DOCKERHUB_TOKEN" "$PROJECT_VERSION"
+      - bash ./cicd/buildspec_steps/1_post_build.bash "$DOCKERHUB_TOKEN" "$PROJECT_VERSION"
 
 artifacts:
   files:

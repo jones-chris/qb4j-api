@@ -17,6 +17,8 @@ echo "ENV environment variable is $ENV"
 # If DEV env variable, then deploy to Lightsail.
 # If PROD env variable, then deploy CloudFormation.
 if [ "$ENV" == "dev" ]; then
+    QB4J_CONFIG="$(cat ./qb4j.yml)"
+
     echo "Deploying to DEV"
     chmod +x ./cicd/deployment/deployment_dev.sh
     sh ./cicd/deployment/deployment_dev.sh "$PROJECT_VERSION" "$QB4J_CONFIG"
