@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.querybuilder4j</groupId>
     <artifactId>qb4j-api</artifactId>
-    <version>0.0.13</version>
+    <version>0.0.14</version>
     <packaging>jar</packaging>
 
     <name>qb4j-api</name>
