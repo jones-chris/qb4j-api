@@ -28,7 +28,7 @@ ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" 
 
   sudo docker container stop $DOCKER_CONTAINER_ID_TO_STOP
 
-  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config=$QB4J_CONFIG joneschris/qb4j-api:$DOCKER_IMAGE_TAG &
+  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config=$(cat ./qb4j.yml) joneschris/qb4j-api:$DOCKER_IMAGE_TAG &
 
   sleep 10s
 
