@@ -2,6 +2,7 @@ package net.querybuilder4j.service.database.metadata;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
 import net.querybuilder4j.model.Column;
+import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Schema;
 import net.querybuilder4j.model.Table;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DatabaseMetaDataServiceImpl implements DatabaseMetaDataService {
@@ -18,6 +20,11 @@ public class DatabaseMetaDataServiceImpl implements DatabaseMetaDataService {
     @Autowired
     public DatabaseMetaDataServiceImpl(DatabaseMetadataCache databaseMetadataCache) {
         this.databaseMetadataCache = databaseMetadataCache;
+    }
+
+    @Override
+    public Set<Database> getDatabases() {
+        return this.databaseMetadataCache.getDatabases();
     }
 
     /**

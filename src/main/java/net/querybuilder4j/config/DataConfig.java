@@ -2,27 +2,27 @@ package net.querybuilder4j.config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 @Configuration
-@PropertySource("classpath:application.properties")
 public class DataConfig {
 
-    @Value("${environment}")
-    private String environment;
+    final Logger LOG  = LoggerFactory.getLogger(DataConfig.class);
 
     @Bean(name = "qb4jConfig")
     public Qb4jConfig getTargetDatabases() throws IOException {
-        InputStream inputStream = getClass().getResourceAsStream("/qb4j.json");
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(inputStream);
-        return mapper.readValue(node.get(environment).toPrettyString(), Qb4jConfig.class);
+        String qb4jConfig = System.getProperty("qb4jConfig");
+        LOG.info("Here is the qb4jConfig: \n {}", qb4jConfig);
+
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        JsonNode node = mapper.readTree(qb4jConfig);
+        return mapper.readValue(node.toPrettyString(), Qb4jConfig.class);
     }
 
 }

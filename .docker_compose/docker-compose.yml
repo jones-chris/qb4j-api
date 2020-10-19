@@ -1,0 +1,28 @@
+version: '3.1'
+
+services:
+  api:
+    image: joneschris/qb4j-api:0.0.8
+    deploy:
+      restart_policy:
+        condition: on-failure
+  hr_database:
+    image: qb4j-mysql
+    build:
+      context: .
+      dockerfile: mysql.Dockerfile
+    ports:
+      - '3306:3306'
+    deploy:
+      restart_policy:
+        condition: on-failure
+  finance_database:
+    image: qb4j-postgresql
+    build:
+      context: .
+      dockerfile: postgresql.Dockerfile
+    ports:
+      - '5432:5432'
+    deploy:
+      restart_policy:
+        condition: on-failure

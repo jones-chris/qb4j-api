@@ -1,0 +1,24 @@
+targetDataSources:
+  - name: hr_database
+    url: jdbc:sqlite:./data/hr_database.db
+    driverClassName: org.sqlite.JDBC
+    databaseType: Sqlite
+    excludeObjects:
+      schemas: []
+      tables: []
+      columns: []
+  - name: finance_database
+    url: jdbc:h2:./data/finance_database;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false
+    driverClassName: org.h2.Driver
+    databaseType: H2
+    username: sa
+    excludeObjects:
+      schemas: [
+        INFORMATION_SCHEMA,
+        PUBLIC
+      ]
+      tables: []
+      columns: []
+queryTemplateDataSource:
+  url: jdbc:sqlite:./data/query_templates.db
+  driverClassName: org.sqlite.JDBC

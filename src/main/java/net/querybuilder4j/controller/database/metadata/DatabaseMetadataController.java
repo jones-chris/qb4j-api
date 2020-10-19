@@ -1,6 +1,5 @@
 package net.querybuilder4j.controller.database.metadata;
 
-import net.querybuilder4j.config.Qb4jConfig;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Schema;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
@@ -20,13 +19,10 @@ import java.util.stream.Collectors;
 public class DatabaseMetadataController {
 
     private DatabaseMetaDataService databaseMetaDataService;
-    private Qb4jConfig qb4jConfig;
 
     @Autowired
-    public DatabaseMetadataController(DatabaseMetaDataService databaseMetaDataService,
-                                      Qb4jConfig qb4jConfig) {
+    public DatabaseMetadataController(DatabaseMetaDataService databaseMetaDataService) {
         this.databaseMetaDataService = databaseMetaDataService;
-        this.qb4jConfig = qb4jConfig;
     }
 
     /**
@@ -35,11 +31,8 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Database objects.
      */
     @GetMapping(value = "/database")
-    public ResponseEntity<List<Database>> getDatabases() {
-        List<Database> databases = qb4jConfig.getTargetDataSources().stream()
-                .map(targetDataSource -> new Database(targetDataSource.getName(), targetDataSource.getDatabaseType()))
-                .collect(Collectors.toList());
-
+    public ResponseEntity<Set<Database>> getDatabases() {
+        Set<Database> databases = this.databaseMetaDataService.getDatabases();
         return ResponseEntity.ok(databases);
     }
 
