@@ -27,7 +27,6 @@ chmod 600 private_key.txt
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << "EOF"
   sudo docker stop $(sudo docker ps -aq)
   sudo docker rm $(sudo docker ps -aq)
-  sudo docker rmi $(sudo docker images -a -q)
 EOF
 
 # ssh into the lightsail instance, pull the docker image, and start a container based on the image.
