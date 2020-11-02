@@ -78,6 +78,13 @@ Balancer which exposes the `qb4j-mvc` docker image to the internet.  Once this s
 taking the Application Load Balancer's DNS Name (which can be found in the AWS Console) and prepending it with `http://` 
 (ex:  `http://<ALB DNS Name>/metadata/database` would retrieve all databases from the API).
 
+### Running the Image as a Scheduled Task for Database Metadata Cache Refreshing
+
+You can use the following command to run the API's docker image as a scheduled task to refresh the database metadata cache
+(you'll need to `cd` to the root of the directory to read `qb4j.yml` file correctly with `cat`): 
+
+`docker run --env qb4j_config="$(cat ./qb4j.yml)" --entrypoint '/bin/sh' joneschris/qb4j-api:0.0.20 -c 'java -DupdateCache=true -Dqb4jConfig="$qb4j_config" -jar /qb4j/qb4j-api-0.0.20.jar'`
+
 #### Common Gotchas
 
 There are no Common Gotchas at this time :)!

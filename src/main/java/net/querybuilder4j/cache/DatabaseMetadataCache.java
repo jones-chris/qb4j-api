@@ -34,7 +34,7 @@ public class DatabaseMetadataCache {
     @Autowired
     public DatabaseMetadataCache(Qb4jConfig qb4jConfig) throws Exception {
         this.qb4jConfig = qb4jConfig;
-        refreshCache();  // Populate cache on cache instantiation - which should occur at app start up.
+//        refreshCache();  // Populate cache on cache instantiation - which should occur at app start up.
     }
 
     /**
@@ -44,7 +44,7 @@ public class DatabaseMetadataCache {
      *
      * @throws Exception If an exception is raised when querying one of the target data sources.
      */
-    @Scheduled(fixedRate = 8640000000L)
+//    @Scheduled(fixedRate = 8640000000L)
     public void refreshCache() throws Exception {
         // Get list of databases from qb4jConfig's target data sources.
         List<Database> databases = qb4jConfig.getTargetDataSources().stream()
