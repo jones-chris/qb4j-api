@@ -27,7 +27,12 @@ public class UpdateDatabaseMetadataCacheRunner implements ApplicationListener<Ap
 
         try {
             Optional<String> updateCacheOption = Optional.ofNullable(System.getProperty("updateCache"));
+
+            LOG.info("updateCache option exists?:  {}", updateCacheOption.isPresent());
+
             if (updateCacheOption.isPresent() && updateCacheOption.get().equals("true")) {
+                LOG.info("updateCache property value is:  {}", updateCacheOption.get());
+
                 LOG.info("updateCache property is present.  Refreshing cache.");
                 applicationReadyEvent.getApplicationContext().getBean(DatabaseMetadataCache.class).refreshCache();
 
@@ -36,7 +41,10 @@ public class UpdateDatabaseMetadataCacheRunner implements ApplicationListener<Ap
             }
         } catch (Exception e) {
             LOG.error(e.getMessage());
+            applicationReadyEvent.getApplicationContext().close();
         }
+
+        LOG.info("Exiting UpdateDatabaseMetadataCacheRunner.onApplicationEvent method");
     }
 
 }

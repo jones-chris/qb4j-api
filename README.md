@@ -10,6 +10,13 @@ To run the API locally, first build the project with:
 The command, `$(cat qb4j.yml)`, reads the `qb4j.yml` file contents into the `qb4jConfig` parameter which will be used for API configuration.
 The command, `$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)`, reads the version from the `pom.xml` file.
 
+To run the API with docker-compose, do the following:
+
+1) Assign the qb4j.yml contents to the exported `QB4J_CONFIG` variable with `export QB4J_CONFIG=$(cat ./qb4j.yml)`.
+2) Update the `docker-compose.yml` `api` service's image to the tag you want to run.
+3) Update the `docker-compose.yml` `api` service's `update_cache` environment variable to `true` to run the image to refresh the 
+database metadata cache or `false` to run the image as the API (TODO:  look into passing this is in with the `-e` option).
+
 ## Deployment
 
 #### One Time Set Up

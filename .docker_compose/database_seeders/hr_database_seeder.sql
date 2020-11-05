@@ -1,10 +1,7 @@
--- Foreign keys must be enabled explicitly and on each database connection.
--- Because this database is only intended for read operations, JDBC database connections will not need foreign keys enabled.
-PRAGMA foreign_keys = ON;
-PRAGMA foreign_keys;
+USE qb4j;
 
 CREATE TABLE level (
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
     level_num INTEGER NOT NULL UNIQUE,
     min_salary FLOAT NOT NULL,  -- Annual salary
     max_salary FLOAT NOT NULL  -- Annual salary
@@ -32,44 +29,44 @@ INSERT INTO level (level_num, min_salary, max_salary) VALUES (19, 281000, 294999
 INSERT INTO level (level_num, min_salary, max_salary) VALUES (20, 295000, 300000);
 INSERT INTO level (level_num, min_salary, max_salary) VALUES (21, 300001, 400000);
 
-CREATE TABLE position (
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+CREATE TABLE role (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
     name VARCHAR(30) NOT NULL UNIQUE,
     level_id INTEGER,
 
     FOREIGN KEY (level_id) REFERENCES level(id)
 );
 
-INSERT INTO position (name, level_id) VALUES ('Administrator', 2);
-INSERT INTO position (name, level_id) VALUES ('Senior Administrator', 3);
-INSERT INTO position (name, level_id) VALUES ('Truck Driver', 3);
-INSERT INTO position (name, level_id) VALUES ('Senior Truck Driver', 4);
-INSERT INTO position (name, level_id) VALUES ('Accountant', 3);
-INSERT INTO position (name, level_id) VALUES ('Senior Accountant', 4);
-INSERT INTO position (name, level_id) VALUES ('Analyst', 4);
-INSERT INTO position (name, level_id) VALUES ('Senior Analyst', 5);
-INSERT INTO position (name, level_id) VALUES ('Engineer', 5);
-INSERT INTO position (name, level_id) VALUES ('Senior Engineer', 6);
-INSERT INTO position (name, level_id) VALUES ('Consultant', 7);
-INSERT INTO position (name, level_id) VALUES ('Senior Consultant', 8);
-INSERT INTO position (name, level_id) VALUES ('Advisor', 7);
-INSERT INTO position (name, level_id) VALUES ('Senior Advisor', 8);
-INSERT INTO position (name, level_id) VALUES ('Team Leader', 9);
-INSERT INTO position (name, level_id) VALUES ('Senior Team Leader', 10);
-INSERT INTO position (name, level_id) VALUES ('Director', 11);
-INSERT INTO position (name, level_id) VALUES ('Senior Director', 12);
-INSERT INTO position (name, level_id) VALUES ('Vice President', 13);
-INSERT INTO position (name, level_id) VALUES ('Senior Vice President', 14);
-INSERT INTO position (name, level_id) VALUES ('Officer', 15);
-INSERT INTO position (name, level_id) VALUES ('Senior Officer', 16);
-INSERT INTO position (name, level_id) VALUES ('Chief Officer', 17);
-INSERT INTO position (name, level_id) VALUES ('President', 18);
-INSERT INTO position (name, level_id) VALUES ('Emporer', 19);  -- One day we'll have the title of Emporer in corporate America :P !
-INSERT INTO position (name, level_id) VALUES ('Senior Emperor', 20);
-INSERT INTO position (name, level_id) VALUES ('Grand Emporer', 21);
+INSERT INTO role (name, level_id) VALUES ('Administrator', 2);
+INSERT INTO role (name, level_id) VALUES ('Senior Administrator', 3);
+INSERT INTO role (name, level_id) VALUES ('Truck Driver', 3);
+INSERT INTO role (name, level_id) VALUES ('Senior Truck Driver', 4);
+INSERT INTO role (name, level_id) VALUES ('Accountant', 3);
+INSERT INTO role (name, level_id) VALUES ('Senior Accountant', 4);
+INSERT INTO role (name, level_id) VALUES ('Analyst', 4);
+INSERT INTO role (name, level_id) VALUES ('Senior Analyst', 5);
+INSERT INTO role (name, level_id) VALUES ('Engineer', 5);
+INSERT INTO role (name, level_id) VALUES ('Senior Engineer', 6);
+INSERT INTO role (name, level_id) VALUES ('Consultant', 7);
+INSERT INTO role (name, level_id) VALUES ('Senior Consultant', 8);
+INSERT INTO role (name, level_id) VALUES ('Advisor', 7);
+INSERT INTO role (name, level_id) VALUES ('Senior Advisor', 8);
+INSERT INTO role (name, level_id) VALUES ('Team Leader', 9);
+INSERT INTO role (name, level_id) VALUES ('Senior Team Leader', 10);
+INSERT INTO role (name, level_id) VALUES ('Director', 11);
+INSERT INTO role (name, level_id) VALUES ('Senior Director', 12);
+INSERT INTO role (name, level_id) VALUES ('Vice President', 13);
+INSERT INTO role (name, level_id) VALUES ('Senior Vice President', 14);
+INSERT INTO role (name, level_id) VALUES ('Officer', 15);
+INSERT INTO role (name, level_id) VALUES ('Senior Officer', 16);
+INSERT INTO role (name, level_id) VALUES ('Chief Officer', 17);
+INSERT INTO role (name, level_id) VALUES ('President', 18);
+INSERT INTO role (name, level_id) VALUES ('Emporer', 19);  -- One day we'll have the title of Emporer in corporate America :P !
+INSERT INTO role (name, level_id) VALUES ('Senior Emperor', 20);
+INSERT INTO role (name, level_id) VALUES ('Grand Emporer', 21);
 
 CREATE TABLE team (
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
     short_name VARCHAR(4) NOT NULL UNIQUE,
     long_name VARCHAR(40) NOT NULL UNIQUE
 );
@@ -134,63 +131,63 @@ INSERT INTO team_mapping (child_id, parent_id) VALUES (21, 22);
 INSERT INTO team_mapping (child_id, parent_id) VALUES (22, 23);
 
 CREATE TABLE employee (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    guid VARCHAR(50) NOT NULL UNIQUE DEFAULT (abs(random())),
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    guid VARCHAR(50) NOT NULL UNIQUE DEFAULT (uuid()),
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     team_id INTEGER NOT NULL,
-    position_id INTEGER NOT NULL,
+    role_id INTEGER NOT NULL,
 
     FOREIGN KEY (team_id) REFERENCES team(id),
-    FOREIGN KEY (position_id) REFERENCES position(id)
+    FOREIGN KEY (role_id) REFERENCES role(id)
 );
 
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Tai', 'Barlow', 1, 2);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Stan', 'Prince', 1, 2);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Jannah', 'Chase', 1, 2);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Jackson', 'Gamble', 2, 3);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Alvin', 'Burke', 2, 4);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Chay', 'Witt', 2, 3);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Ernie', 'Clifford', 3, 4);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Giorgia', 'Salaz', 3, 3);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Alena', 'Swanson', 3, 2);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Jeffrey', 'Glover', 4, 17);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Antonina', 'Stark', 4, 15);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Wyatt', 'Blankenship', 5, 8);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Arif', 'Bird', 5, 5);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Emelie', 'Parry', 6, 5);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Johnny', 'O''Moore', 6, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Yassin', 'Lopez', 7, 5);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Malika', 'Marsden', 7, 4);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Lyla-Rose', 'Harwood', 8, 5);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Eilidh', 'McKay', 8, 5);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Sonya', 'McCullough', 9, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Emme', 'Leon', 9, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Patricia', 'McDougall', 10, 16);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Rebekah', 'Allman', 10, 17);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Ernie', 'Marshall', 11, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Millie', 'Johns', 11, 8);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Saba', 'Kennedy', 12, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Tamara', 'Paine', 12, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Ishaan', 'Moody', 13, 16);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Shivam', 'Sargent', 13, 18);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Kobi', 'Millington', 14, 9);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Jasleen', 'Carson', 14, 10);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Myla', 'Ballard', 15, 9);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Tillie', 'Hampton', 15, 10);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Elora', 'Armstrong', 16, 16);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Nile', 'Odom', 16, 18);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Dylon', 'Villarreal', 17, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Eliott', 'Brett', 18, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Joss', 'Rhodes', 19, 7);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Izabel', 'Manning', 20, 8);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Amrit', 'Webber', 21, 17);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Margaret', 'Driscoll', 22, 19);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Mica', 'Millar', 22, 20);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Noah', 'Jennings', 22, 21);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Bo', 'Cardenas', 23, 22);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Yousef', 'Wooley', 23, 25);
-INSERT INTO employee (first_name, last_name, team_id, position_id) VALUES ('Montague', 'Townsend', 23, 27);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Tai', 'Barlow', 1, 2);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Stan', 'Prince', 1, 2);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Jannah', 'Chase', 1, 2);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Jackson', 'Gamble', 2, 3);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Alvin', 'Burke', 2, 4);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Chay', 'Witt', 2, 3);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Ernie', 'Clifford', 3, 4);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Giorgia', 'Salaz', 3, 3);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Alena', 'Swanson', 3, 2);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Jeffrey', 'Glover', 4, 17);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Antonina', 'Stark', 4, 15);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Wyatt', 'Blankenship', 5, 8);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Arif', 'Bird', 5, 5);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Emelie', 'Parry', 6, 5);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Johnny', 'O''Moore', 6, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Yassin', 'Lopez', 7, 5);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Malika', 'Marsden', 7, 4);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Lyla-Rose', 'Harwood', 8, 5);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Eilidh', 'McKay', 8, 5);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Sonya', 'McCullough', 9, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Emme', 'Leon', 9, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Patricia', 'McDougall', 10, 16);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Rebekah', 'Allman', 10, 17);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Ernie', 'Marshall', 11, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Millie', 'Johns', 11, 8);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Saba', 'Kennedy', 12, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Tamara', 'Paine', 12, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Ishaan', 'Moody', 13, 16);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Shivam', 'Sargent', 13, 18);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Kobi', 'Millington', 14, 9);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Jasleen', 'Carson', 14, 10);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Myla', 'Ballard', 15, 9);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Tillie', 'Hampton', 15, 10);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Elora', 'Armstrong', 16, 16);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Nile', 'Odom', 16, 18);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Dylon', 'Villarreal', 17, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Eliott', 'Brett', 18, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Joss', 'Rhodes', 19, 7);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Izabel', 'Manning', 20, 8);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Amrit', 'Webber', 21, 17);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Margaret', 'Driscoll', 22, 19);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Mica', 'Millar', 22, 20);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Noah', 'Jennings', 22, 21);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Bo', 'Cardenas', 23, 22);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Yousef', 'Wooley', 23, 25);
+INSERT INTO employee (first_name, last_name, team_id, role_id) VALUES ('Montague', 'Townsend', 23, 27);
 
 -- Technically, `salary_amount` could have been a column in the `employee` table, but I thought putting salaries
 -- in it's own separate table, `salary`, made it easier to restrict access to rather than restrict access to a column

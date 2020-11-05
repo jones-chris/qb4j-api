@@ -44,7 +44,6 @@ public class DatabaseMetadataCache {
      *
      * @throws Exception If an exception is raised when querying one of the target data sources.
      */
-//    @Scheduled(fixedRate = 8640000000L)
     public void refreshCache() throws Exception {
         // Get list of databases from qb4jConfig's target data sources.
         List<Database> databases = qb4jConfig.getTargetDataSources().stream()

@@ -2,4 +2,4 @@
 # "dev" or "prod".  It is used to get database properties depending on the environment that the application is
 # running in.
 server.port: 8080
-environment: ${env}
+#environment: ${env}
