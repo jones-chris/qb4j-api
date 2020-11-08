@@ -1,5 +1,6 @@
 package net.querybuilder4j.config;
 
+import net.querybuilder4j.cache.CacheType;
 import net.querybuilder4j.constants.DatabaseType;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 
@@ -14,6 +15,7 @@ public class Qb4jConfig {
 
     private List<TargetDataSource> targetDataSources;
     private QueryTemplateDataSource queryTemplateDataSource;
+    private DatabaseMetadataCacheSource databaseMetadataCacheSource;
 
     public Qb4jConfig() {}
 
@@ -37,6 +39,14 @@ public class Qb4jConfig {
 
     public void setQueryTemplateDataSource(QueryTemplateDataSource queryTemplateDataSource) {
         this.queryTemplateDataSource = queryTemplateDataSource;
+    }
+
+    public DatabaseMetadataCacheSource getDatabaseMetadataCacheSource() {
+        return databaseMetadataCacheSource;
+    }
+
+    public void setDatabaseMetadataCacheSource(DatabaseMetadataCacheSource databaseMetadataCacheSource) {
+        this.databaseMetadataCacheSource = databaseMetadataCacheSource;
     }
 
     public List<DataSource> getTargetDataSourcesAsDataSource() {
@@ -255,6 +265,38 @@ public class Qb4jConfig {
                 this.dataSource = ds;
             }
             return this.dataSource;
+        }
+    }
+
+    public static class DatabaseMetadataCacheSource {
+        private CacheType cacheType;
+        private String host;
+        private int port;
+
+        public DatabaseMetadataCacheSource() {}
+
+        public CacheType getCacheType() {
+            return cacheType;
+        }
+
+        public void setCacheType(CacheType cacheType) {
+            this.cacheType = cacheType;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
         }
     }
 

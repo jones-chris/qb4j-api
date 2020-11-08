@@ -2,4 +2,5 @@
 # "dev" or "prod".  It is used to get database properties depending on the environment that the application is
 # running in.
 server.port: 8080
+qb4j.env: local
 #environment: ${env}

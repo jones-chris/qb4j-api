@@ -1,8 +1,8 @@
 package net.querybuilder4j.sql_builder;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.constants.DatabaseType;
-import net.querybuilder4j.model.select_statement.CriteriaTreeFlattener;
 import net.querybuilder4j.model.select_statement.SelectStatement;
 import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 import org.springframework.beans.factory.annotation.Autowired;

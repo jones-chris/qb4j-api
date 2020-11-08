@@ -1,6 +1,7 @@
 package net.querybuilder4j.model.select_statement;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 
 import java.util.*;

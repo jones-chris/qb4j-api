@@ -1,6 +1,6 @@
 targetDataSources:
   - name: hr_database
-    url: jdbc:mysql://hr_database:3306/qb4j # The host name is `hr_database` so that docker-compose can resolve the IP on the default docker network it creates.
+    url: jdbc:mysql://localhost:3306/qb4j # The host name is `hr_database` so that docker-compose can resolve the IP on the default docker network it creates.
     driverClassName: com.mysql.cj.jdbc.Driver
     databaseType: MySql
     username: root
@@ -22,6 +22,10 @@ targetDataSources:
 #      ]
 #      tables: []
 #      columns: []
+databaseMetadataCacheSource:
+  cacheType: IN_MEMORY
+#  host: database_metadata_cache
+#  port: 6379
 queryTemplateDataSource:
   url: jdbc:sqlite:./data/query_templates.db
   driverClassName: org.sqlite.JDBC

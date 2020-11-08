@@ -1,6 +1,7 @@
 package net.querybuilder4j.model.select_statement;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 import org.junit.Test;
@@ -8,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.inject.Inject;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collections;
