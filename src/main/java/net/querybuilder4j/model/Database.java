@@ -10,14 +10,23 @@ import java.util.List;
 
 public class Database {
 
+    private @JsonIgnore String fullyQualifiedName;
     private String databaseName;
     private DatabaseType databaseType;
-    private @JsonIgnore
-    List<Schema> schemas = new ArrayList<>();
+    private @JsonIgnore List<Schema> schemas = new ArrayList<>();
 
     public Database(String databaseName, DatabaseType databaseType) {
+        this.fullyQualifiedName = String.format("%s", databaseName);
         this.databaseName = databaseName;
         this.databaseType = databaseType;
+    }
+
+    public String getFullyQualifiedName() {
+        return this.fullyQualifiedName;
+    }
+
+    public void setFullyQualifiedName(String fullyQualifiedName) {
+        this.fullyQualifiedName = fullyQualifiedName;
     }
 
     public String getDatabaseName() {

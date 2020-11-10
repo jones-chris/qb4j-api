@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * The class that will instantiate a {@link Qb4jConfig} based on whether the `qb4j.env` property in the application.properties
@@ -29,16 +30,26 @@ public class DataConfig {
     )
     @Bean(name = "qb4jConfigLocal")
     public Qb4jConfig getTargetDatabasesLocal() throws IOException {
-        InputStream qb4jConfig = this.getClass()
+        // Try to read the `local-qb4j.yml` file.  If the file cannot be found, then `getResourceAsStream` will return
+        // null.
+        Optional<InputStream> qb4jConfig = Optional.ofNullable(
+                this.getClass()
                 .getClassLoader()
-                .getResourceAsStream("qb4j.yml");
+                .getResourceAsStream("local-qb4j.yml")
+        );
 
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        JsonNode node = mapper.readTree(qb4jConfig);
+        // If the `local-qb4j.yml` file can be found, then deserialize into a Qb4jConfig object.
+        if (qb4jConfig.isPresent()) {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            JsonNode node = mapper.readTree(qb4jConfig.get());
 
-        LOG.info("Here is the qb4jConfig: \n {}", node.toPrettyString());
+            LOG.info("Here is the qb4jConfig: \n {}", node.toPrettyString());
 
-        return mapper.readValue(node.toPrettyString(), Qb4jConfig.class);
+            return mapper.readValue(node.toPrettyString(), Qb4jConfig.class);
+        }
+
+        // Otherwise, throw an exception.
+        throw new Qb4jConfigNotFoundException("local-qb4j.yml could not be found");
     }
 
     @ConditionalOnProperty(
