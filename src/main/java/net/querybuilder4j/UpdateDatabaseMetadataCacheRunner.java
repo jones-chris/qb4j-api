@@ -1,5 +1,6 @@
 package net.querybuilder4j;
 
+import net.querybuilder4j.cache.DatabaseMetadataCache;
 import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class UpdateDatabaseMetadataCacheRunner implements ApplicationListener<Ap
                 LOG.info("updateCache property value is:  {}", updateCacheOption.get());
 
                 LOG.info("updateCache property is present.  Refreshing cache.");
-                applicationReadyEvent.getApplicationContext().getBean(InMemoryDatabaseMetadataCacheImpl.class).refreshCache();
+                applicationReadyEvent.getApplicationContext().getBean(DatabaseMetadataCache.class).refreshCache();
 
                 LOG.info("Shutting down Spring application.");
                 applicationReadyEvent.getApplicationContext().close();

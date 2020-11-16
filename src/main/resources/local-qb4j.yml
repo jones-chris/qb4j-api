@@ -25,6 +25,7 @@ targetDataSources:
 databaseMetadataCacheSource:
   cacheType: IN_MEMORY
 #  host: database_metadata_cache
+#  host: localhost
 #  port: 6379
 queryTemplateDataSource:
   url: jdbc:sqlite:./data/query_templates.db

@@ -1,16 +1,16 @@
 version: '3.1'
 
 services:
-  api:
-    image: joneschris/qb4j-api:0.0.21
-    ports:
-    - '8080:8080'
-    environment:
-      - qb4j_config=${QB4J_CONFIG}  # QB4J_CONFIG should already be an exported variable in your shell in order to be interpolated here.
-      - update_cache=true  # True if you want to test the cache refresh, otherwise false to run the image as the API.
-    depends_on:
-      - hr_database
-      - database_metadata_cache
+#  api:
+#    image: joneschris/qb4j-api:0.0.21
+#    ports:
+#    - '8080:8080'
+#    environment:
+#      - qb4j_config=${QB4J_CONFIG}  # QB4J_CONFIG should already be an exported variable in your shell in order to be interpolated here.
+#      - update_cache=${UPDATE_CACHE:false}  # True if you want to test the cache refresh, otherwise false to run the image as the API.
+#    depends_on:
+#      - hr_database
+#      - database_metadata_cache
 #      - finance_database
 #    deploy:
 #      restart_policy:

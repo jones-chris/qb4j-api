@@ -1,7 +1,22 @@
 # qb4j-api
 
 ## Local Development
-The URL for the `finance_databas.mv.db` H2 database is `jdbc:h2:./data/finance_database;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false`.
+
+To run the API locally and be able to debug it in IntelliJ, do the following:
+1) Set up an IntelliJ Configuration like so (note the VM Option of `-DupdateCache=false`.  Change this to `true` to run 
+the API as a one-time cache updater): ![IntelliJ Configuration](./readme-images/intellij_configuration.png)
+
+2) Change the `qb4j.env` property to `local` in the `application.yml`.  This will cause the `Qb4j` object to be instantiated from
+the `local-qb4j.yml` file.
+
+3) To cache database metadata in the API's memory, change the `local-qb4j.yml` to look like this: ![In-memory local-qb4j.yml](./readme-images/local-qb4j-in-memory.png).  
+To cache database metadata in a locally running Redis Docker container, change the `local-qb4j.yml` to look like this: ![Redis local-qb4j.yml](./readme-images/local-qb4j-redis.png).
+If you cache database metadata in Redis, remember to start the Redis container using `docker-compose up -d`.  You'll also need
+to run the IntelliJ Configuration that you set up in step #1 with a VM option of `-DupdateCache=true` so that Redis is populated with 
+database metadata.  Do this before the next step or the Redis cache will be empty.
+
+
+4) Start the IntelliJ Configuration that you set up in step #1.
 
 To run the API locally, first build the project with:
 

@@ -8,6 +8,7 @@ import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Schema;
 import net.querybuilder4j.model.Table;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
 import java.sql.Connection;
@@ -127,7 +128,10 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         this.jedis.select(this.SCHEMA_REDIS_DB);
 
         // Get all Redis values that start with `{datbabaseName}.*` (notice the trailing period before `*`.
-        ScanResult<String> scanResult = this.jedis.scan(databaseName + ".*");
+        ScanResult<String> scanResult = this.jedis.scan(
+                "0",
+                new ScanParams().match(databaseName + ".*")
+        );
         List<String> schemasJson = scanResult.getResult();
         return this.deserializeJsons(schemasJson, Schema.class);
     }
@@ -136,7 +140,10 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     public List<Table> findTables(String databaseName, String schemaName) {
         this.jedis.select(this.TABLE_REDIS_DB);
 
-        ScanResult<String> scanResult = this.jedis.scan(String.format("%s.%s.*", databaseName, schemaName));
+        ScanResult<String> scanResult = this.jedis.scan(
+                "0",
+                new ScanParams().match(String.format("%s.%s.*", databaseName, schemaName))
+        );
         List<String> tablesJson = scanResult.getResult();
         return this.deserializeJsons(tablesJson, Table.class);
     }
@@ -145,7 +152,10 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     public List<Column> findColumns(String databaseName, String schemaName, String tableName) {
         this.jedis.select(this.COLUMN_REDIS_DB);
 
-        ScanResult<String> scanResult = this.jedis.scan(String.format("%s.%s.%s.*", databaseName, schemaName, tableName));
+        ScanResult<String> scanResult = this.jedis.scan(
+                "0",
+                new ScanParams().match(String.format("%s.%s.%s.*", databaseName, schemaName, tableName))
+        );
         List<String> columnsJson = scanResult.getResult();
         return this.deserializeJsons(columnsJson, Column.class);
     }

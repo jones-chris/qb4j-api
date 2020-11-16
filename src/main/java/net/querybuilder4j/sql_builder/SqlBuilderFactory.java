@@ -46,10 +46,6 @@ public class SqlBuilderFactory {
                 sqlBuilder = new SqliteSqlBuilder(this.databaseMetadataCache, this.databaseMetadataCacheValidator)
                         .setStatement(selectStatement);
                 break;
-            case H2:
-                sqlBuilder = new H2SqlBuilder(this.databaseMetadataCache, this.databaseMetadataCacheValidator)
-                        .setStatement(selectStatement);
-                break;
             default:
                 throw new RuntimeException(String.format("Database type, %s, not recognized", databaseType));
         }
