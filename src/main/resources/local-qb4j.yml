@@ -1,6 +1,6 @@
 targetDataSources:
   - name: hr_database
-    url: jdbc:mysql://localhost:3306/qb4j # The host name is `hr_database` so that docker-compose can resolve the IP on the default docker network it creates.
+    url: jdbc:mysql://127.0.0.1:3306/qb4j # The host name is `hr_database` so that docker-compose can resolve the IP on the default docker network it creates.
     driverClassName: com.mysql.cj.jdbc.Driver
     databaseType: MySql
     username: root
@@ -9,23 +9,32 @@ targetDataSources:
       schemas: []
       tables: []
       columns: []
-#  - name: finance_database
-#    url: jdbc:postgresql://localhost:5432/postgres
-#    driverClassName: org.postgresql.Driver
-#    databaseType: PostgreSQL
-#    username: postgres
-#    password: postgres
-#    excludeObjects:
-#      schemas: [
-#        INFORMATION_SCHEMA,
-#        PUBLIC
-#      ]
-#      tables: []
-#      columns: []
+  - name: finance_database
+    url: jdbc:postgresql://localhost:5432/postgres
+    driverClassName: org.postgresql.Driver
+    databaseType: PostgreSQL
+    username: postgres
+    password: example
+    excludeObjects:
+      schemas: [
+        information_schema,
+        public,
+        pg_catalog
+      ]
+      tables: []
+      columns: []
 databaseMetadataCacheSource:
-  cacheType: IN_MEMORY
+  # An in-memory cache.
+#  cacheType: IN_MEMORY
+
+  # A redis cache for local debugging.
+  cacheType: REDIS
+  host: localhost
+  port: 6379
+
+  # A redis cache without local debugging.
+#  cacheType: REDIS
 #  host: database_metadata_cache
-#  host: localhost
 #  port: 6379
 queryTemplateDataSource:
   url: jdbc:sqlite:./data/query_templates.db

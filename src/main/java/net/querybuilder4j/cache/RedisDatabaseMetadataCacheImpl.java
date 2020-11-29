@@ -212,7 +212,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
                 Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
 
                 // Add the schema if it is not an excluded schema.
-                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName())) {
+                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName().toLowerCase())) {
                     schemas.add(schema);
                 }
             }
@@ -244,7 +244,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
 
         try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getTables(null, schema, null, null);
+            ResultSet rs = conn.getMetaData().getTables(null, schema, null, new String[] {"TABLE", "VIEW"});
 
             while (rs.next()) {
                 String schemaName = rs.getString("TABLE_SCHEM");
@@ -252,7 +252,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
                 Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
 
                 // Add the table if it is not an excluded table.
-                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName())) {
+                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName().toLowerCase())) {
                     tables.add(table);
                 }
             }
@@ -290,7 +290,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
                 Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
 
                 // Add the column if it is not an excluded column.
-                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName())) {
+                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName().toLowerCase())) {
                     columns.add(column);
                 }
             }

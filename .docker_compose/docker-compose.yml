@@ -15,6 +15,7 @@ services:
 #    deploy:
 #      restart_policy:
 #        condition: on-failure
+
   hr_database:
     image: qb4j-mysql
     build:
@@ -25,16 +26,21 @@ services:
 ##    deploy:
 ##      restart_policy:
 ##        condition: on-failure
-#  finance_database:
-#    image: qb4j-postgresql
-#    build:
-#      context: .
-#      dockerfile: postgresql.Dockerfile
-#    ports:
-#      - '5432:5432'
+
+  finance_database:
+    image: qb4j-postgresql
+    build:
+      context: .
+      dockerfile: postgresql.Dockerfile
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
 ##    deploy:
 ##      restart_policy:
 ##        condition: on-failure
+
   database_metadata_cache:
     image: redis:latest
     ports:
