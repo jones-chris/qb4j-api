@@ -16,6 +16,8 @@ public class Table implements SqlRepresentation {
     private String tableName;
     private @JsonIgnore List<Column> columns = new ArrayList<>();
 
+    public Table() {}
+
     public Table(String databaseName, String schemaName, String tableName) {
         this.fullyQualifiedName = String.format("%s.%s.%s", databaseName, schemaName, tableName);
         this.databaseName = databaseName;

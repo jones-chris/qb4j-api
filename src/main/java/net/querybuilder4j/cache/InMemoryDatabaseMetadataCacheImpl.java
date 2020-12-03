@@ -5,6 +5,7 @@ import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Schema;
 import net.querybuilder4j.model.Table;
+import net.querybuilder4j.util.DatabaseMetadataCrawler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -36,8 +37,8 @@ public class InMemoryDatabaseMetadataCacheImpl implements DatabaseMetadataCache 
     }
 
     /**
-     * Run every 24 hours thereafter.  This method walks the qb4j target databases that are included in the Qb4jConfig.json
-     * file and saves the target database metadata (databases, schemas, tables, and columns) to this class' `cache` field.
+     * Run every 24 hours thereafter.  This method walks the qb4j target databases that are included in the qb4jConfig
+     * and saves the target database metadata (databases, schemas, tables, and columns) to this class' `cache` field.
      * This class eager loads this metadata.
      *
      * @throws CacheRefreshException If an exception is raised when querying one of the target data sources.
@@ -45,31 +46,30 @@ public class InMemoryDatabaseMetadataCacheImpl implements DatabaseMetadataCache 
     @Override
     @Scheduled(fixedRate = 8640000000L)
     public void refreshCache() throws CacheRefreshException {
-        // Get list of databases from qb4jConfig's target data sources.
-        List<Database> databases = qb4jConfig.getTargetDataSources().stream()
-                .map(targetDataSource -> new Database(targetDataSource.getName(), targetDataSource.getDatabaseType()))
-                .collect(Collectors.toList());
+        List<Database> databases = new ArrayList<>();
 
-        for (Database database : databases) {
+        for (Qb4jConfig.TargetDataSource targetDataSource : this.qb4jConfig.getTargetDataSources()) {
             // Get schemas
-            List<Schema> schemas = this.getSchemas(database.getDatabaseName());
+            List<Schema> schemas = DatabaseMetadataCrawler.getSchemas(targetDataSource);
+            Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());
             database.setSchemas(schemas);
 
             // Get tables
             for (Schema schema : database.getSchemas()) {
-                List<Table> tables = this.getTablesAndViews(database.getDatabaseName(), schema.getSchemaName());
+                List<Table> tables = DatabaseMetadataCrawler.getTablesAndViews(targetDataSource, schema.getSchemaName());
                 schema.setTables(tables);
 
                 // Get columns
                 for (Table table : schema.getTables()) {
-                    List<Column> columns = this.getColumns(database.getDatabaseName(), table.getSchemaName(), table.getTableName());
+                    List<Column> columns = DatabaseMetadataCrawler.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
                     table.setColumns(columns);
                 }
             }
 
+            databases.add(database);
         }
 
-        // Save database metadata to cache
+        // Clear cache all at once and save new database metadata list to cache.
         cache.clear();
         cache.addAll(databases);
     }
@@ -151,89 +151,6 @@ public class InMemoryDatabaseMetadataCacheImpl implements DatabaseMetadataCache 
                 .filter(column -> column.getColumnName().equals(columnName))
                 .findFirst()
                 .orElseThrow(Exception::new);
-    }
-
-    private List<Schema> getSchemas(String databaseName) throws CacheRefreshException {
-        List<Schema> schemas = new ArrayList<>();
-        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
-
-        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getSchemas();
-
-            while (rs.next()) {
-                String schemaName = rs.getString("TABLE_SCHEM");
-                Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
-
-                // Add the schema if it is not an excluded schema.
-                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName().toLowerCase())) {
-                    schemas.add(schema);
-                }
-            }
-
-            // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
-            // the schema name.
-            if (schemas.isEmpty()) {
-                schemas.add(new Schema(databaseName, "null"));
-            }
-
-        } catch (SQLException e) {
-            throw new CacheRefreshException(e);
-        }
-
-        return schemas;
-    }
-
-    private List<Table> getTablesAndViews(String databaseName, String schema) throws CacheRefreshException {
-        List<Table> tables = new ArrayList<>();
-        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
-
-        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getTables(null, schema, null, new String[] {"TABLE", "VIEW"});
-
-            while (rs.next()) {
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String tableName = rs.getString("TABLE_NAME");
-                Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
-
-                // Add the table if it is not an excluded table.
-                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName().toLowerCase())) {
-                    tables.add(table);
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new CacheRefreshException(e);
-        }
-
-        return tables;
-    }
-
-    private List<Column> getColumns(String databaseName, String schema, String table) throws CacheRefreshException {
-        List<Column> columns = new ArrayList<>();
-        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
-
-        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getColumns(null, schema, table, "%");
-
-            while (rs.next()) {
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String tableName = rs.getString("TABLE_NAME");
-                String columnName = rs.getString("COLUMN_NAME");
-                int dataType = rs.getInt("DATA_TYPE");
-
-                Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
-
-                // Add the column if it is not an excluded column.
-                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName().toLowerCase())) {
-                    columns.add(column);
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new CacheRefreshException(e);
-        }
-
-        return columns;
     }
 
 }

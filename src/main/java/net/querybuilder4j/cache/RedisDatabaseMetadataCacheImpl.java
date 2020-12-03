@@ -7,13 +7,11 @@ import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Schema;
 import net.querybuilder4j.model.Table;
+import net.querybuilder4j.util.DatabaseMetadataCrawler;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -71,35 +69,31 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
 
     @Override
     public void refreshCache() throws Exception {
-        // Get list of databases from qb4jConfig's target data sources.
-        List<Database> databases = qb4jConfig.getTargetDataSources().stream()
-                .map(targetDataSource -> new Database(targetDataSource.getName(), targetDataSource.getDatabaseType()))
-                .collect(Collectors.toList());
-
-        // Clear the currently selected Redis database.
+        // Clear all Redis databases.
         this.jedis.flushAll();
 
         // Loop through each database, get the schema, table/view, and column metadata and write it to Redis.
         // TODO:  Make this loop asynchronous for each database?
-        for (Database database : databases) {
+        for (Qb4jConfig.TargetDataSource targetDataSource : this.qb4jConfig.getTargetDataSources()) {
             // Write the database metadata to Redis.
             this.jedis.select(this.DATABASE_REDIS_DB);
+            Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());
             this.jedis.set(database.getFullyQualifiedName(), database.toString());
 
             // Get schema metadata and write to Redis.
-            List<Schema> schemas = this.getSchemas(database.getDatabaseName());
+            List<Schema> schemas = DatabaseMetadataCrawler.getSchemas(targetDataSource);
             this.jedis.select(this.SCHEMA_REDIS_DB);
             schemas.forEach(schema -> this.jedis.set(schema.getFullyQualifiedName(), schema.toString()));
 
             // Get tables metadata and write to Redis.
             for (Schema schema : database.getSchemas()) {
-                List<Table> tables = this.getTablesAndViews(database.getDatabaseName(), schema.getSchemaName());
+                List<Table> tables = DatabaseMetadataCrawler.getTablesAndViews(targetDataSource, schema.getSchemaName());
                 this.jedis.select(this.TABLE_REDIS_DB);
                 tables.forEach(table -> this.jedis.set(table.getFullyQualifiedName(), table.toString()));
 
                 // Get columns
                 for (Table table : schema.getTables()) {
-                    List<Column> columns = this.getColumns(database.getDatabaseName(), table.getSchemaName(), table.getTableName());
+                    List<Column> columns = DatabaseMetadataCrawler.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
                     this.jedis.select(this.COLUMN_REDIS_DB);
                     columns.forEach(column -> this.jedis.set(column.getFullyQualifiedName(), column.toString()));
                 }
@@ -128,11 +122,22 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         this.jedis.select(this.SCHEMA_REDIS_DB);
 
         // Get all Redis values that start with `{datbabaseName}.*` (notice the trailing period before `*`.
+        String databaseKeyPattern = databaseName + ".*";
         ScanResult<String> scanResult = this.jedis.scan(
                 "0",
-                new ScanParams().match(databaseName + ".*")
+                new ScanParams().match(databaseKeyPattern)
         );
-        List<String> schemasJson = scanResult.getResult();
+        List<String> schemasRedisKeys = scanResult.getResult();
+
+        if (schemasRedisKeys.isEmpty()) {
+            throw new CacheMissException(
+                    String.format("Could not find %s", databaseKeyPattern)
+            );
+        }
+
+        // Get the values of the schemas redis keys.
+        List<String> schemasJson = this.jedis.mget(schemasRedisKeys.toArray(new String[0]));
+
         return this.deserializeJsons(schemasJson, Schema.class);
     }
 
@@ -140,11 +145,22 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     public List<Table> findTables(String databaseName, String schemaName) {
         this.jedis.select(this.TABLE_REDIS_DB);
 
+        String tableKeyPattern = String.format("%s.%s.*", databaseName, schemaName);
         ScanResult<String> scanResult = this.jedis.scan(
                 "0",
-                new ScanParams().match(String.format("%s.%s.*", databaseName, schemaName))
+                new ScanParams().match(tableKeyPattern)
         );
-        List<String> tablesJson = scanResult.getResult();
+        List<String> tablesRedisKeys = scanResult.getResult();
+
+        if (tablesRedisKeys.isEmpty()) {
+            throw new CacheMissException(
+                    String.format("Could not find %s", tableKeyPattern)
+            );
+        }
+
+        // Get the values of the schemas redis keys.
+        List<String> tablesJson = this.jedis.mget(tablesRedisKeys.toArray(new String[0]));
+
         return this.deserializeJsons(tablesJson, Table.class);
     }
 
@@ -152,11 +168,22 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     public List<Column> findColumns(String databaseName, String schemaName, String tableName) {
         this.jedis.select(this.COLUMN_REDIS_DB);
 
+        String columnKeyPattern = String.format("%s.%s.%s.*", databaseName, schemaName, tableName);
         ScanResult<String> scanResult = this.jedis.scan(
                 "0",
-                new ScanParams().match(String.format("%s.%s.%s.*", databaseName, schemaName, tableName))
+                new ScanParams().match(columnKeyPattern)
         );
-        List<String> columnsJson = scanResult.getResult();
+        List<String> columnsRedisKeys = scanResult.getResult();
+
+        if (columnsRedisKeys.isEmpty()) {
+            throw new CacheMissException(
+                    String.format("Could not find %s", columnKeyPattern)
+            );
+        }
+
+        // Get the values of the schemas redis keys.
+        List<String> columnsJson = this.jedis.mget(columnsRedisKeys.toArray(new String[0]));
+
         return this.deserializeJsons(columnsJson, Column.class);
     }
 
@@ -190,116 +217,6 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         String fullyQualifiedColumnName = String.format("%s.%s.%s.%s", databaseName, schemaName, tableName, columnName);
         String columnJson = this.jedis.get(fullyQualifiedColumnName);
         return this.deserializeJson(columnJson, Column.class);
-    }
-
-    /**
-     * Queries the target SQL database for schemas (excluding schemas defined in the `excludeObjects#schemas` of the
-     * {@link Qb4jConfig.TargetDataSource#getExcludeObjects()#getSchemas(String)}) as defined in the {@link Qb4jConfig}
-     * and instantiates a {@link Schema} for each schema the query returns.
-     * @param databaseName The name of the database to query for schema metadata.
-     * @return {@link List<Schema>} A list of the database schemas.
-     * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
-     */
-    private List<Schema> getSchemas(String databaseName) throws CacheRefreshException {
-        List<Schema> schemas = new ArrayList<>();
-        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
-
-        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getSchemas();
-
-            while (rs.next()) {
-                String schemaName = rs.getString("TABLE_SCHEM");
-                Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
-
-                // Add the schema if it is not an excluded schema.
-                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName().toLowerCase())) {
-                    schemas.add(schema);
-                }
-            }
-
-            // If no schemas exist (which is the case for some databases, like SQLite), add a schema with null for
-            // the schema name.
-            if (schemas.isEmpty()) {
-                schemas.add(new Schema(databaseName, "null"));
-            }
-
-        } catch (SQLException e) {
-            throw new CacheRefreshException(e);
-        }
-
-        return schemas;
-    }
-
-    /**
-     * Queries the target SQL database for tables and views (excluding tables and views defined in the
-     * {@link Qb4jConfig.TargetDataSource#getExcludeObjects()#getTablesAndViews(String, String)} (String)}) as defined in
-     * the {@link Qb4jConfig} and instantiates a {@link Table} for each table and view the query returns.
-     * @param databaseName The name of the database to query for table and view metadata.
-     * @param schema The name of the schema to query for table and view metadata.
-     * @return {@link List<Table>} A list of the database tables and views.
-     * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
-     */
-    private List<Table> getTablesAndViews(String databaseName, String schema) throws CacheRefreshException {
-        List<Table> tables = new ArrayList<>();
-        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
-
-        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getTables(null, schema, null, new String[] {"TABLE", "VIEW"});
-
-            while (rs.next()) {
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String tableName = rs.getString("TABLE_NAME");
-                Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
-
-                // Add the table if it is not an excluded table.
-                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName().toLowerCase())) {
-                    tables.add(table);
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new CacheRefreshException(e);
-        }
-
-        return tables;
-    }
-
-    /**
-     * Queries the target SQL database for columns (excluding columns defined in the
-     * {@link Qb4jConfig.TargetDataSource#getExcludeObjects()#getColumns(String, String, String)}) as defined in
-     * the {@link Qb4jConfig} and instantiates a {@link Column} for each column the query returns.
-     * @param databaseName The name of the database to query for table and view metadata.
-     * @param schema The name of the schema to query for table and view metadata.
-     * @param table The name of the table or view to query for column metatdata.
-     * @return {@link List<Column>} A list of the database columns.
-     * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
-     */
-    private List<Column> getColumns(String databaseName, String schema, String table) throws CacheRefreshException {
-        List<Column> columns = new ArrayList<>();
-        Qb4jConfig.TargetDataSource targetDataSource = qb4jConfig.getTargetDataSource(databaseName);
-
-        try (Connection conn = targetDataSource.getDataSource().getConnection()) {
-            ResultSet rs = conn.getMetaData().getColumns(null, schema, table, "%");
-
-            while (rs.next()) {
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String tableName = rs.getString("TABLE_NAME");
-                String columnName = rs.getString("COLUMN_NAME");
-                int dataType = rs.getInt("DATA_TYPE");
-
-                Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
-
-                // Add the column if it is not an excluded column.
-                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName().toLowerCase())) {
-                    columns.add(column);
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new CacheRefreshException(e);
-        }
-
-        return columns;
     }
 
     /**
