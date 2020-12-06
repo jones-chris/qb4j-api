@@ -86,13 +86,13 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
             schemas.forEach(schema -> this.jedis.set(schema.getFullyQualifiedName(), schema.toString()));
 
             // Get tables metadata and write to Redis.
-            for (Schema schema : database.getSchemas()) {
+            for (Schema schema : schemas) {
                 List<Table> tables = DatabaseMetadataCrawler.getTablesAndViews(targetDataSource, schema.getSchemaName());
                 this.jedis.select(this.TABLE_REDIS_DB);
                 tables.forEach(table -> this.jedis.set(table.getFullyQualifiedName(), table.toString()));
 
                 // Get columns
-                for (Table table : schema.getTables()) {
+                for (Table table : tables) {
                     List<Column> columns = DatabaseMetadataCrawler.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
                     this.jedis.select(this.COLUMN_REDIS_DB);
                     columns.forEach(column -> this.jedis.set(column.getFullyQualifiedName(), column.toString()));
@@ -121,13 +121,9 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     public List<Schema> findSchemas(String databaseName) {
         this.jedis.select(this.SCHEMA_REDIS_DB);
 
-        // Get all Redis values that start with `{datbabaseName}.*` (notice the trailing period before `*`.
+        // Get all Redis keys that start with `{datbabaseName}.*` (notice the trailing period before `*`.
         String databaseKeyPattern = databaseName + ".*";
-        ScanResult<String> scanResult = this.jedis.scan(
-                "0",
-                new ScanParams().match(databaseKeyPattern)
-        );
-        List<String> schemasRedisKeys = scanResult.getResult();
+        Set<String> schemasRedisKeys = this.jedis.keys(databaseKeyPattern);
 
         if (schemasRedisKeys.isEmpty()) {
             throw new CacheMissException(
@@ -146,11 +142,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         this.jedis.select(this.TABLE_REDIS_DB);
 
         String tableKeyPattern = String.format("%s.%s.*", databaseName, schemaName);
-        ScanResult<String> scanResult = this.jedis.scan(
-                "0",
-                new ScanParams().match(tableKeyPattern)
-        );
-        List<String> tablesRedisKeys = scanResult.getResult();
+        Set<String> tablesRedisKeys = this.jedis.keys(tableKeyPattern);
 
         if (tablesRedisKeys.isEmpty()) {
             throw new CacheMissException(
@@ -169,11 +161,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         this.jedis.select(this.COLUMN_REDIS_DB);
 
         String columnKeyPattern = String.format("%s.%s.%s.*", databaseName, schemaName, tableName);
-        ScanResult<String> scanResult = this.jedis.scan(
-                "0",
-                new ScanParams().match(columnKeyPattern)
-        );
-        List<String> columnsRedisKeys = scanResult.getResult();
+        Set<String> columnsRedisKeys = this.jedis.keys(columnKeyPattern);
 
         if (columnsRedisKeys.isEmpty()) {
             throw new CacheMissException(
