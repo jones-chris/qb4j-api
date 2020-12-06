@@ -7,7 +7,6 @@
 DOCKERHUB_TOKEN=$1
 PROJECT_VERSION=$2
 DOCKER_IMAGE_NAME="joneschris/qb4j-api:$PROJECT_VERSION"
-QB4J_CONFIG="$(cat ./qb4j.yml)"
 
 echo "$DOCKERHUB_TOKEN" | docker login --username joneschris --password-stdin
 docker push "$DOCKER_IMAGE_NAME"
