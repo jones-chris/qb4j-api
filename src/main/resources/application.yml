@@ -1,9 +1,3 @@
-# The "environment" property comes from a runtime environment variable also called "environment".  It should be either
-# "dev" or "prod".  It is used to get database properties depending on the environment that the application is
-# running in.
-server.port: 8080
-#qb4j.env: local
-#environment: ${env}
+# This is the main application.yml file.
 
-qb4j:
-  env: local
+server.port: 8080

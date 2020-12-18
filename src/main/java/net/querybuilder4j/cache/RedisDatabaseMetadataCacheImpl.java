@@ -65,6 +65,17 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         String host = this.qb4jConfig.getDatabaseMetadataCacheSource().getHost();
         int port = this.qb4jConfig.getDatabaseMetadataCacheSource().getPort();
         this.jedis = new Jedis(host, port);
+
+        String password = this.qb4jConfig.getDatabaseMetadataCacheSource().getPassword();
+        String username = this.qb4jConfig.getDatabaseMetadataCacheSource().getUsername();
+        if (password != null) {
+            if (username == null) {
+                this.jedis.auth(password);
+            } else {
+                this.jedis.auth(username, password);
+            }
+        }
+
     }
 
     @Override

@@ -60,7 +60,13 @@ phases:
 
   post_build:
     commands:
-      - # todo:  copy the nonLocal qb4j.yml file here.
+      # Zip the swarm directory.  Use the CODEBUILD_BUILD_NUMBER environment variable, which is the number of the build.
+#      - ZIP_FILE="$CODEBUILD_BUILD_NUMBER.zip"
+#      - zip -r $ZIP_FILE ./cicd/deployment/swarm/
+      # Copy the zip file to S3.
+#      - aws s3 cp $ZIP_FILE s3://qb4j-mvc/$ZIP_FILE
+
+        # todo:  pass the zip file as an argument to the bash script below.
       - bash ./cicd/buildspec_steps/1_post_build.bash "$DOCKERHUB_TOKEN" "$PROJECT_VERSION"
 
 artifacts:
