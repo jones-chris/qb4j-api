@@ -25,15 +25,19 @@ chmod 600 private_key.txt
 #        EOF is NOT wrapped in double quotes.  I am not aware of a way to accomplish both server and client side expansion
 #        in the same ssh command.
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << "EOF"
-  sudo docker stop $(sudo docker ps -aq)
-  sudo docker rm $(sudo docker ps -aq)
+  export PROJECT_VERSION=$DOCKER_IMAGE_TAG
+  export UPDATE_CACHE=false
+  export QB4J_CONFIG="$QB4J_CONFIG"
+  cat ./cicd/deployment/swarm/docker-swarm.yml | sudo -E docker stack deploy --compose-file - qb4j
+#  sudo docker stop $(sudo docker ps -aq)
+#  sudo docker rm $(sudo docker ps -aq)
   exit
 EOF
 
 # ssh into the lightsail instance, pull the docker image, and start a container based on the image.
 # shellcheck disable=SC2087
-ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << EOF
-  sudo docker pull joneschris/qb4j-api:$DOCKER_IMAGE_TAG
-  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config="$QB4J_CONFIG" joneschris/qb4j-api:$DOCKER_IMAGE_TAG &
-  exit
-EOF
+#ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << EOF
+#  sudo docker pull joneschris/qb4j-api:$DOCKER_IMAGE_TAG
+#  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config="$QB4J_CONFIG" joneschris/qb4j-api:$DOCKER_IMAGE_TAG &
+#  exit
+#EOF

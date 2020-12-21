@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.8'
 
 services:
 
@@ -6,7 +6,7 @@ services:
     image: qb4j-mysql
     build:
       context: .
-      dockerfile: ./database_dockerfiles/mysql.Dockerfile
+      dockerfile: mysql.Dockerfile
     ports:
       - '3306:3306'
     deploy:
@@ -18,7 +18,7 @@ services:
     image: qb4j-postgresql
     build:
       context: .
-      dockerfile: ./database_dockerfiles/postgresql.Dockerfile
+      dockerfile: postgresql.Dockerfile
     ports:
       - '5432:5432'
     environment:
