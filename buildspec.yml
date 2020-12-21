@@ -24,7 +24,6 @@ phases:
       - docker --version
       - docker info
       - apt-get update
-      - apt-get yq
 
   pre_build:
     commands:
@@ -44,12 +43,6 @@ phases:
       # Copy custom maven settings from S3 bucket.
       - aws s3 cp s3://maven-build-settings/qb4j_settings.xml /root/.m2/settings.xml
 
-      # Set qb4j.env property in application.yml to `nonLocal` because `local` is only used for local debugging.
-      # `nonLocal` will cause the DataConfig class to create a bean from the DataConfig#getTargetDatabasesNonLocal method when the Spring app starts.
-      # This bean will look for a qb4jConfig property by calling System#getProperty("qb4jConfig") rather than using the
-      # local-qb4j.yml file under resources, which is only intended to be used for local debugging and development.
-      - yq w -i src/main/resources/application.yml qb4j.env nonLocal
-
   build:
     commands:
       # Build the uber jar and run unit tests.
@@ -66,7 +59,6 @@ phases:
       # Copy the zip file to S3.
 #      - aws s3 cp $ZIP_FILE s3://qb4j-mvc/$ZIP_FILE
 
-        # todo:  pass the zip file as an argument to the bash script below.
       - bash ./cicd/buildspec_steps/1_post_build.bash "$DOCKERHUB_TOKEN" "$PROJECT_VERSION"
 
 artifacts:
