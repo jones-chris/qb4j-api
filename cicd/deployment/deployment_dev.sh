@@ -24,13 +24,12 @@ chmod 600 private_key.txt
 #        EOF is wrapped in double quotes.  Whereas the second ssh command needs to be expanded on the client side - thus
 #        EOF is NOT wrapped in double quotes.  I am not aware of a way to accomplish both server and client side expansion
 #        in the same ssh command.
+DOCKER_SWARM_YAML=$(cat ./cicd/deployment/swarm/docker-swarm.yml)
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << "EOF"
   export PROJECT_VERSION=$DOCKER_IMAGE_TAG
   export UPDATE_CACHE=false
   export QB4J_CONFIG="$QB4J_CONFIG"
-  cat ./cicd/deployment/swarm/docker-swarm.yml | sudo -E docker stack deploy --compose-file - qb4j
-#  sudo docker stop $(sudo docker ps -aq)
-#  sudo docker rm $(sudo docker ps -aq)
+  "$DOCKER_SWARM_YAML" | sudo -E docker stack deploy --compose-file - qb4j
   exit
 EOF
 
