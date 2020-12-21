@@ -13,7 +13,7 @@ phases:
   install:
     runtime-versions:
       docker: 18
-      java: openjdk8
+      java: openjdk11
     commands:
       # Get information about this image, the current directory, maven version, docker version.
       # Update apg-get.
