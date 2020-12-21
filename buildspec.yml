@@ -46,7 +46,7 @@ phases:
   build:
     commands:
       # Build the uber jar and run unit tests.
-      - mvn clean install
+      - mvn clean install -Dmaven.javadoc.skip=true
 
       # Build docker image
       - docker image build -t joneschris/qb4j-api:"$PROJECT_VERSION" --build-arg project_version="$PROJECT_VERSION" .
