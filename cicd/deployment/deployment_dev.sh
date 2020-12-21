@@ -25,6 +25,8 @@ chmod 600 private_key.txt
 #        EOF is NOT wrapped in double quotes.  I am not aware of a way to accomplish both server and client side expansion
 #        in the same ssh command.
 DOCKER_SWARM_YAML=$(cat ./cicd/deployment/swarm/docker-swarm.yml)
+echo "DOCKER_SWARM_YAML is: "
+echo "$DOCKER_SWARM_YAML"
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << "EOF"
   export PROJECT_VERSION=$DOCKER_IMAGE_TAG
   export UPDATE_CACHE=false
