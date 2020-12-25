@@ -1,6 +1,7 @@
 package net.querybuilder4j.service.database.metadata;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.Schema;

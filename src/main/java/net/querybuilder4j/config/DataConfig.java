@@ -8,14 +8,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.*;
+import java.io.IOException;
 
+/**
+ * The class that will instantiate a {@link Qb4jConfig}.
+ */
 @Configuration
 public class DataConfig {
 
     final Logger LOG  = LoggerFactory.getLogger(DataConfig.class);
 
-    @Bean(name = "qb4jConfig")
+    @Bean
     public Qb4jConfig getTargetDatabases() throws IOException {
         String qb4jConfig = System.getProperty("qb4jConfig");
         LOG.info("Here is the qb4jConfig: \n {}", qb4jConfig);

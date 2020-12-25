@@ -7,7 +7,6 @@
 DOCKERHUB_TOKEN=$1
 PROJECT_VERSION=$2
 DOCKER_IMAGE_NAME="joneschris/qb4j-api:$PROJECT_VERSION"
-QB4J_CONFIG="$(cat ./qb4j.yml)"
 
 echo "$DOCKERHUB_TOKEN" | docker login --username joneschris --password-stdin
 docker push "$DOCKER_IMAGE_NAME"
@@ -17,7 +16,7 @@ echo "ENV environment variable is $ENV"
 # If DEV env variable, then deploy to Lightsail.
 # If PROD env variable, then deploy CloudFormation.
 if [ "$ENV" == "dev" ]; then
-    QB4J_CONFIG="$(cat ./qb4j.yml)"
+    QB4J_CONFIG=$(cat ./cicd/deployment/swarm/swarm-qb4j.yml)
     echo "$QB4J_CONFIG"
 
     echo "Deploying to DEV"

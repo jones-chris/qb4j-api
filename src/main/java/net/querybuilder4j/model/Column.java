@@ -14,6 +14,8 @@ public class Column implements SqlRepresentation {
     private int dataType;
     private String alias;
 
+    public Column() {}
+
     public Column(String databaseName, String schemaName, String tableName, String columnName, int dataType, String alias) {
         this.fullyQualifiedName = String.format("%s.%s.%s.%s", databaseName, schemaName, tableName, columnName);
         this.databaseName = databaseName;

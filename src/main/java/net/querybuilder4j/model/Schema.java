@@ -15,6 +15,8 @@ public class Schema {
     private @JsonIgnore
     List<Table> tables = new ArrayList<>();
 
+    public Schema() {}
+
     public Schema(String databaseName, String schemaName) {
         this.fullyQualifiedName = String.format("%s.%s", databaseName, schemaName);
         this.databaseName = databaseName;
