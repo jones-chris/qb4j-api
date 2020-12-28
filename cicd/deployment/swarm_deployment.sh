@@ -4,6 +4,7 @@
 DOCKER_IMAGE_TAG=$1
 QB4J_CONFIG=$2
 
+QB4J_CONFIG=$(cat ./cicd/deployment/swarm/swarm-qb4j.yml)
 echo "Docker image tag / Project Version argument is: $DOCKER_IMAGE_TAG"
 echo "QB4J_CONFIG is $QB4J_CONFIG"
 
@@ -27,6 +28,7 @@ chmod 600 private_key.txt
 DOCKER_SWARM_YAML=$(cat ./cicd/deployment/swarm/docker-swarm.yml)
 echo "DOCKER_SWARM_YAML is: "
 echo "$DOCKER_SWARM_YAML"
+
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << "EOF"
   export PROJECT_VERSION=$DOCKER_IMAGE_TAG
   export UPDATE_CACHE=false

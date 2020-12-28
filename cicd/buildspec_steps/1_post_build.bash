@@ -15,17 +15,16 @@ echo "ENV environment variable is $ENV"
 
 # If DEV env variable, then deploy to Lightsail.
 # If PROD env variable, then deploy CloudFormation.
-if [ "$ENV" == "dev" ]; then
-    QB4J_CONFIG=$(cat ./cicd/deployment/swarm/swarm-qb4j.yml)
-    echo "$QB4J_CONFIG"
+if [ "$ENV" == "swarm" ]; then
+    echo "Deploying to swarm"
 
-    echo "Deploying to DEV"
-    chmod +x ./cicd/deployment/deployment_dev.sh
-    sh ./cicd/deployment/deployment_dev.sh "$PROJECT_VERSION" "$QB4J_CONFIG"
-elif [ "$ENV" == "prod" ]; then
-    echo "Deploying to PROD"
-    chmod +x ./cicd/deployment/deployment_prod.sh
-    sh ./cicd/deployment/deployment_prod.sh "$DOCKER_IMAGE_NAME"
+    chmod +x ./cicd/deployment/swarm_deployment.sh
+    sh ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+elif [ "$ENV" == "ecs" ]; then
+    echo "Deploying to ECS"
+
+    chmod +x ./cicd/deployment/ecs_deployment.sh
+    sh ./cicd/deployment/ecs_deployment.sh "$DOCKER_IMAGE_NAME"
 else
     echo "Did not recognize the ENV, $ENV.  Not deploying."
 fi

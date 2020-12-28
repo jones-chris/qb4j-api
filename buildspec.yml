@@ -54,8 +54,7 @@ phases:
   post_build:
     commands:
       # Zip the swarm directory.  Use the CODEBUILD_BUILD_NUMBER environment variable, which is the number of the build.
-#      - ZIP_FILE="$CODEBUILD_BUILD_NUMBER.zip"
-#      - zip -r $ZIP_FILE ./cicd/deployment/swarm/
+      - zip -r -j swarm_artifacts.zip ./cicd/deployment/swarm/
       # Copy the zip file to S3.
 #      - aws s3 cp $ZIP_FILE s3://qb4j-mvc/$ZIP_FILE
 
@@ -64,8 +63,12 @@ phases:
 artifacts:
   files:
     - target/qb4j-api-$PROJECT_VERSION.jar
+    - swarm_artifacts.zip
   discard-paths: yes
-#  secondary-artifacts:
+  secondary-artifacts:
+    swarm_artifact:
+      files:
+        - swarm_artifacts.zip
 #    code_coverage:
 #      files:
 #        - target/site/jacoco/**/*  # All files recursively in jacoco directory.
