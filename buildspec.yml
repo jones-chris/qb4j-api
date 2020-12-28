@@ -20,10 +20,12 @@ phases:
       # Install yq.
       - lsb_release -a
       - pwd
+      - apt-get update
+      - apt-get install -y maven
       - mvn --version
       - docker --version
+      - java --version
       - docker info
-      - apt-get update
 
   pre_build:
     commands:
