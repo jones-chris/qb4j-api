@@ -1,22 +1,14 @@
 #!/bin/bash
 
 # This script should log into the lightsail instance using the SSH private key, stop the qb4j-api docker container, pull down the new image, start the qb4j-api docker container.
-DOCKER_IMAGE_TAG=$1
-QB4J_CONFIG=$2
+PROJECT_VERSION=$1
 
+echo "Docker image tag / Project Version argument is: $PROJECT_VERSION"
 QB4J_CONFIG=$(cat ./cicd/deployment/swarm/swarm-qb4j.yml)
-echo "Docker image tag / Project Version argument is: $DOCKER_IMAGE_TAG"
 echo "QB4J_CONFIG is $QB4J_CONFIG"
 
-
-# Get the private key, user name, and IP address for the lightsail instance to ssh into the lightsail instance.
-PRIVATE_KEY=$(aws ssm get-parameter --name /dev/qb4j_api_lightsail/ssh_key --with-decryption --output text --query Parameter.Value)
-USER_NAME=$(aws ssm get-parameter --name /dev/qb4j_api_lightsail/user_name --with-decryption --output text --query Parameter.Value)
-IP_ADDRESS=$(aws ssm get-parameter --name /dev/qb4j_api_lightsail/ip_address --with-decryption --output text --query Parameter.Value)
-
 # Put the private key in a txt file.
-echo "$PRIVATE_KEY" > private_key.txt
-
+echo "$AWS_LIGHTSAIL_SSH_KEY" > private_key.txt
 chmod 600 private_key.txt
 
 # ssh into the lightsail instance, stop all containers, remove all containers, and remove all images.  This creates a
@@ -29,8 +21,8 @@ DOCKER_SWARM_YAML=$(cat ./cicd/deployment/swarm/docker-swarm.yml)
 echo "DOCKER_SWARM_YAML is: "
 echo "$DOCKER_SWARM_YAML"
 
-ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << "EOF"
-  export PROJECT_VERSION=$DOCKER_IMAGE_TAG
+ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$AWS_LIGHTSAIL_USERNAME@$AWS_LIGHTSAIL_IP_ADDRESS" /bin/bash << "EOF"
+  export PROJECT_VERSION=$PROJECT_VERSIONV
   export UPDATE_CACHE=false
   export QB4J_CONFIG="$QB4J_CONFIG"
   "$DOCKER_SWARM_YAML" | sudo -E docker stack deploy --compose-file - qb4j

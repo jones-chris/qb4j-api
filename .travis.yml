@@ -1,0 +1,68 @@
+language: java
+
+git:
+  depth: 1
+  submodules: false
+
+cache:
+  directories:
+    - $HOME/.m2
+
+os:
+  - linux
+
+jdk:
+  - openjdk11
+
+addons:
+  ssh_known_hosts:
+    - $LIGHTSAIL_IP_ADDRESS
+
+services:
+  - docker
+
+# Output some information about the environment, maven, and docker.
+before_script:
+  - lsb_release -a
+  - pwd
+  - mvn --version
+  - docker --version
+  - docker info
+
+script:
+  # Get project version from pom.
+  - PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+
+  # Check if a docker image exists for this project version.
+  - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
+  - |
+    if [ "$IMAGE_EXISTS" == "true" ]; then
+      echo "The image, $PROJECT_VERSION, already exists.  You probably need to bump the project's version in the pom.xml."
+      exit 1
+    fi
+
+#  - aws s3 cp s3://maven-build-settings/qb4j_settings.xml /root/.m2/settings.xml
+
+  # Build the uber jar and run unit tests.
+  - mvn clean install -Dmaven.javadoc.skip=true
+
+  # Build the docker image.
+  - docker image build -t joneschris/qb4j-api:"$PROJECT_VERSION" --build-arg project_version="$PROJECT_VERSION" .
+
+  # Push docker image to Docker Hub.
+  - echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+  - docker push "$DOCKERHUB_USERNAME/qb4j-api:$PROJECT_VERSION"
+
+deploy:
+  # Upload the artifact to S3.
+  - provider: s3
+    access_key_id: "$AWS_ACCESS_KEY_ID"
+    secret_access_key: "$AWS_SECRET_ACCESS_KEY"
+    bucket: "$AWS_QB4J_API_BUCKET"
+    skip_cleanup: true
+    upload-dir: "/build/$TRAVIS_JOB_ID"
+
+  # Deploy the new image to swarm.
+  - provider: script
+    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+
