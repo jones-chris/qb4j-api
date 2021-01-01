@@ -16,7 +16,7 @@ jdk:
 
 addons:
   ssh_known_hosts:
-    - 	dev.api.querybuilder4j.net
+    - dev.api.querybuilder4j.net
 
 services:
   - docker
