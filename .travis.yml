@@ -16,7 +16,7 @@ jdk:
 
 addons:
   ssh_known_hosts:
-    - "$AWS_LIGHTSAIL_IP_ADDRESS"
+    - 	dev.api.querybuilder4j.net
 
 services:
   - docker
