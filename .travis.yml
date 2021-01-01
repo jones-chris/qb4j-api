@@ -16,7 +16,7 @@ jdk:
 
 addons:
   ssh_known_hosts:
-    - $LIGHTSAIL_IP_ADDRESS
+    - "$AWS_LIGHTSAIL_IP_ADDRESS"
 
 services:
   - docker
