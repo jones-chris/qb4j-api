@@ -60,7 +60,9 @@ deploy:
     secret_access_key: "$AWS_SECRET_ACCESS_KEY"
     bucket: "$AWS_QB4J_API_BUCKET"
     skip_cleanup: true
-    upload-dir: "/build/$TRAVIS_JOB_ID"
+    local_dir: ./target
+    dot_match: true
+#    upload-dir: "/build/$TRAVIS_JOB_ID"
     on:
       all_branches: true
 
