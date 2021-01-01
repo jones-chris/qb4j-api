@@ -61,8 +61,26 @@ deploy:
     bucket: "$AWS_QB4J_API_BUCKET"
     skip_cleanup: true
     upload-dir: "/build/$TRAVIS_JOB_ID"
+    on:
+      all_branches: true
 
-  # Deploy the new image to swarm.
+  # To understand ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}, see this:  https://unhashable.com/getting-the-current-branch-name-during-a-pull-request-in-travis-ci/
+  # Deploy the new image to swarm, if the master branch triggered the job.
   - provider: script
     script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+    on:
+      all_branches: true
+
+#  - provider: script
+#    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+#    on:
+#      branch: "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} = master"
+#
+#  # Deploy the new image to a lightsail instance and run a single container with the app, if the a branch other than
+#  # master triggered the job.
+#  - provider: script
+#    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+#    on:
+#      all_branches: true
+#      condition: "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} != master"
 

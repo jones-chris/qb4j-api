@@ -4,8 +4,6 @@
 PROJECT_VERSION=$1
 
 echo "Docker image tag / Project Version argument is: $PROJECT_VERSION"
-QB4J_CONFIG=$(cat ./cicd/deployment/swarm/swarm-qb4j.yml)
-echo "QB4J_CONFIG is $QB4J_CONFIG"
 
 # Put the private key in a txt file.
 echo "$AWS_LIGHTSAIL_SSH_KEY" > private_key.txt
@@ -17,14 +15,17 @@ chmod 600 private_key.txt
 #        EOF is wrapped in double quotes.  Whereas the second ssh command needs to be expanded on the client side - thus
 #        EOF is NOT wrapped in double quotes.  I am not aware of a way to accomplish both server and client side expansion
 #        in the same ssh command.
-DOCKER_SWARM_YAML=$(cat ./cicd/deployment/swarm/docker-swarm.yml)
-echo "DOCKER_SWARM_YAML is: "
-echo "$DOCKER_SWARM_YAML"
-
 ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$AWS_LIGHTSAIL_USERNAME@$AWS_LIGHTSAIL_IP_ADDRESS" /bin/bash << "EOF"
-  export PROJECT_VERSION=$PROJECT_VERSIONV
-  export UPDATE_CACHE=false
-  export QB4J_CONFIG="$QB4J_CONFIG"
-  "$DOCKER_SWARM_YAML" | sudo -E docker stack deploy --compose-file - qb4j
+  sudo docker stop $(sudo docker ps -aq)
+  sudo docker rm $(sudo docker ps -aq)
+  sudo docker rmi $(sudo docker images -a -q)
   exit
 EOF
+
+# ssh into the lightsail instance, pull the docker image, and start a container based on the image.
+# shellcheck disable=SC2087
+#ssh -i private_key.txt -tt -o StrictHostKeyChecking=no "$USER_NAME@$IP_ADDRESS" /bin/bash << EOF
+#  sudo docker pull joneschris/qb4j-api:$DOCKER_IMAGE_TAG
+#  sudo nohup docker container run --publish 8080:8080 --detach --restart always --env qb4j_config="$QB4J_CONFIG" joneschris/qb4j-api:$DOCKER_IMAGE_TAG &
+#  exit
+#EOF

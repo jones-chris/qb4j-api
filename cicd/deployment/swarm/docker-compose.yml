@@ -2,37 +2,13 @@ version: '3.8'
 
 services:
 
-  hr_database:
-    image: qb4j-mysql
-    build:
-      context: .
-      dockerfile: mysql.Dockerfile
-    ports:
-      - '3306:3306'
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-
-  finance_database:
-    image: qb4j-postgresql
-    build:
-      context: .
-      dockerfile: postgresql.Dockerfile
+  postgresql:
+    image: postgresql:latest
     ports:
       - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-
-  database_metadata_cache:
-    image: redis:latest
-    ports:
-      - '6379:6379'
     deploy:
       restart_policy:
         condition: on-failure
@@ -47,11 +23,8 @@ services:
       - qb4j_config=${QB4J_CONFIG}  # QB4J_CONFIG should already be an exported variable in your shell in order to be interpolated here.
       - update_cache=${UPDATE_CACHE}  # True if you want to test the cache refresh, otherwise false to run the image as the API.
     depends_on:
-      - hr_database
-      - finance_database
-      - database_metadata_cache
+      - postgresql
     deploy:
-      replicas: 1
       restart_policy:
         condition: on-failure
         max_attempts: 3
