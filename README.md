@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/jones-chris/qb4j-api.svg?branch=master)](https://travis-ci.com/jones-chris/qb4j-api)
+
 # qb4j-api (QueryBuilder4Java-API)
 
 ## About ![Notebook](https://github.githubassets.com/images/icons/emoji/unicode/1f4d3.png)
