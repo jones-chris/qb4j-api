@@ -39,12 +39,12 @@ script:
   - PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 
   # Check if a docker image exists for this project version.
-  - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
-  - |
-    if [ "$IMAGE_EXISTS" == "true" ]; then
-      echo "The image, $PROJECT_VERSION, already exists.  You probably need to bump the project's version in the pom.xml."
-      exit 1
-    fi
+#  - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
+#  - |
+#    if [ "$IMAGE_EXISTS" == "true" ]; then
+#      echo "The image, $PROJECT_VERSION, already exists.  You probably need to bump the project's version in the pom.xml."
+#      exit 1
+#    fi
 
 #  - aws s3 cp s3://maven-build-settings/qb4j_settings.xml /root/.m2/settings.xml
 
