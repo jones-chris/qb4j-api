@@ -63,6 +63,7 @@ deploy:
     secret_access_key: "$AWS_SECRET_ACCESS_KEY"
     bucket: "$AWS_QB4J_API_BUCKET"
     skip_cleanup: true
+    local_dir: target
     glob: "*.jar"
     upload-dir: travis-builds
     on:
