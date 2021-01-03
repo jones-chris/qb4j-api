@@ -61,24 +61,15 @@ script:
   - docker push "$DOCKERHUB_USERNAME/qb4j-api:$PROJECT_VERSION"
 
 deploy:
-  # Upload the artifact to S3.
-#  - provider: s3
-#    access_key_id: "$AWS_ACCESS_KEY_ID"
-#    secret_access_key: "$AWS_SECRET_ACCESS_KEY"
-#    bucket: "$AWS_QB4J_API_BUCKET"
-#    skip_cleanup: true
-#    glob: "*.jar"
-#    upload-dir: travis-builds
-#    on:
-#      all_branches: true
-
+  # Upload the artifact to S3.  The AWS access key id, secret access key, and default region are exported as environment
+  # variables earlier in the build from the Travis project's settings, so the AWS CLI will look for those environment
+  # variables automatically when `aws s3 cp` is called.  So there is no need to run `aws configure`.
   - provider: script
     skip_cleanup: true
     script: ./cicd/deployment/s3_deployment.sh "$PROJECT_VERSION"
     on:
       all_branches: true
 
-  # To understand ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}, see this:  https://unhashable.com/getting-the-current-branch-name-during-a-pull-request-in-travis-ci/
   # Deploy the new image to swarm, if the master branch triggered the job.
   - provider: script
     skip_cleanup: true
@@ -86,6 +77,7 @@ deploy:
     on:
       all_branches: true
 
+   # To understand ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}, see this:  https://unhashable.com/getting-the-current-branch-name-during-a-pull-request-in-travis-ci/
 #  - provider: script
 #    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
 #    on:
