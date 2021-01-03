@@ -1,0 +1,93 @@
+language: java
+
+git:
+  depth: 1
+  submodules: false
+
+cache:
+  directories:
+    - $HOME/.m2
+
+os:
+  - linux
+
+jdk:
+  - openjdk11
+
+addons:
+  ssh_known_hosts:
+    - dev.api.querybuilder4j.net
+  apt:
+    update: true
+
+services:
+  - docker
+
+# Install aws cli and decrypt the ssh private key for the swarm deployment.
+before_install:
+  - sudo apt-get -y install awscli
+  - openssl aes-256-cbc -K $encrypted_3f2dabfde256_key -iv $encrypted_3f2dabfde256_iv -in travis_key.enc -out travis_key -d
+  - chmod 0400 travis_key
+  - mv travis_key ~/.ssh/id_rsa
+
+# Output some information about the environment, maven, and docker.
+before_script:
+  - lsb_release -a
+  - pwd
+  - mvn --version
+  - docker --version
+  - docker info
+
+script:
+  # Get project version from pom.
+  - PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+
+  # Check if a docker image exists for this project version.
+#  - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
+#  - |
+#    if [ "$IMAGE_EXISTS" == "true" ]; then
+#      echo "The image, $PROJECT_VERSION, already exists.  You probably need to bump the project's version in the pom.xml."
+#      exit 1
+#    fi
+
+  # Build the uber jar and run unit tests.
+  - mvn clean install -Dmaven.javadoc.skip=true
+
+  # Build the docker image.
+  - docker image build -t joneschris/qb4j-api:"$PROJECT_VERSION" --build-arg project_version="$PROJECT_VERSION" .
+
+  # Push docker image to Docker Hub.
+  - echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+  - docker push "$DOCKERHUB_USERNAME/qb4j-api:$PROJECT_VERSION"
+
+deploy:
+  # Upload the artifact to S3.  The AWS access key id, secret access key, and default region are exported as environment
+  # variables earlier in the build from the Travis project's settings, so the AWS CLI will look for those environment
+  # variables automatically when `aws s3 cp` is called.  So there is no need to run `aws configure`.
+  - provider: script
+    skip_cleanup: true
+    script: ./cicd/deployment/s3_deployment.sh "$PROJECT_VERSION"
+    on:
+      all_branches: true
+
+  # Deploy the new image to swarm, if the master branch triggered the job.
+  - provider: script
+    skip_cleanup: true
+    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+    on:
+      all_branches: true
+
+   # To understand ${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}, see this:  https://unhashable.com/getting-the-current-branch-name-during-a-pull-request-in-travis-ci/
+#  - provider: script
+#    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+#    on:
+#      branch: "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} = master"
+#
+#  # Deploy the new image to a lightsail instance and run a single container with the app, if the a branch other than
+#  # master triggered the job.
+#  - provider: script
+#    script: bash ./cicd/deployment/swarm_deployment.sh "$PROJECT_VERSION"
+#    on:
+#      all_branches: true
+#      condition: "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} != master"
+

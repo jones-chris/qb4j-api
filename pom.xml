@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.querybuilder4j</groupId>
     <artifactId>qb4j-api</artifactId>
-    <version>0.0.22</version>
+    <version>0.0.24</version>
     <packaging>jar</packaging>
 
     <name>qb4j-api</name>
@@ -25,6 +25,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>
