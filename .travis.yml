@@ -46,8 +46,6 @@ script:
 #      exit 1
 #    fi
 
-#  - aws s3 cp s3://maven-build-settings/qb4j_settings.xml /root/.m2/settings.xml
-
   # Build the uber jar and run unit tests.
   - mvn clean install -Dmaven.javadoc.skip=true
 
@@ -65,9 +63,8 @@ deploy:
     secret_access_key: "$AWS_SECRET_ACCESS_KEY"
     bucket: "$AWS_QB4J_API_BUCKET"
     skip_cleanup: true
-    local_dir: ./target
-    dot_match: true
-#    upload-dir: "/build/$TRAVIS_JOB_ID"
+    glob: "*.jar"
+    upload-dir: travis-builds
     on:
       all_branches: true
 
