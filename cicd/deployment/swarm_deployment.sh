@@ -17,14 +17,24 @@ echo "QB4J_CONFIG is $QB4J_CONFIG"
 #        EOF is wrapped in double quotes.  Whereas the second ssh command needs to be expanded on the client side - thus
 #        EOF is NOT wrapped in double quotes.  I am not aware of a way to accomplish both server and client side expansion
 #        in the same ssh command.
-DOCKER_SWARM_YAML=$(cat ./cicd/deployment/swarm/docker-swarm.yml)
 echo "DOCKER_SWARM_YAML is: "
-echo "$DOCKER_SWARM_YAML"
+cat ./cicd/deployment/swarm/docker-swarm.yml
 
-ssh -tt -o StrictHostKeyChecking=no "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net" /bin/bash << "EOF"
+scp ./cicd/deployment/swarm/docker-swarm.yml "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net":/home/ubuntu/swarm/cicd/deployment/swarm
+
+#ssh -tt -o StrictHostKeyChecking=no "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net" /bin/bash << "EOF"
+#  export PROJECT_VERSION=$PROJECT_VERSION
+#  export UPDATE_CACHE=false
+#  export QB4J_CONFIG="$QB4J_CONFIG"
+#  sudo -E docker stack deploy --compose-file /home/ubuntu/swarm/cicd/deployment/swarm/docker-swarm.yml qb4j
+#  exit
+#EOF
+
+ssh "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net" /bin/bash << EOF
   export PROJECT_VERSION=$PROJECT_VERSION
   export UPDATE_CACHE=false
   export QB4J_CONFIG="$QB4J_CONFIG"
-  "$DOCKER_SWARM_YAML" | sudo -E docker stack deploy --compose-file - qb4j
+  sudo -E docker stack deploy --compose-file /home/ubuntu/swarm/cicd/deployment/swarm/docker-swarm.yml qb4j
   exit
 EOF
+
