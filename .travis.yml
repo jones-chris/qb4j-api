@@ -58,14 +58,19 @@ script:
 
 deploy:
   # Upload the artifact to S3.
-  - provider: s3
-    access_key_id: "$AWS_ACCESS_KEY_ID"
-    secret_access_key: "$AWS_SECRET_ACCESS_KEY"
-    bucket: "$AWS_QB4J_API_BUCKET"
+#  - provider: s3
+#    access_key_id: "$AWS_ACCESS_KEY_ID"
+#    secret_access_key: "$AWS_SECRET_ACCESS_KEY"
+#    bucket: "$AWS_QB4J_API_BUCKET"
+#    skip_cleanup: true
+#    glob: "*.jar"
+#    upload-dir: travis-builds
+#    on:
+#      all_branches: true
+
+  - provider: script
     skip_cleanup: true
-    local_dir: target
-    glob: "*.jar"
-    upload-dir: travis-builds
+    script: ./cicd/deployment/s3_deployment.sh "$PROJECT_VERSION"
     on:
       all_branches: true
 
