@@ -2,17 +2,15 @@ version: '3.8'
 
 services:
 
-  postgresql:
-    image: postgresql:latest
+  database:
+    image: postgres:13-alpine
     ports:
       - '5432:5432'
+    volumes:
+      - ./database/finance_database:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
 
   api:
     image: "joneschris/qb4j-api:${PROJECT_VERSION}"
@@ -23,9 +21,5 @@ services:
       - qb4j_config=${QB4J_CONFIG}  # QB4J_CONFIG should already be an exported variable in your shell in order to be interpolated here.
       - update_cache=${UPDATE_CACHE}  # True if you want to test the cache refresh, otherwise false to run the image as the API.
     depends_on:
-      - postgresql
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
+      - database
 

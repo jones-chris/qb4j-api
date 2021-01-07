@@ -141,8 +141,8 @@ public class Join implements SqlRepresentation {
         // table has a schema - otherwise the string will be like this:  " AND/ON `parentTable`.`column` = `targetTable`.`column` ".
         for (int i=0; i<this.getParentJoinColumns().size(); i++) {
             String conjunction = (i == 0) ? "ON" : "AND";
-            String parentJoinColumnSql = this.getParentJoinColumns().get(i).toSql(beginningDelimiter, endingDelimiter);
-            String targetJoinColumnSql = this.getTargetJoinColumns().get(i).toSql(beginningDelimiter, endingDelimiter);
+            String parentJoinColumnSql = this.getParentJoinColumns().get(i).toSqlWithoutAlias(beginningDelimiter, endingDelimiter);
+            String targetJoinColumnSql = this.getTargetJoinColumns().get(i).toSqlWithoutAlias(beginningDelimiter, endingDelimiter);
 
             sb.append(String.format(" %s %s = %s ", conjunction, parentJoinColumnSql, targetJoinColumnSql));
         }

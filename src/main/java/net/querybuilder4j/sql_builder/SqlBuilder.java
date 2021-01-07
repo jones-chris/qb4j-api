@@ -194,7 +194,7 @@ public abstract class SqlBuilder {
             // Get each column's SQL string representation.
             List<String> columnsSqlStrings = new ArrayList<>();
             columns.forEach(column -> {
-                String columnSqlString = column.toSql(beginningDelimiter, endingDelimiter, false);
+                String columnSqlString = column.toSqlWithoutAlias(beginningDelimiter, endingDelimiter);
                 columnsSqlStrings.add(columnSqlString);
             });
 
@@ -221,7 +221,7 @@ public abstract class SqlBuilder {
             // Get each column's SQL string representation.
             List<String> columnsSqlStrings = new ArrayList<>();
             columns.forEach(column -> {
-                String columnSqlString = column.toSql(beginningDelimiter, endingDelimiter, false);
+                String columnSqlString = column.toSqlWithoutAlias(beginningDelimiter, endingDelimiter);
                 columnsSqlStrings.add(columnSqlString);
             });
 
