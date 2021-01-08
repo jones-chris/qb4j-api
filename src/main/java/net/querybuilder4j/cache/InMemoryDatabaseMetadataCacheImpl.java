@@ -145,6 +145,17 @@ public class InMemoryDatabaseMetadataCacheImpl implements DatabaseMetadataCache 
     }
 
     @Override
+    public boolean columnsExist(List<Column> columns) {
+        for (Column column : columns) {
+            if (! this.columnExists(column)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
     public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) throws Exception {
         return this.findColumns(databaseName, schemaName, tableName)
                 .stream()

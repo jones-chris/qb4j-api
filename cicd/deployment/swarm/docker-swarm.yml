@@ -3,22 +3,16 @@ version: '3.8'
 services:
 
   hr_database:
-    image: qb4j-mysql
-    build:
-      context: .
-      dockerfile: mysql.Dockerfile
+    image: joneschris/qb4j-mysql:latest
     ports:
       - '3306:3306'
     deploy:
       restart_policy:
         condition: on-failure
-        max_attempts: 3
+        max_attempts: 2
 
   finance_database:
-    image: qb4j-postgresql
-    build:
-      context: .
-      dockerfile: postgresql.Dockerfile
+    image: joneschris/qb4j-postgres:latest
     ports:
       - '5432:5432'
     environment:
@@ -27,7 +21,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-        max_attempts: 3
+        max_attempts: 2
 
 #  database_metadata_cache:
 #    image: redis:latest
@@ -48,10 +42,10 @@ services:
     depends_on:
       - hr_database
       - finance_database
-      - database_metadata_cache
+#      - database_metadata_cache
     deploy:
       replicas: 2
       restart_policy:
         condition: on-failure
-        max_attempts: 3
+        max_attempts: 2
 

@@ -28,6 +28,7 @@ COPY /data /qb4j/data
 # The port the API is running on.
 EXPOSE 8080
 # The port you can debug the JVM on.
+# todo:  turn this off for prod.
 EXPOSE 5005
 
 # Execute the jar with the qb4j.yml contents passed into the execution as a named argument.
