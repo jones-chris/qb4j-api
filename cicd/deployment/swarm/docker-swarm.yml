@@ -42,7 +42,7 @@ services:
     depends_on:
       - hr_database
       - finance_database
-      - database_metadata_cache
+#      - database_metadata_cache
     deploy:
       replicas: 2
       restart_policy:

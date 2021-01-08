@@ -18,6 +18,7 @@ public interface DatabaseMetadataCache {
     List<Column> findColumns(String databaseName, String schemaName, String tableName);
     int getColumnDataType(Column column);
     boolean columnExists(Column column);
+    boolean columnsExist(List<Column> columns);
     Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) throws Exception;
 
 }

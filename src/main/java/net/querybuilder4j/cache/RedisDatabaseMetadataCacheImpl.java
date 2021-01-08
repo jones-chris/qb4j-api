@@ -210,6 +210,23 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     }
 
     @Override
+    public boolean columnsExist(List<Column> columns) {
+        this.jedis.select(this.COLUMN_REDIS_DB);
+
+        String[] fullyQualifiedColumnNames = (String[]) columns.stream()
+                .map(column -> {
+                    return String.format("%s.%s.%s.%s",
+                            column.getDatabaseName(), column.getSchemaName(), column.getTableName(), column.getColumnName()
+                    );
+                })
+                .toArray();
+
+        long numberOfExistingKeys = this.jedis.exists(fullyQualifiedColumnNames);
+
+        return numberOfExistingKeys == fullyQualifiedColumnNames.length;
+    }
+
+    @Override
     public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) {
         this.jedis.select(this.COLUMN_REDIS_DB);
 

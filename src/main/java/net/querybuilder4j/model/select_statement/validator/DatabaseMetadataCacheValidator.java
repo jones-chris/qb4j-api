@@ -1,14 +1,16 @@
 package net.querybuilder4j.model.select_statement.validator;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
-import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.constants.Constants;
+import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.select_statement.Criterion;
 import net.querybuilder4j.model.select_statement.SelectStatement;
 import net.querybuilder4j.sql_builder.SqlCleanser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.querybuilder4j.sql_builder.SqlCleanser.sqlIsClean;
@@ -69,14 +71,19 @@ public class DatabaseMetadataCacheValidator {
 
     public boolean passesDatabaseValidation(SelectStatement selectStatement) throws IllegalArgumentException {
         // Validate selectStatement's columns and selectStatement's criteria's columns.
-        boolean columnsExist = selectStatement.getCriteria().stream()
+        List<Column> criteriaColumns = selectStatement.getCriteria().stream()
                 .map(Criterion::getColumn)
-                .collect(Collectors.toCollection(selectStatement::getColumns))
-                .stream()
-                .allMatch(column -> this.databaseMetadataCache.columnExists(column));
+                .collect(Collectors.toList());
+
+        List<Column> selectColumns = selectStatement.getColumns();
+
+        List<Column> allColumns = new ArrayList<>(criteriaColumns);
+        allColumns.addAll(selectColumns);
+
+        assert this.databaseMetadataCache.columnsExist(allColumns);
 
         // Validate selectStatement's criteria.
-        areCriteriaValid(selectStatement); // Will throw exception instead of returning false.
+        assert areCriteriaValid(selectStatement); // Will throw exception instead of returning false.
 
         return true;
     }
