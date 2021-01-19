@@ -1,7 +1,9 @@
 package net.querybuilder4j.sql_builder;
 
+import net.querybuilder4j.exceptions.UncleanSqlException;
 import net.querybuilder4j.model.select_statement.Criterion;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,13 +53,13 @@ public class SqlCleanser {
         String upperCaseStr = str.toUpperCase();
         for (String opr : reservedOperators) {
             if (upperCaseStr.contains(opr)) {
-                return false;
+                throw new UncleanSqlException();
             }
         }
 
         for (String mark : forbiddenMarks) {
             if (upperCaseStr.contains(mark)) {
-                return false;
+                throw new UncleanSqlException();
             }
         }
 
@@ -66,7 +68,7 @@ public class SqlCleanser {
             Pattern pattern = Pattern.compile(String.format("(^|\\W)\\Q%s\\E\\W", keyword), Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(upperCaseStr);
             if (matcher.find()) {
-                return false;
+                throw new UncleanSqlException();
             }
         }
 
@@ -77,9 +79,10 @@ public class SqlCleanser {
     public static boolean sqlIsClean(Criterion criterion) throws IllegalArgumentException {
         //todo:  don't pass params and subqueries into sqlIsClean().
         //todo:  also make Criteria's filter field a String again instead of Object since we're not using SubQuery class anymore.
-        if (criterion.getFilter() != null) {
-            if (! isSubQueryOrParam(criterion.getFilter())) {
-                return sqlIsClean(criterion.getFilter());
+        List<String> values = criterion.getFilter().getValues();
+        if (! values.isEmpty()) {
+            for (String value : values) {
+                assert sqlIsClean(value);
             }
         }
 

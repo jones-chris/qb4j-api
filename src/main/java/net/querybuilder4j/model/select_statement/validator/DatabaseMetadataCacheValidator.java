@@ -93,7 +93,6 @@ public class DatabaseMetadataCacheValidator {
      * True will be returned if the criteria are valid.
      *
      * @return boolean
-     * @throws Exception If the criteria is not valid or if the criteria is not clean SQL.
      */
     private boolean areCriteriaValid(SelectStatement selectStatement) throws IllegalArgumentException {
         for (Criterion criterion : selectStatement.getCriteria()) {
@@ -108,13 +107,13 @@ public class DatabaseMetadataCacheValidator {
             // Now that we know that the criteria's operator is not 'isNull' or 'isNotNull', we can assume that the
             // criteria's filter is needed.  Therefore, we should check if the filter is null or an empty string.
             // If so, throw an exception.
-            if (! criterion.filterIsEmpty()) {
+            if (! criterion.getFilter().getValues().isEmpty()) {
                 int columnDataType = this.databaseMetadataCache.getColumnDataType(criterion.getColumn());
                 boolean shouldHaveQuotes = isColumnQuoted(columnDataType);
 
-                if (! shouldHaveQuotes && ! criterion.filterIsEmpty()) {
-                    criterion.getFilterItems().forEach(filterItem -> {
-                        if (! SqlCleanser.canParseNonQuotedFilter(filterItem)) {
+                if (! shouldHaveQuotes && ! criterion.getFilter().getValues().isEmpty()) {
+                    criterion.getFilter().getValues().forEach(value -> {
+                        if (! SqlCleanser.canParseNonQuotedFilter(value)) {
                             throw new RuntimeException("The column is a number type, but the criteria's filter is not an number type: " + criterion);
                         }
                     });

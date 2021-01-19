@@ -1,7 +1,6 @@
 package net.querybuilder4j.model.select_statement;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
-import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 import org.junit.Test;
@@ -28,7 +27,8 @@ public class CriterionTest {
     @Test
     public void hasSearchOperator_trueForLikeOperator() {
         Column column = createMockColumn("test", false);
-        Criterion criterion = new Criterion(0, null, null, column, Operator.like, "hello%", null);
+        Filter filter = new Filter(List.of("hello%"));
+        Criterion criterion = new Criterion(0, null, null, column, Operator.like, filter, null);
 
         assertTrue(criterion.hasSearchOperator());
     }
@@ -36,7 +36,8 @@ public class CriterionTest {
     @Test
     public void hasSearchOperator_trueForNotLikeOperator() {
         Column column = createMockColumn("test", false);
-        Criterion criterion = new Criterion(0, null, null, column, Operator.notLike, "hello%", null);
+        Filter filter = new Filter(List.of("hello%"));
+        Criterion criterion = new Criterion(0, null, null, column, Operator.notLike, filter, null);
 
         assertTrue(criterion.hasSearchOperator());
     }
@@ -44,7 +45,8 @@ public class CriterionTest {
     @Test
     public void hasSearchOperator_falseForEqualToOperator() {
         Column column = createMockColumn("test",false);
-        Criterion criterion = new Criterion(0,null, null, column, Operator.equalTo, "hello%", null);
+        Filter filter = new Filter(List.of("hello%"));
+        Criterion criterion = new Criterion(0,null, null, column, Operator.equalTo, filter, null);
 
         assertFalse(criterion.hasSearchOperator());
     }
@@ -52,7 +54,8 @@ public class CriterionTest {
     @Test
     public void isValid_trueForNotNullOperatorWithEmptyStringFilter() {
         Column column = createMockColumn("test",true);
-        Criterion criterion = new Criterion(0, null, null, column, Operator.isNotNull, "", null);
+        Filter filter = new Filter(List.of(""));
+        Criterion criterion = new Criterion(0, null, null, column, Operator.isNotNull, filter, null);
 
         assertTrue(criterion.isValid());
     }
@@ -60,7 +63,8 @@ public class CriterionTest {
     @Test
     public void isValid_falseForEqualToOperatorWithEmptyStringFilter() {
         Column column = createMockColumn("test",true);
-        Criterion criterion = new Criterion(0, null, null, column, Operator.equalTo, "", null);
+        Filter filter = new Filter(List.of(""));
+        Criterion criterion = new Criterion(0, null, null, column, Operator.equalTo, filter, null);
 
         assertFalse(criterion.isValid());
     }
@@ -68,7 +72,8 @@ public class CriterionTest {
     @Test
     public void isValid_trueForEqualToOperatorWithNonEmptyStringFilter() {
         Column column = createMockColumn("test",true);
-        Criterion criterion = new Criterion(0, null, null, column, Operator.equalTo, "test", null);
+        Filter filter = new Filter(List.of("test"));
+        Criterion criterion = new Criterion(0, null, null, column, Operator.equalTo, filter, null);
 
         assertTrue(criterion.isValid());
     }
@@ -76,7 +81,8 @@ public class CriterionTest {
     @Test
     public void toSql_nullSchema() {
         Column column = createMockColumn(null, true);
-        Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, "test", null);
+        Filter filter = new Filter(List.of("test"));
+        Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, filter, null);
         String expectedSql = " AND `test`.`test` = (test) ";
 
         String actualSql = criterion.toSql('`', '`');
@@ -87,7 +93,8 @@ public class CriterionTest {
     @Test
     public void toSql_nullStringSchema() {
         Column column = createMockColumn("null", true);
-        Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, "test", null);
+        Filter filter = new Filter(List.of("test"));
+        Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, filter, null);
         String expectedSql = " AND `test`.`test` = (test) ";
 
         String actualSql = criterion.toSql('`', '`');
@@ -98,7 +105,8 @@ public class CriterionTest {
     @Test
     public void toSql_nonNullSchema() {
         Column column = createMockColumn("my_schema", true);
-        Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, "test", null);
+        Filter filter = new Filter(List.of("test"));
+        Criterion criterion = new Criterion(0, null, Conjunction.And, column, Operator.equalTo, filter, null);
         String expectedSql = " AND `my_schema`.`test`.`test` = (test) ";
 
         String actualSql = criterion.toSql('`', '`');
@@ -251,10 +259,11 @@ public class CriterionTest {
     private Criterion createMockCriterion(Criterion parentCriterion, Column column, Conjunction parentCriterionConjunction) {
         // If no parentCriterion parameter, then return a root criterion.
         // Else, return a child criterion.
+        Filter filter = new Filter(List.of("test"));
         if (parentCriterion == null) {
-            return new Criterion(0, null, parentCriterionConjunction, column, Operator.equalTo, "test", null);
+            return new Criterion(0, null, parentCriterionConjunction, column, Operator.equalTo, filter, null);
         } else {
-            return new Criterion(0, parentCriterion, Conjunction.And, column, Operator.equalTo, "test", null);
+            return new Criterion(0, parentCriterion, Conjunction.And, column, Operator.equalTo, filter, null);
         }
     }
 

@@ -4,13 +4,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import net.querybuilder4j.exceptions.JsonDeserializationException;
 import net.querybuilder4j.model.Column;
-import net.querybuilder4j.model.select_statement.Conjunction;
-import net.querybuilder4j.model.select_statement.CriteriaTreeFlattener;
-import net.querybuilder4j.model.select_statement.Criterion;
-import net.querybuilder4j.model.select_statement.Operator;
+import net.querybuilder4j.model.select_statement.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public CriteriaDeserializer() {
         this(null);
@@ -47,6 +48,7 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
 
     private Criterion buildCriterion(JsonNode criterionJson, List<Criterion> deserializedCriteria) {
         Conjunction conjunction = Conjunction.valueOf(criterionJson.get("conjunction").asText());
+
         Column column = new Column(
                 criterionJson.get("column").get("databaseName").asText(),
                 criterionJson.get("column").get("schemaName").asText(),
@@ -56,7 +58,13 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
                 criterionJson.get("column").get("alias").asText()
         );
         Operator operator = Operator.valueOf(criterionJson.get("operator").asText());
-        String filter = criterionJson.get("filter").asText();
+
+        Filter filter;
+        try {
+            filter = this.objectMapper.readValue(criterionJson.get("filter").toString(), Filter.class);
+        } catch (JsonProcessingException e) {
+            throw new JsonDeserializationException("Not able to deserialize criterion filter");
+        }
 
         int id = criterionJson.get("id").asInt();
 

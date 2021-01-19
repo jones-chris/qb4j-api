@@ -8,6 +8,7 @@ import net.querybuilder4j.model.Database;
 import net.querybuilder4j.model.QueryResult;
 import net.querybuilder4j.model.Table;
 import net.querybuilder4j.model.select_statement.Criterion;
+import net.querybuilder4j.model.select_statement.Filter;
 import net.querybuilder4j.model.select_statement.Operator;
 import net.querybuilder4j.model.select_statement.SelectStatement;
 import net.querybuilder4j.sql_builder.SqlBuilderFactory;
@@ -61,7 +62,10 @@ public class DatabaseDataDaoImpl implements DatabaseDataDao {
         selectStatement.getColumns().add(column);
         selectStatement.setTable(new Table(databaseName, schemaName, tableName));
         if (search != null) {
-            Criterion criterion = new Criterion(0, null, null, column, Operator.like, search, null);
+            Filter filter = new Filter();
+            filter.getValues().add(search);
+
+            Criterion criterion = new Criterion(0, null, null, column, Operator.like, filter, null);
             selectStatement.getCriteria().add(criterion);
         }
         selectStatement.setLimit(Integer.toUnsignedLong(limit));

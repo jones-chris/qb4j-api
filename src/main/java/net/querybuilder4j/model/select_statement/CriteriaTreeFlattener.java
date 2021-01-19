@@ -251,13 +251,11 @@ public class CriteriaTreeFlattener {
 
     /**
      * Wrap each column's filter items (after splitting on ",") in quotes based on the column's data type.
-     *
-     * @throws Exception
      */
     private void quoteCriteriaFilterItems() {
         for (Map.Entry<Integer, List<Criterion>> entry : this.flattenedCriteria.entrySet()) {
             for (Criterion criterion : entry.getValue()) {
-                String[] filterItems = criterion.getFilter().split(",");
+                String[] filterItems = criterion.getFilter().getValues().toArray(String[]::new);
                 String[] newFilterItems = filterItems.clone();
                 for (int i=0; i<filterItems.length; i++) {
                     String filterItem = filterItems[i];
@@ -283,7 +281,10 @@ public class CriteriaTreeFlattener {
                     newFilterItems[i] = filterItem;
                 }
 
-                criterion.setFilter(String.join(",", newFilterItems));
+                Filter newFilter = new Filter();
+                newFilter.setValues(Arrays.asList(newFilterItems));
+
+                criterion.setFilter(newFilter);
             }
         }
     }
