@@ -1,12 +1,10 @@
 package net.querybuilder4j.sql_builder;
 
 import net.querybuilder4j.cache.DatabaseMetadataCache;
-import net.querybuilder4j.cache.InMemoryDatabaseMetadataCacheImpl;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Join;
 import net.querybuilder4j.model.Table;
 import net.querybuilder4j.model.select_statement.*;
-import net.querybuilder4j.model.select_statement.parser.SubQueryParser;
 import net.querybuilder4j.model.select_statement.validator.DatabaseMetadataCacheValidator;
 
 import java.util.ArrayList;
@@ -48,7 +46,7 @@ public abstract class SqlBuilder {
     /**
      * The class responsible for parsing sub queries.
      */
-    protected SubQueryParser subQueryParser;
+//    protected SubQueryParser subQueryParser;
 
     /**
      * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
@@ -67,7 +65,7 @@ public abstract class SqlBuilder {
 
     public SqlBuilder setStatement(SelectStatement selectStatement) throws Exception {
         this.selectStatement = selectStatement;
-        this.subQueryParser = new SubQueryParser(this.selectStatement, this);
+//        this.subQueryParser = new SubQueryParser(this.selectStatement, this);
 
         // Prepare the SelectStatement.
         this.addExcludingJoinCriteria();
@@ -339,23 +337,23 @@ public abstract class SqlBuilder {
      * from this class' subQueryParser's builtSubQueries method.
      */
     private void interpolateSubQueries() {
-        for (Criterion criterion : this.selectStatement.getCriteria()) {
-            String filter = criterion.getFilter();
-            String newFilter = filter;
-
-            if (SubQueryParser.argIsSubQuery(filter)) {
-                String subquery = this.subQueryParser.getBuiltSubQueries().get(filter);
-
-                if (subquery == null) {
-                    throw new RuntimeException("Could not find subquery with name:  " + filter);
-                }
-
-                newFilter = "(" + subquery + ")";
-            }
-
-            // Join newFilterItems with a "," and set the criterion's filter to the resulting string.
-            criterion.setFilter(newFilter);
-        }
+//        for (Criterion criterion : this.selectStatement.getCriteria()) {
+//            Filter filter = criterion.getFilter();
+//            Filter newFilter = filter;
+//
+//            if (filter.hasSubQuery()) {
+//                String subquery = this.subQueryParser.getBuiltSubQueries().get(filter);
+//
+//                if (subquery == null) {
+//                    throw new RuntimeException("Could not find subquery with name:  " + filter);
+//                }
+//
+//                newFilter = "(" + subquery + ")";
+//            }
+//
+//            // Join newFilterItems with a "," and set the criterion's filter to the resulting string.
+//            criterion.setFilter(newFilter);
+//        }
     }
 
     /**
@@ -367,32 +365,25 @@ public abstract class SqlBuilder {
      */
     private void replaceParameters() throws Exception {
         // Now that we know there are equal number of parameters and arguments, try replacing the parameters with arguments.
-        if (this.selectStatement.getCriteriaArguments().size() != 0) {
-            for (Criterion criterion : this.selectStatement.getCriteria()) {
-
-                String filter = criterion.getFilter();
-                String[] splitFilters = filter.split(",");
-                List<String> resultFilters = new ArrayList<>();
-
-                for (String splitFilter : splitFilters) {
-                    if (splitFilter.length() >= 1 && splitFilter.substring(0, 1).equals("@")) {
-                        String paramName = splitFilter.substring(1);
-                        String paramValue = this.selectStatement.getCriteriaArguments().get(paramName);
-                        if (paramValue != null) {
-                            resultFilters.add(paramValue);
-                        } else {
-                            String message = String.format("No criteria parameter was found with the name, %s", paramName);
-                            throw new Exception(message);
-                        }
-                    }
-                }
-
-                if (resultFilters.size() != 0) {
-                    String joinedResultFilters = String.join(",", resultFilters);
-                    criterion.setFilter(joinedResultFilters);
-                }
-            }
-        }
+//        if (this.selectStatement.getCriteriaArguments().size() != 0) {
+//            for (Criterion criterion : this.selectStatement.getCriteria()) {
+//
+//                Filter filter = criterion.getFilter();
+//                List<String> arguments = new ArrayList<>();
+//
+//                for (String parameter : filter.getParameters()) {
+//                    String argument = this.selectStatement.getCriteriaArguments().get(parameter);
+//                    if (argument != null) {
+//                        arguments.add(argument);
+//                    } else {
+//                        String message = String.format("No criteria parameter was found with the name, %s", parameter);
+//                        throw new Exception(message);
+//                    }
+//                }
+//
+//                criterion.getFilter().getValues().addAll(arguments);
+//            }
+//        }
     }
 
 }

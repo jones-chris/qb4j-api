@@ -1,8 +1,7 @@
 package net.querybuilder4j.model.select_statement;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.*;
 import net.querybuilder4j.converter.CriteriaDeserializer;
 import net.querybuilder4j.model.Column;
 import net.querybuilder4j.model.Database;
@@ -14,6 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class SelectStatement {
 
     /**
@@ -100,143 +104,5 @@ public class SelectStatement {
      * The value is a description of the parameter that users choose in the front end app's UI.
      */
     private List<CriterionParameter> criteriaParameters = new ArrayList<>();
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public List<Column> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(List<Column> columns) {
-        this.columns = columns;
-    }
-
-    public Table getTable() {
-        return table;
-    }
-
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
-    public List<Criterion> getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(List<Criterion> criteria) {
-        this.criteria = criteria;
-    }
-
-    public List<Join> getJoins() {
-        return joins;
-    }
-
-    public void setJoins(List<Join> joins) {
-        this.joins = joins;
-    }
-
-    public boolean isDistinct() {
-        return distinct;
-    }
-
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
-    }
-
-    public boolean isGroupBy() {
-        return groupBy;
-    }
-
-    public void setGroupBy(boolean groupBy) {
-        this.groupBy = groupBy;
-    }
-
-    public boolean isOrderBy() {
-        return orderBy;
-    }
-
-    public void setOrderBy(boolean orderBy) {
-        this.orderBy = orderBy;
-    }
-
-    public boolean isAscending() {
-        return ascending;
-    }
-
-    public void setAscending(boolean ascending) {
-        this.ascending = ascending;
-    }
-
-    public Long getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Long limit) {
-        this.limit = limit;
-    }
-
-    public Long getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Long offset) {
-        this.offset = offset;
-    }
-
-    public boolean isSuppressNulls() {
-        return suppressNulls;
-    }
-
-    public void setSuppressNulls(boolean suppressNulls) {
-        this.suppressNulls = suppressNulls;
-    }
-
-    public Map<String, String> getSubQueries() {
-        return subQueries;
-    }
-
-    public void setSubQueries(Map<String, String> subQueries) {
-        this.subQueries = subQueries;
-    }
-
-    public Map<String, String> getCriteriaArguments() {
-        return criteriaArguments;
-    }
-
-    public void setCriteriaArguments(Map<String, String> criteriaArguments) {
-        this.criteriaArguments = criteriaArguments;
-    }
-
-    public List<CriterionParameter> getCriteriaParameters() {
-        return criteriaParameters;
-    }
-
-    public void setCriteriaParameters(List<CriterionParameter> criteriaParameters) {
-        this.criteriaParameters = criteriaParameters;
-    }
-
-    @Override
-    public String toString() {
-        String s = "";
-        try {
-            s = new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException ignored) {}
-
-        return s;
-    }
 
 }
