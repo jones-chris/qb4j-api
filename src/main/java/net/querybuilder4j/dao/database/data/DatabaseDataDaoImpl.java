@@ -1,17 +1,17 @@
 package net.querybuilder4j.dao.database.data;
 
-import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCache;
 import net.querybuilder4j.config.Qb4jConfig;
 import net.querybuilder4j.constants.DatabaseType;
-import net.querybuilder4j.model.Column;
-import net.querybuilder4j.model.Database;
-import net.querybuilder4j.model.QueryResult;
-import net.querybuilder4j.model.Table;
-import net.querybuilder4j.model.select_statement.Criterion;
-import net.querybuilder4j.model.select_statement.Filter;
-import net.querybuilder4j.model.select_statement.Operator;
-import net.querybuilder4j.model.select_statement.SelectStatement;
-import net.querybuilder4j.sql_builder.SqlBuilderFactory;
+import net.querybuilder4j.sql.statement.column.Column;
+import net.querybuilder4j.sql.statement.criterion.Filter;
+import net.querybuilder4j.sql.statement.criterion.Operator;
+import net.querybuilder4j.sql.statement.database.Database;
+import net.querybuilder4j.util.QueryResult;
+import net.querybuilder4j.sql.statement.table.Table;
+import net.querybuilder4j.sql.statement.criterion.Criterion;
+import net.querybuilder4j.sql.statement.SelectStatement;
+import net.querybuilder4j.sql.builder.SqlBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

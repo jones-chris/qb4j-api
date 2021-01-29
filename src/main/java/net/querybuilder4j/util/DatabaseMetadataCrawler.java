@@ -1,10 +1,10 @@
 package net.querybuilder4j.util;
 
-import net.querybuilder4j.cache.CacheRefreshException;
+import net.querybuilder4j.exceptions.CacheRefreshException;
 import net.querybuilder4j.config.Qb4jConfig;
-import net.querybuilder4j.model.Column;
-import net.querybuilder4j.model.Schema;
-import net.querybuilder4j.model.Table;
+import net.querybuilder4j.sql.statement.column.Column;
+import net.querybuilder4j.sql.statement.schema.Schema;
+import net.querybuilder4j.sql.statement.table.Table;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

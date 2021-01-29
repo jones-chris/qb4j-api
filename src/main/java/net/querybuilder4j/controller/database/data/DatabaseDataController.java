@@ -1,10 +1,10 @@
 package net.querybuilder4j.controller.database.data;
 
-import net.querybuilder4j.model.QueryResult;
-import net.querybuilder4j.model.select_statement.SelectStatement;
+import net.querybuilder4j.util.QueryResult;
+import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.service.database.data.DatabaseDataService;
-import net.querybuilder4j.sql_builder.SqlBuilder;
-import net.querybuilder4j.sql_builder.SqlBuilderFactory;
+import net.querybuilder4j.sql.builder.SqlBuilder;
+import net.querybuilder4j.sql.builder.SqlBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

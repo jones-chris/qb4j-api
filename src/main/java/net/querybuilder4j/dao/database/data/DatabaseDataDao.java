@@ -1,6 +1,6 @@
 package net.querybuilder4j.dao.database.data;
 
-import net.querybuilder4j.model.QueryResult;
+import net.querybuilder4j.util.QueryResult;
 
 public interface DatabaseDataDao {
 

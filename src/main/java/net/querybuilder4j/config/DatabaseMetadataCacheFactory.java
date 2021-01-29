@@ -1,6 +1,7 @@
 package net.querybuilder4j.config;
 
-import net.querybuilder4j.cache.*;
+import net.querybuilder4j.dao.database.metadata.*;
+import net.querybuilder4j.exceptions.CacheTypeNotRecognizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.annotation.Configuration;

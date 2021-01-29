@@ -1,6 +1,6 @@
 package net.querybuilder4j.config;
 
-import net.querybuilder4j.cache.CacheType;
+import net.querybuilder4j.dao.database.metadata.CacheType;
 import net.querybuilder4j.constants.DatabaseType;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 

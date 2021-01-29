@@ -1,5 +1,6 @@
 package net.querybuilder4j.model;
 
+import net.querybuilder4j.sql.statement.column.Column;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;

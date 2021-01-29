@@ -2,7 +2,7 @@ package net.querybuilder4j.controller.query_template;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.querybuilder4j.model.select_statement.SelectStatement;
+import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.service.query_template.QueryTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
@@ -24,18 +25,13 @@ public class QueryTemplateController {
     }
 
     /**
-     * Gets the query template names given a limit, offset, and and ordering (ascending vs descending).
+     * Gets query template names.
      *
-     * @param limit The maximum number of query template names to retrieve (used for pagination).
-     * @param offset The query template name record number that the results should start at (used for pagination).
-     * @param ascending Whether the query that retrieves the query template names should be in ascending or descending order.
      * @return A ResponseEntity object containing a List of Strings with each String being the name of a query template.
      */
     @GetMapping(value = "")
-    public ResponseEntity<List<String>> getQueryTemplates(@RequestParam(required = false) Integer limit,
-                                                          @RequestParam(required = false) Integer offset,
-                                                          @RequestParam(required = false) boolean ascending) throws Exception {
-        List<String> queryTemplateNames = queryTemplateService.getNames(limit, offset, ascending);
+    public ResponseEntity<List<String>> getQueryTemplates() {
+        List<String> queryTemplateNames = queryTemplateService.getNames();
         return ResponseEntity.ok(queryTemplateNames);
     }
 
@@ -59,21 +55,18 @@ public class QueryTemplateController {
      */
     @PostMapping(value = "/")
     public ResponseEntity<?> saveQueryTemplate(@RequestBody SelectStatement selectStatement) {
-        if (selectStatement.getName() == null) {
-            throw new RuntimeException("The name of the select statement cannot be null when saving the statement " +
-                    "as a query template");
-        }
+        Objects.requireNonNull(selectStatement.getName(), "The name of the select statement cannot be null when saving it");
 
         String json;
         try {
             json = new ObjectMapper().writeValueAsString(selectStatement);
+            this.queryTemplateService.save(selectStatement.getName(), json);
+            return ResponseEntity.ok().build();
         } catch (JsonProcessingException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Could not serialize the selectStatement");
         }
-
-        queryTemplateService.save(selectStatement.getName(), json);
-
-        return ResponseEntity.ok().build();
     }
 
 }

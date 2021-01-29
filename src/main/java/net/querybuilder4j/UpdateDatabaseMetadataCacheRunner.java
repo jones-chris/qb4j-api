@@ -1,6 +1,6 @@
 package net.querybuilder4j;
 
-import net.querybuilder4j.cache.DatabaseMetadataCache;
+import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
