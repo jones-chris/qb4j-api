@@ -10,6 +10,7 @@ import net.querybuilder4j.sql.statement.database.Database;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
 import net.querybuilder4j.util.DatabaseMetadataCrawler;
+import net.querybuilder4j.util.Utils;
 import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
+public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheDao {
 
     /**
      * The Redis database index that will hold database metadata.
@@ -40,13 +41,6 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
     private final int COLUMN_REDIS_DB = 3;
 
     /**
-     * An object mapper that can be used by the {@link this#deserializeJson(String, Class)} and
-     * {@link this#deserializeJsons(Iterable, Class)} methods.  I opted to make this a class field so that these methods
-     * do not have to constantly instantiate an {@link ObjectMapper} over and over again.
-     */
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    /**
      * The {@link Qb4jConfig} encapsulating the application context.
      */
     private final Qb4jConfig qb4jConfig;
@@ -56,7 +50,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
      */
     private final Jedis jedis;
 
-    public RedisDatabaseMetadataCacheImpl(Qb4jConfig qb4jConfig) {
+    public RedisDatabaseMetadataCacheDaoImpl(Qb4jConfig qb4jConfig) {
         this.qb4jConfig = qb4jConfig;
 
         // I know this constructor could just take `host` and `port` as parameters, but I think passing the Qb4jConfig
@@ -125,7 +119,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         this.jedis.select(this.DATABASE_REDIS_DB);
 
         String databaseJson = this.jedis.get(databaseName);
-        return this.deserializeJson(databaseJson, Database.class);
+        return Utils.deserializeJson(databaseJson, Database.class);
     }
 
     @Override
@@ -145,7 +139,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         // Get the values of the schemas redis keys.
         List<String> schemasJson = this.jedis.mget(schemasRedisKeys.toArray(new String[0]));
 
-        return this.deserializeJsons(schemasJson, Schema.class);
+        return Utils.deserializeJsons(schemasJson, Schema.class);
     }
 
     @Override
@@ -164,7 +158,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         // Get the values of the schemas redis keys.
         List<String> tablesJson = this.jedis.mget(tablesRedisKeys.toArray(new String[0]));
 
-        return this.deserializeJsons(tablesJson, Table.class);
+        return Utils.deserializeJsons(tablesJson, Table.class);
     }
 
     @Override
@@ -183,7 +177,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         // Get the values of the schemas redis keys.
         List<String> columnsJson = this.jedis.mget(columnsRedisKeys.toArray(new String[0]));
 
-        return this.deserializeJsons(columnsJson, Column.class);
+        return Utils.deserializeJsons(columnsJson, Column.class);
     }
 
     @Override
@@ -195,7 +189,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
         );
 
         String columnJson = this.jedis.get(fullyQualifiedColumnName);
-        Column deserializedColumn = this.deserializeJson(columnJson, Column.class);
+        Column deserializedColumn = Utils.deserializeJson(columnJson, Column.class);
         return deserializedColumn.getDataType();
     }
 
@@ -232,43 +226,7 @@ public class RedisDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
 
         String fullyQualifiedColumnName = String.format("%s.%s.%s.%s", databaseName, schemaName, tableName, columnName);
         String columnJson = this.jedis.get(fullyQualifiedColumnName);
-        return this.deserializeJson(columnJson, Column.class);
-    }
-
-    /**
-     * A convenience method for instantiating a {@link T} from a JSON {@link String}.
-     * @param json The JSON {@link String}.
-     * @param clazz The class to instantiate from the JSON {@link String}.
-     * @param <T> The class to instantiate from the JSON {@link String}.
-     * @return An instance of {@link T}.
-     */
-    private <T> T deserializeJson(String json, Class<T> clazz) {
-        try {
-            return this.objectMapper.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
-            /*
-             * Instantiate and throw a child of the RuntimeException class so we don't have to worry about exception checking
-             * in the event that a JSON string cannot be deserialized because the application is not expected to recover
-             * from that.
-             */
-            throw new CacheJsonDeserializationException(e);
-        }
-    }
-
-    /**
-     * A convenience method for instantiating a {@link List<T>} from a {@link Iterable<String>}.
-     * @param jsons The {@link Iterable<String>} of JSON {@link String}s.
-     * @param clazz The class to instantiate from each of the JSON {@link String}s.
-     * @param <T> The class to instantiate from each of the JSON {@link String}s.
-     * @return A {@link List<T>}.
-     */
-    private <T> List<T> deserializeJsons(Iterable<String> jsons, Class<T> clazz) {
-        List<T> deserializedObjects = new ArrayList<>();
-        jsons.forEach(json -> deserializedObjects.add(
-                this.deserializeJson(json, clazz)
-        ));
-
-        return deserializedObjects;
+        return Utils.deserializeJson(columnJson, Column.class);
     }
 
 }

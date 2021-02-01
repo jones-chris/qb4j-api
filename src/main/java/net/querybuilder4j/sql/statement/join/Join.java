@@ -2,10 +2,10 @@ package net.querybuilder4j.sql.statement.join;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.querybuilder4j.sql.builder.SqlValidator;
 import net.querybuilder4j.sql.statement.SqlRepresentation;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.table.Table;
-import net.querybuilder4j.sql.builder.SqlCleanser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,13 +129,13 @@ public class Join implements SqlRepresentation {
         if (this.targetTable.getSchemaName().equals("null")) {
             sb.append(this.getJoinType().toString())
                     .append(String.format(" %s%s%s ",
-                            beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getTableName()), endingDelimiter)
+                            beginningDelimiter, SqlValidator.escape(this.getTargetTable().getTableName()), endingDelimiter)
                     );
         } else {
             sb.append(this.getJoinType().toString())
                     .append(String.format(" %s%s%s.%s%s%s ",
-                            beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getSchemaName()), endingDelimiter,
-                            beginningDelimiter, SqlCleanser.escape(this.getTargetTable().getTableName()), endingDelimiter)
+                            beginningDelimiter, SqlValidator.escape(this.getTargetTable().getSchemaName()), endingDelimiter,
+                            beginningDelimiter, SqlValidator.escape(this.getTargetTable().getTableName()), endingDelimiter)
                     );
         }
 

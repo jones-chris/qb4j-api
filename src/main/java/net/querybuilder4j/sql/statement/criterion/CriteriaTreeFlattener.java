@@ -1,12 +1,12 @@
 package net.querybuilder4j.sql.statement.criterion;
 
-import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCache;
-import net.querybuilder4j.sql.statement.validator.DatabaseMetadataCacheValidator;
+import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCacheDao;
+import net.querybuilder4j.sql.builder.SqlValidator;
+import net.querybuilder4j.util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.querybuilder4j.sql.builder.SqlCleanser.escape;
 
 public class CriteriaTreeFlattener {
 
@@ -34,19 +34,11 @@ public class CriteriaTreeFlattener {
     /**
      * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
      */
-    protected DatabaseMetadataCache databaseMetadataCache;
+    protected DatabaseMetadataCacheDao databaseMetadataCacheDao;
 
-    /**
-     * The class responsible for validating the various fields in the `selectStatement`.
-     */
-    protected DatabaseMetadataCacheValidator databaseMetadataCacheValidator;
-
-    public CriteriaTreeFlattener(List<Criterion> criteria,
-                                 DatabaseMetadataCache databaseMetadataCache,
-                                 DatabaseMetadataCacheValidator databaseMetadataCacheValidator) {
+    public CriteriaTreeFlattener(List<Criterion> criteria, DatabaseMetadataCacheDao databaseMetadataCacheDao) {
         this.unflattenedCriteria = criteria;
-        this.databaseMetadataCache = databaseMetadataCache;
-        this.databaseMetadataCacheValidator = databaseMetadataCacheValidator;
+        this.databaseMetadataCacheDao = databaseMetadataCacheDao;
         this.flattenedCriteria = flattenCriteria(criteria, new HashMap<>());
         this.addParenthesis();
         this.quoteCriteriaFilterItems();
@@ -265,7 +257,7 @@ public class CriteriaTreeFlattener {
                         continue;
                     }
 
-                    filterItem = escape(filterItem);
+                    filterItem = SqlValidator.escape(filterItem);
 
                     // If the criterion's operator is a "search" operator (LIKE or NOT LIKE), then wrap the filter in single
                     // quotes so that the database will treat it as a string search regardless of whether the column type
@@ -276,8 +268,8 @@ public class CriteriaTreeFlattener {
                         // If the criterion's filter does not contain a search character, then proceed as normal but getting
                         // the column's data type from the cache, because we don't trust the column's data type that the client
                         // sent.
-                        int columnDataType = this.databaseMetadataCache.getColumnDataType(criterion.getColumn());
-                        boolean shouldHaveQuotes = this.databaseMetadataCacheValidator.isColumnQuoted(columnDataType);
+                        int columnDataType = this.databaseMetadataCacheDao.getColumnDataType(criterion.getColumn());
+                        boolean shouldHaveQuotes = Utils.shouldBeQuoted(columnDataType);
                         if (shouldHaveQuotes) {
                             filterItem = String.format("'%s'", filterItem);
                         }

@@ -1,15 +1,12 @@
 package net.querybuilder4j.sql.builder;
 
-import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCache;
-import net.querybuilder4j.sql.statement.validator.DatabaseMetadataCacheValidator;
+import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCacheDao;
 import net.querybuilder4j.service.query_template.QueryTemplateService;
 
 public class SqlServerSqlBuilder extends SqlBuilder {
 
-    public SqlServerSqlBuilder(DatabaseMetadataCache databaseMetadataCache,
-                               DatabaseMetadataCacheValidator databaseMetadataCacheValidator,
-                               QueryTemplateService queryTemplateService) {
-        super(databaseMetadataCache, databaseMetadataCacheValidator, queryTemplateService);
+    public SqlServerSqlBuilder(DatabaseMetadataCacheDao databaseMetadataCacheDao, QueryTemplateService queryTemplateService) {
+        super(databaseMetadataCacheDao, queryTemplateService);
         beginningDelimiter = '[';
         endingDelimiter = ']';
     }

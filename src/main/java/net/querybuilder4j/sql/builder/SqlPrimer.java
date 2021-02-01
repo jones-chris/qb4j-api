@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 import static net.querybuilder4j.sql.statement.join.Join.JoinType.*;
 
 /**
- * This class contains static functions to prepare/prime a SelectStatement before it is built by the SqlBuilder.
+ * This class contains static functions to prepare/prime a SelectStatement before it is validated and then built by the
+ * SqlBuilder.
  */
 public class SqlPrimer {
 

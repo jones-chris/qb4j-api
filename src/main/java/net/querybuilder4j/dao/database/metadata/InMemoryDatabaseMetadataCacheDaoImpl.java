@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class InMemoryDatabaseMetadataCacheImpl implements DatabaseMetadataCache {
+public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheDao {
 
     private final Qb4jConfig qb4jConfig;
 
@@ -24,7 +24,7 @@ public class InMemoryDatabaseMetadataCacheImpl implements DatabaseMetadataCache 
         return cache;
     }
 
-    public InMemoryDatabaseMetadataCacheImpl(Qb4jConfig qb4jConfig) {
+    public InMemoryDatabaseMetadataCacheDaoImpl(Qb4jConfig qb4jConfig) {
         this.qb4jConfig = qb4jConfig;
         refreshCache();  // Populate cache on cache instantiation - which should occur at app start up.
     }

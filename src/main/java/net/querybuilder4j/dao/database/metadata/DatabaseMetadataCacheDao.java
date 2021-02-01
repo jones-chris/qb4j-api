@@ -8,7 +8,7 @@ import net.querybuilder4j.sql.statement.table.Table;
 import java.util.List;
 import java.util.Set;
 
-public interface DatabaseMetadataCache {
+public interface DatabaseMetadataCacheDao {
 
     void refreshCache() throws Exception;
     Set<Database> getDatabases();

@@ -2,15 +2,10 @@ package net.querybuilder4j.sql.statement.criterion;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import net.querybuilder4j.exceptions.CriterionColumnDataTypeAndFilterMismatchException;
-import net.querybuilder4j.sql.statement.column.Column;
+import net.querybuilder4j.sql.builder.SqlValidator;
 import net.querybuilder4j.sql.statement.SqlRepresentation;
-import net.querybuilder4j.sql.statement.validator.Validator;
-import net.querybuilder4j.sql.builder.SqlCleanser;
-import net.querybuilder4j.util.Utils;
+import net.querybuilder4j.sql.statement.column.Column;
 
-import java.math.BigDecimal;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,11 +13,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static net.querybuilder4j.sql.builder.SqlCleanser.sqlIsClean;
+import static net.querybuilder4j.sql.statement.criterion.Operator.*;
 
 @ToString
 @EqualsAndHashCode
-public class Criterion implements SqlRepresentation, Validator {
+public class Criterion implements SqlRepresentation {
 
     private int id;
 
@@ -138,15 +133,15 @@ public class Criterion implements SqlRepresentation, Validator {
     @Override
     public String toSql(char beginningDelimiter, char endingDelimiter) {
         String schema = ofNullable(column.getSchemaName())
-                .map(SqlCleanser::escape)
+                .map(SqlValidator::escape)
                 .orElse(null);
 
         String table = ofNullable(column.getTableName())
-                .map(SqlCleanser::escape)
+                .map(SqlValidator::escape)
                 .orElseThrow(IllegalArgumentException::new);
 
         String columnName = ofNullable(column.getColumnName())
-                .map(SqlCleanser::escape)
+                .map(SqlValidator::escape)
                 .orElseThrow(IllegalArgumentException::new);
 
         String closingParenthesisString = this.closingParenthesis.stream().map(Enum::toString).collect(Collectors.joining());
@@ -158,7 +153,7 @@ public class Criterion implements SqlRepresentation, Validator {
                     beginningDelimiter, table, endingDelimiter,
                     beginningDelimiter, columnName, endingDelimiter,
                     this.getOperator(),
-                    this.filter.toSql(beginningDelimiter, endingDelimiter),
+                    this.filter.toSql(this.operator),
                     closingParenthesisString);
         } else {
             return String.format(" %s %s%s%s%s.%s%s%s.%s%s%s %s %s%s ",
@@ -168,59 +163,17 @@ public class Criterion implements SqlRepresentation, Validator {
                     beginningDelimiter, table, endingDelimiter,
                     beginningDelimiter, columnName, endingDelimiter,
                     this.getOperator(),
-                    this.filter.toSql(beginningDelimiter, endingDelimiter),
+                    this.filter.toSql(this.operator),
                     closingParenthesisString);
         }
     }
 
-    public boolean isValid() {
-        // Column and operator must always be non-null.
-        if (column == null || operator == null) {
-            return false;
-        }
-
-        // If operator is not `isNotNull` and `isNull` and filter is null or an empty string, then criterion is not valid.
-        // In other words, the criterion has an operator that expects a non-null or non-empty filter, but the filter is
-        // null or an empty string.
-        if ((operator != Operator.isNotNull && operator != Operator.isNull)) {
-            if (filter.getValues().isEmpty() || filter.getValues().contains("")) {
-                return false;
-            }
-        }
-
-        // If the criterion's column's data type is a non-string type, check that the values can be converted to the data type.
-        int jdbcDataType = column.getDataType();
-        if (jdbcDataType == Types.BIGINT || jdbcDataType == Types.DECIMAL || jdbcDataType == Types.DOUBLE ||
-            jdbcDataType == Types.FLOAT || jdbcDataType == Types.INTEGER || jdbcDataType == Types.NUMERIC ||
-            jdbcDataType == Types.SMALLINT || jdbcDataType == Types.TINYINT) {
-            for (String value : filter.getValues()) {
-                try {
-                    BigDecimal.valueOf(Double.parseDouble(value));
-                } catch (NumberFormatException e) {
-                    throw new CriterionColumnDataTypeAndFilterMismatchException(
-                            Utils.getJdbcSqlType(jdbcDataType),
-                            value);
-                }
-            }
-        } else if (jdbcDataType == Types.BOOLEAN) {
-            for (String value : filter.getValues()) {
-                try {
-                    Boolean.valueOf(value);
-                } catch (NumberFormatException e) {
-                    throw new CriterionColumnDataTypeAndFilterMismatchException("BOOLEAN", value);
-                }
-            }
-        }
-
-        return sqlIsClean(this);
-    }
-
     public boolean hasSearchOperator() {
-        return this.operator != null && (this.operator.equals(Operator.like) || this.operator.equals(Operator.notLike));
+        return this.operator != null && (this.operator.equals(like) || this.operator.equals(notLike));
     }
 
     public boolean hasMultipleValuesOperator() {
-        return this.operator != null && (this.operator.equals(Operator.in) || this.operator.equals(Operator.notIn));
+        return this.operator != null && (this.operator.equals(in) || this.operator.equals(notIn));
     }
 
 }

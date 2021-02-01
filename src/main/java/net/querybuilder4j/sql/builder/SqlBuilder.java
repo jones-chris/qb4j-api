@@ -1,14 +1,13 @@
 package net.querybuilder4j.sql.builder;
 
-import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCache;
+import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCacheDao;
+import net.querybuilder4j.service.query_template.QueryTemplateService;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.criterion.CriteriaTreeFlattener;
 import net.querybuilder4j.sql.statement.criterion.Criterion;
 import net.querybuilder4j.sql.statement.join.Join;
 import net.querybuilder4j.sql.statement.table.Table;
-import net.querybuilder4j.sql.statement.validator.DatabaseMetadataCacheValidator;
-import net.querybuilder4j.service.query_template.QueryTemplateService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,22 +45,15 @@ public abstract class SqlBuilder {
     /**
      * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
      */
-    protected DatabaseMetadataCache databaseMetadataCache;
-
-    /**
-     * The class responsible for validating the various fields in the `selectStatement`.
-     */
-    protected DatabaseMetadataCacheValidator databaseMetadataCacheValidator;
+    protected DatabaseMetadataCacheDao databaseMetadataCacheDao;
 
     /**
      * The class responsible for getting query templates for Common Table Expressions.
      */
     protected QueryTemplateService queryTemplateService;
 
-    public SqlBuilder(DatabaseMetadataCache databaseMetadataCache, DatabaseMetadataCacheValidator databaseMetadataCacheValidator,
-                      QueryTemplateService queryTemplateService) {
-        this.databaseMetadataCache = databaseMetadataCache;
-        this.databaseMetadataCacheValidator = databaseMetadataCacheValidator;
+    public SqlBuilder(DatabaseMetadataCacheDao databaseMetadataCacheDao, QueryTemplateService queryTemplateService) {
+        this.databaseMetadataCacheDao = databaseMetadataCacheDao;
         this.queryTemplateService = queryTemplateService;
     }
 
@@ -79,8 +71,7 @@ public abstract class SqlBuilder {
         SqlPrimer.interpolateCriteriaParameters(this.selectStatement);
 
         // Validate selectStatement.
-        this.databaseMetadataCacheValidator.assertPassesBasicValidation(this.selectStatement);
-        this.databaseMetadataCacheValidator.assertPassesDatabaseValidation(this.selectStatement);
+        SqlValidator.assertIsValid(this.selectStatement, this.databaseMetadataCacheDao);
 
         return this;
     }
@@ -93,8 +84,7 @@ public abstract class SqlBuilder {
     protected void createCommonTableExpressionClause() {
         if (! this.selectStatement.getCommonTableExpressions().isEmpty()) {
             // Instantiate a SqlBuilderFactory inside this SqlBuilder instance to build the SQL for the Common Table Expressions.
-            SqlBuilderFactory sqlBuilderFactory = new SqlBuilderFactory(this.databaseMetadataCache,
-                    this.databaseMetadataCacheValidator, this.queryTemplateService);
+            SqlBuilderFactory sqlBuilderFactory = new SqlBuilderFactory(this.databaseMetadataCacheDao, this.queryTemplateService);
 
             List<String> commonTableExpressionSqlStrings = new ArrayList<>();
             this.selectStatement.getCommonTableExpressions().forEach(commonTableExpression -> {
@@ -188,11 +178,7 @@ public abstract class SqlBuilder {
         List<Criterion> criteria = this.selectStatement.getCriteria();
 
         if (! criteria.isEmpty()) {
-            CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(
-                    criteria,
-                    this.databaseMetadataCache,
-                    this.databaseMetadataCacheValidator
-            );
+            CriteriaTreeFlattener criteriaTreeFlattener = new CriteriaTreeFlattener(criteria, this.databaseMetadataCacheDao);
 
             this.stringBuilder.append(" WHERE ");
             String joinedCriteriaSqlStrings = criteriaTreeFlattener.getSqlStringRepresentation(beginningDelimiter, endingDelimiter);

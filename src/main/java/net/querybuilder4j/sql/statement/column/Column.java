@@ -2,8 +2,8 @@ package net.querybuilder4j.sql.statement.column;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import net.querybuilder4j.sql.builder.SqlValidator;
 import net.querybuilder4j.sql.statement.SqlRepresentation;
-import net.querybuilder4j.sql.builder.SqlCleanser;
 
 @EqualsAndHashCode
 @ToString
@@ -84,14 +84,14 @@ public class Column implements SqlRepresentation {
     public String toSql(char beginningDelimiter, char endingDelimiter) {
         if (this.schemaName == null || this.schemaName.equals("null")) {
             return String.format(" %s%s%s.%s%s%s AS %s ",
-                    beginningDelimiter, SqlCleanser.escape(this.tableName), endingDelimiter,
-                    beginningDelimiter, SqlCleanser.escape(this.columnName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.tableName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.columnName), endingDelimiter,
                     this.getAlias());
         } else {
             return String.format(" %s%s%s.%s%s%s.%s%s%s AS %s ",
-                    beginningDelimiter, SqlCleanser.escape(this.schemaName), endingDelimiter,
-                    beginningDelimiter, SqlCleanser.escape(this.tableName), endingDelimiter,
-                    beginningDelimiter, SqlCleanser.escape(this.columnName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.schemaName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.tableName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.columnName), endingDelimiter,
                     this.getAlias());
         }
 
@@ -107,13 +107,13 @@ public class Column implements SqlRepresentation {
     public String toSqlWithoutAlias(char beginningDelimiter, char endingDelimiter) {
         if (this.schemaName == null || this.schemaName.equals("null")) {
             return String.format(" %s%s%s.%s%s%s ",
-                    beginningDelimiter, SqlCleanser.escape(this.tableName), endingDelimiter,
-                    beginningDelimiter, SqlCleanser.escape(this.columnName), endingDelimiter);
+                    beginningDelimiter, SqlValidator.escape(this.tableName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.columnName), endingDelimiter);
         } else {
             return String.format(" %s%s%s.%s%s%s.%s%s%s ",
-                    beginningDelimiter, SqlCleanser.escape(this.schemaName), endingDelimiter,
-                    beginningDelimiter, SqlCleanser.escape(this.tableName), endingDelimiter,
-                    beginningDelimiter, SqlCleanser.escape(this.columnName), endingDelimiter);
+                    beginningDelimiter, SqlValidator.escape(this.schemaName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.tableName), endingDelimiter,
+                    beginningDelimiter, SqlValidator.escape(this.columnName), endingDelimiter);
         }
     }
 

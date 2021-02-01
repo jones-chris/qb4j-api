@@ -12,17 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static net.querybuilder4j.sql.statement.criterion.Operator.*;
+import static net.querybuilder4j.sql.statement.criterion.Operator.isNotNull;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class Filter implements SqlRepresentation {
+public class Filter {
 
-    private List<String> values = new ArrayList<>(); // todo:  could be quoted
+    private List<String> values = new ArrayList<>();
 
-    private List<String> subQueries = new ArrayList<>(); // todo:  do not quote.
+    private List<String> subQueries = new ArrayList<>();
 
-    private List<String> parameters = new ArrayList<>(); // todo:  could be quoted
+    private List<String> parameters = new ArrayList<>();
 
     public boolean isEmpty() {
         return this.values.isEmpty() && this.subQueries.isEmpty() && this.parameters.isEmpty();
@@ -69,16 +72,26 @@ public class Filter implements SqlRepresentation {
         );
     }
 
-    @Override
-    public String toSql(char beginningDelimiter, char endingDelimiter) {
+    public String toSql(Operator operator) {
         StringBuilder sql = new StringBuilder();
 
-        if (! this.values.isEmpty()) {
-            return sql.append("(").append(String.join(", ", this.values)).append(")")
-                    .toString();
-        } else {
+        if (this.values.isEmpty()) {
             return "";
         }
 
+        if (operator.equals(isNull) || operator.equals(isNotNull)) {
+            return "";
+        }
+        // todo:  Add this BETWEEN and NOT BETWEEN logic eventually.  Check that this logic is correct!
+//        else if (operator.equals(between) || operator.equals(notBetween)) {
+//            return sql.append(this.values.get(0)).append(" AND ").append(this.values.get(1))
+//                    .toString();
+//        }
+        else {
+            return sql.append("(").append(String.join(", ", this.values)).append(")")
+                    .toString();
+        }
+
     }
+
 }

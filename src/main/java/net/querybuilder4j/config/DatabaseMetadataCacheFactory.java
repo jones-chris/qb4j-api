@@ -6,30 +6,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.annotation.Configuration;
 
+import static net.querybuilder4j.dao.database.metadata.CacheType.*;
+
 @Configuration
-public class DatabaseMetadataCacheFactory extends AbstractFactoryBean<DatabaseMetadataCache> {
+public class DatabaseMetadataCacheFactory extends AbstractFactoryBean<DatabaseMetadataCacheDao> {
 
     private final Qb4jConfig qb4jConfig;
 
     @Autowired
     public DatabaseMetadataCacheFactory(Qb4jConfig qb4jConfig) {
         this.qb4jConfig = qb4jConfig;
-        this.setSingleton(true);  // Always create singletons regardless of the DatabaseMetadataCache implementation.
+        this.setSingleton(true);  // Always create singletons regardless of the DatabaseMetadataCacheDao implementation.
     }
 
     @Override
     public Class<?> getObjectType() {
-        return DatabaseMetadataCache.class;
+        return DatabaseMetadataCacheDao.class;
     }
 
     @Override
-    protected DatabaseMetadataCache createInstance() {
+    protected DatabaseMetadataCacheDao createInstance() {
         CacheType cacheType = this.qb4jConfig.getDatabaseMetadataCacheSource().getCacheType();
 
-        if (cacheType.equals(CacheType.IN_MEMORY)) {
-            return new InMemoryDatabaseMetadataCacheImpl(this.qb4jConfig);
-        } else if (cacheType.equals(CacheType.REDIS)) {
-            return new RedisDatabaseMetadataCacheImpl(this.qb4jConfig);
+        if (cacheType.equals(IN_MEMORY)) {
+            return new InMemoryDatabaseMetadataCacheDaoImpl(this.qb4jConfig);
+        } else if (cacheType.equals(REDIS)) {
+            return new RedisDatabaseMetadataCacheDaoImpl(this.qb4jConfig);
         } else {
             throw new CacheTypeNotRecognizedException(cacheType + " is not a recognized database metadata cache type");
         }

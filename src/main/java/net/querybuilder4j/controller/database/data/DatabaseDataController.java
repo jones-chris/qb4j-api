@@ -72,10 +72,4 @@ public class DatabaseDataController {
         return ResponseEntity.ok(queryResult);
     }
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<?> handleException(HttpServletRequest request, Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Collections.singletonMap("message", ex.getMessage()));
-    }
-
 }

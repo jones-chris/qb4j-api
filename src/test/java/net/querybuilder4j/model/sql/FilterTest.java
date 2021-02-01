@@ -1,6 +1,7 @@
 package net.querybuilder4j.model.sql;
 
 import net.querybuilder4j.sql.statement.criterion.Filter;
+import net.querybuilder4j.sql.statement.criterion.Operator;
 import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
 import org.junit.Test;
 
@@ -67,7 +68,7 @@ public class FilterTest {
         Filter filter = new Filter();
         filter.setValues(List.of("hello", "world"));
 
-        String actualSql = filter.toSql('`', '`');
+        String actualSql = filter.toSql(Operator.in);
 
         assertEquals("(hello, world)", actualSql);
     }
@@ -76,9 +77,151 @@ public class FilterTest {
     public void toSql_emptyValuesFormattedCorrectly() {
         Filter filter = new Filter();
 
-        String actualSql = filter.toSql('`', '`');
+        String actualSql = filter.toSql(Operator.in);
 
         assertEquals("", actualSql);
+    }
+
+    @Test
+    public void toSql_equalToFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.equalTo);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_notEqualToFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.notEqualTo);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_greaterThanFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.greaterThan);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_lessThanFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.lessThan);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_greaterThanOrEqualFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.greaterThanOrEquals);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_lessThanOrEqualFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.lessThanOrEquals);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_likeFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.like);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_notLikeFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.notLike);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    @Test
+    public void toSql_inFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello", "world"));
+
+        String actualSql = filter.toSql(Operator.in);
+
+        assertEquals("(hello, world)", actualSql);
+    }
+
+    @Test
+    public void toSql_notInFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello", "world"));
+
+        String actualSql = filter.toSql(Operator.notIn);
+
+        assertEquals("(hello, world)", actualSql);
+    }
+
+    @Test
+    public void toSql_isNullFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.isNull);
+
+        assertEquals("", actualSql);
+    }
+
+    @Test
+    public void toSql_isNotNullFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.isNotNull);
+
+        assertEquals("", actualSql);
+    }
+
+    // todo:  change this expected string once BETWEEN and NOT BETWEEN are supported.
+    @Test
+    public void toSql_betweenFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.between);
+
+        assertEquals("(hello)", actualSql);
+    }
+
+    // todo:  change this expected string once BETWEEN and NOT BETWEEN are supported.
+    @Test
+    public void toSql_notBetweenFormattedCorrectly() {
+        Filter filter = new Filter();
+        filter.setValues(List.of("hello"));
+
+        String actualSql = filter.toSql(Operator.notBetween);
+
+        assertEquals("(hello)", actualSql);
     }
 
     @Test
