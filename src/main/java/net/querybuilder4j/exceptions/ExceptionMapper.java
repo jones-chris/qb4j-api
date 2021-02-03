@@ -20,7 +20,7 @@ public class ExceptionMapper {
             DatabaseTypeNotRecognizedException.class, SqlTypeNotRecognizedException.class, CacheTypeNotRecognizedException.class,
             SqlTypeNotRecognizedException.class, UncleanSqlException.class, IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<?> handleExceptionsThatShouldReturn400Response(RuntimeException ex, WebRequest request) {
-        LOG.error("An exception returning a 400 response occurred", ex);
+        LOG.error("An exception returning a 400 response occurred ", ex);
 
         return ResponseEntity.badRequest()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -30,7 +30,7 @@ public class ExceptionMapper {
     @ExceptionHandler({ JsonDeserializationException.class, JsonSerializationException.class, CacheRefreshException.class,
             CacheMissException.class })
     public ResponseEntity<?> handleExceptionsThatShouldReturn500Response(RuntimeException ex, WebRequest request) {
-        LOG.error("An exception returning a 500 response occurred", ex);
+        LOG.error("An exception returning a 500 response occurred ", ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)

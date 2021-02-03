@@ -6,6 +6,7 @@ import net.querybuilder4j.exceptions.UncleanSqlException;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.criterion.Criterion;
+import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
 import net.querybuilder4j.util.Utils;
 
 import java.math.BigDecimal;
@@ -84,6 +85,10 @@ public class SqlValidator {
             assertIsValid(criterion);
         }
 
+        for (CommonTableExpression commonTableExpression : selectStatement.getCommonTableExpressions()) {
+            assertIsValid(commonTableExpression);
+        }
+
         // todo:  test if Select Statement joins pass validation.
     }
 
@@ -131,6 +136,10 @@ public class SqlValidator {
 
         // Now check that the criterion's filter does not contain SQL injection attempts.
         assertSqlIsClean(criterion);
+    }
+
+    private static void assertIsValid(CommonTableExpression commonTableExpression) {
+        assertSqlIsClean(commonTableExpression.getName());
     }
 
     /**

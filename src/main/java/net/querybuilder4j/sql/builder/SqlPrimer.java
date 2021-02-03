@@ -1,14 +1,16 @@
 package net.querybuilder4j.sql.builder;
 
+import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.criterion.Conjunction;
+import net.querybuilder4j.sql.statement.criterion.Criterion;
 import net.querybuilder4j.sql.statement.criterion.Operator;
 import net.querybuilder4j.sql.statement.join.Join;
-import net.querybuilder4j.sql.statement.criterion.Criterion;
-import net.querybuilder4j.sql.statement.SelectStatement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static net.querybuilder4j.sql.statement.join.Join.JoinType.*;
@@ -74,11 +76,57 @@ public class SqlPrimer {
      * Arguments.
      */
     public static void interpolateCriteriaParameters(SelectStatement selectStatement) {
+        Map<String, String> runtimeArguments = selectStatement.getCriteriaArguments();
+
+        // For each criterion...
         selectStatement.getCriteria().forEach(criterion -> {
-            criterion.getFilter().interpolate(
-                    selectStatement.getCommonTableExpressions(),
-                    selectStatement.getCriteriaArguments()
-            );
+            // For each parameter...
+            criterion.getFilter().getParameters().forEach(parameter -> {
+                // Get the runtime arg...
+                Optional.ofNullable(runtimeArguments.get(parameter))
+                        .ifPresentOrElse(
+                                // If present and the runtime arg is sub query, then add the sub query name to sub queries...
+                                runtimeArgument -> {
+                                    if (runtimeArgument.startsWith("$")) {
+                                        String subQueryName = runtimeArgument.substring(1);
+                                        criterion.getFilter().getSubQueries().add(subQueryName);
+                                    } else {
+                                        // If present and the runtime arg is not sub query, then add the argument to values...
+                                        criterion.getFilter().getValues().add(runtimeArgument);
+                                    }
+                                },
+                                // If not present, throw an exception.
+                                () -> {
+                                    throw new IllegalStateException("Could not find runtime argument for parameter, " + parameter);
+                                }
+                        );
+            });
+
+            // For each sub query...
+            final String sql = "(SELECT * FROM %s)";
+            criterion.getFilter().getSubQueries().forEach(subQuery -> {
+                // Find the Common Table Expression with the same name as the sub query...
+                selectStatement.getCommonTableExpressions().stream()
+                        .filter(commonTableExpression -> commonTableExpression.getName().equals(subQuery))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                // If present, create the sub query SQL and add it to the values...
+                                commonTableExpression -> {
+                                    if (commonTableExpression.isBuilt()) {
+                                        criterion.getFilter().getValues().add(
+                                                String.format(sql, commonTableExpression.getName())
+                                        );
+                                    } else {
+                                        throw new IllegalStateException("Common Table Expression, " + commonTableExpression.getName() +
+                                                " is not built yet");
+                                    }
+                                },
+                                // If not present, throw an exception.
+                                () -> {
+                                    throw new IllegalStateException("Could not find Common Table Expression with name, " + subQuery);
+                                }
+                        );
+            });
         });
     }
 

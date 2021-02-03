@@ -1,4 +1,4 @@
-package net.querybuilder4j.model;
+package net.querybuilder4j.sql.statement;
 
 import net.querybuilder4j.sql.statement.column.Column;
 import org.junit.Test;

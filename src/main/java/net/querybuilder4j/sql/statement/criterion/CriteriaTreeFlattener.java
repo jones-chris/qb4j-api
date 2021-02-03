@@ -11,11 +11,6 @@ import java.util.stream.Collectors;
 public class CriteriaTreeFlattener {
 
     /**
-     * The original, un-flattened criteria.
-     */
-    private List<Criterion> unflattenedCriteria = new ArrayList<>();
-
-    /**
      * The flattened criteria that are written here as the tree is walked.
      * The key is just an index representing each root's tree.  The value is the flattened tree for that root criterion.
      */
@@ -37,7 +32,6 @@ public class CriteriaTreeFlattener {
     protected DatabaseMetadataCacheDao databaseMetadataCacheDao;
 
     public CriteriaTreeFlattener(List<Criterion> criteria, DatabaseMetadataCacheDao databaseMetadataCacheDao) {
-        this.unflattenedCriteria = criteria;
         this.databaseMetadataCacheDao = databaseMetadataCacheDao;
         this.flattenedCriteria = flattenCriteria(criteria, new HashMap<>());
         this.addParenthesis();

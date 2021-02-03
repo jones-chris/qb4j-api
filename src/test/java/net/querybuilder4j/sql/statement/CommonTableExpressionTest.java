@@ -1,4 +1,4 @@
-package net.querybuilder4j.model.sql;
+package net.querybuilder4j.sql.statement;
 
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
