@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface QueryTemplateService {
 
-    boolean save(String primaryKey, String json);
+    boolean save(SelectStatement selectStatement);
     Map<String, SelectStatement> findByNames(List<String> names);
     SelectStatement findByName(String name);
     List<String> getNames();

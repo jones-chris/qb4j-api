@@ -1,17 +1,13 @@
 package net.querybuilder4j.controller.query_template;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.service.query_template.QueryTemplateService;
-import net.querybuilder4j.util.Utils;
+import net.querybuilder4j.sql.statement.SelectStatement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
@@ -19,6 +15,7 @@ import java.util.Objects;
 public class QueryTemplateController {
 
     private QueryTemplateService queryTemplateService;
+
 
     @Autowired
     public QueryTemplateController(QueryTemplateService queryTemplateService) {
@@ -31,7 +28,7 @@ public class QueryTemplateController {
      * @return A {@link ResponseEntity} containing a {@link List<String>} with each {@link String} being the name of a
      * query template.
      */
-    @GetMapping(value = "")
+    @GetMapping
     public ResponseEntity<List<String>> getQueryTemplates() {
         List<String> queryTemplateNames = queryTemplateService.getNames();
         return ResponseEntity.ok(queryTemplateNames);
@@ -55,14 +52,16 @@ public class QueryTemplateController {
      * @param selectStatement The {@link SelectStatement} object to save.
      * @return A ResponseEntity object.
      */
-    @PostMapping(value = "/")
+    @PostMapping
     public ResponseEntity<?> saveQueryTemplate(@RequestBody SelectStatement selectStatement) {
         if (selectStatement.getName() == null) {
             throw new IllegalStateException("The name of the select statement cannot be null when saving it");
         }
 
-        String json = Utils.serializeToJson(selectStatement);
-        this.queryTemplateService.save(selectStatement.getName(), json);
+        this.queryTemplateService.save(selectStatement);
+
+        // todo:  add a link with the query name ({query_name}_{version}) here.
+
         return ResponseEntity.ok().build();
     }
 

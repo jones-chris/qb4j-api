@@ -12,6 +12,7 @@ import net.querybuilder4j.sql.statement.join.Join;
 import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
 import net.querybuilder4j.sql.statement.table.Table;
 
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,31 @@ public class SelectStatement {
      * The name of the SelectStatement.
      */
     @JsonProperty(value = "name")
+    @Size(max = 50, message = "Select Statement name cannot exceed 50 characters")
     private String name = "";
+
+    /**
+     * The description of the SelectStatement.
+     */
+    @JsonProperty(value = "description")
+    @Size(max = 1000, message = "Select Statement description cannot exceed 1000 characters")
+    private String description;
+
+    /**
+     * The version of the SelectStatement.
+     */
+    private int version;
+
+    /**
+     * The author of the SelectStatement.
+     */
+    private String author = "qb4j"; // todo:  change this to read the request's JWT once auth is added.
+
+    /**
+     * Whether the SelectStatement can be discovered by users.
+     */
+    @JsonProperty(value = "isDiscoverable")
+    private boolean isDiscoverable;
 
     /**
      * The database metadata object that can be used to find the database that the SelectStatement is intended to be
@@ -115,14 +140,14 @@ public class SelectStatement {
      * The query's criteria runtime arguments.  The key is the name of the parameter to find in the query criteria.  The
      * value is what will be passed into the query criteria.
      */
-    @JsonProperty(value = "criteriaArguments")
+    @JsonProperty(value = "arguments")
     private Map<String, String> criteriaArguments = new HashMap<>();
 
     /**
      * The query's criteria parameters.  The key is the name of the parameter to find in the SelectStatement's criteria.
      * The value is a description of the parameter that users choose in the front end app's UI.
      */
-    @JsonProperty(value = "criteriaParameters")
+    @JsonProperty(value = "parameters")
     private List<CriterionParameter> criteriaParameters = new ArrayList<>();
 
 }

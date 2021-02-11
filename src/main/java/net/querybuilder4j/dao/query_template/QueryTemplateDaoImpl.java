@@ -5,15 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.querybuilder4j.config.Qb4jConfig;
 import net.querybuilder4j.exceptions.JsonDeserializationException;
 import net.querybuilder4j.sql.statement.SelectStatement;
+import net.querybuilder4j.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Repository
 public class QueryTemplateDaoImpl implements QueryTemplateDao {
@@ -29,12 +28,19 @@ public class QueryTemplateDaoImpl implements QueryTemplateDao {
     }
 
     @Override
-    public boolean save(String primaryKey, String json) {
+    public boolean save(SelectStatement selectStatement) {
+        String json = Utils.serializeToJson(selectStatement);
+
         int numRowsInserted = this.jdbcTemplate.update(
-                "INSERT INTO query_templates VALUES (:name, :json)",
+                "INSERT INTO query_templates (name, version, query_json, discoverable, created_by, last_updated_by) " +
+                     "VALUES (:name, :version, :json, :discoverable, :createdBy, :lastUpdatedBy)",
                 Map.of(
-                        "name", primaryKey,
-                        "json", json
+                        "name", selectStatement.getName(),
+                        "version", selectStatement.getVersion(),
+                        "json", json,
+                        "discoverable", (selectStatement.isDiscoverable()) ? 1 : 0,
+                        "createdBy", selectStatement.getAuthor(),
+                        "lastUpdatedBy", selectStatement.getAuthor()
                 )
         );
 
@@ -48,6 +54,21 @@ public class QueryTemplateDaoImpl implements QueryTemplateDao {
                 Map.of(),
                 String.class
         );
+    }
+
+    @Override
+    public Optional<Integer> getNewestVersion(String name) {
+        try {
+            return Optional.ofNullable(
+                    this.jdbcTemplate.queryForObject(
+                            "SELECT version FROM query_templates WHERE name = :name ORDER BY last_updated_ts DESC LIMIT 1",
+                            Map.of("name", name),
+                            Integer.class
+                    )
+            );
+        } catch (EmptyResultDataAccessException ex) {
+            return Optional.empty();
+        }
     }
 
     @Override

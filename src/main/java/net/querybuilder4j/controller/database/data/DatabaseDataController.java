@@ -1,17 +1,13 @@
 package net.querybuilder4j.controller.database.data;
 
-import net.querybuilder4j.util.QueryResult;
-import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.service.database.data.DatabaseDataService;
 import net.querybuilder4j.sql.builder.SqlBuilder;
 import net.querybuilder4j.sql.builder.SqlBuilderFactory;
+import net.querybuilder4j.sql.statement.SelectStatement;
+import net.querybuilder4j.util.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })

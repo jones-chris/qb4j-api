@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,8 +22,16 @@ public class QueryTemplateServiceImpl implements QueryTemplateService {
     }
 
     @Override
-    public boolean save(String primaryKey, String json) {
-        return queryTemplateDao.save(primaryKey, json);
+    public boolean save(SelectStatement selectStatement) {
+        // Get the newest version number in the database.
+        this.queryTemplateDao.getNewestVersion(selectStatement.getName())
+                .ifPresentOrElse(
+                        (currentVersion) -> selectStatement.setVersion(currentVersion + 1), // If version exists, increment by 1.
+                        () -> selectStatement.setVersion(0) // If version does not exist, set to 0.
+                );
+
+        // Save the Select Statement.
+        return queryTemplateDao.save(selectStatement);
     }
 
     @Override

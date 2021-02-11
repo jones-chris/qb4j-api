@@ -1,7 +1,6 @@
 package net.querybuilder4j.util;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public CriteriaDeserializer() {
         this(null);
@@ -47,8 +44,10 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
     }
 
     private Criterion buildCriterion(JsonNode criterionJson, List<Criterion> deserializedCriteria) {
+        // Conjunction
         Conjunction conjunction = Conjunction.valueOf(criterionJson.get("conjunction").asText());
 
+        // Column
         Column column = new Column(
                 criterionJson.get("column").get("databaseName").asText(),
                 criterionJson.get("column").get("schemaName").asText(),
@@ -57,15 +56,37 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
                 criterionJson.get("column").get("dataType").asInt(),
                 criterionJson.get("column").get("alias").asText()
         );
+
+        // Operator
         Operator operator = Operator.valueOf(criterionJson.get("operator").asText());
 
-        Filter filter;
-        try {
-            filter = this.objectMapper.readValue(criterionJson.get("filter").toString(), Filter.class);
-        } catch (JsonProcessingException e) {
-            throw new JsonDeserializationException("Not able to deserialize criterion filter");
+        // Filter
+        Filter filter = new Filter();
+        JsonNode filterValues = criterionJson.get("filter").get("values");
+        if (! filterValues.isArray()) {
+            throw new JsonDeserializationException("criterion's filter's values must be an array");
         }
 
+        for (JsonNode value : filterValues) {
+            String valueText = value.asText();
+
+            // Parameters
+            if (valueText.startsWith("@")) {
+                String valueWithoutPrefix = valueText.substring(1); // Strip the '@' at the beginning of the value.
+                filter.getParameters().add(valueWithoutPrefix);
+            }
+            // Sub Queries
+            else if (valueText.startsWith("$")) {
+                String valueWithoutPrefix = valueText.substring(1); // Strip the '$' at the beginning of the value.
+                filter.getSubQueries().add(valueWithoutPrefix);
+            }
+            // Values
+            else {
+                filter.getValues().add(valueText);
+            }
+        }
+
+        // Id
         int id = criterionJson.get("id").asInt();
 
         // Find parent criterion.
