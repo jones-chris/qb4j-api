@@ -296,3 +296,25 @@ INSERT INTO financials.expense (amount, date, account_id, description, vendor_id
 INSERT INTO financials.expense (amount, date, account_id, description, vendor_id) VALUES (3626.47, '2019-01-10 06:58:31', 24, NULL, 17);
 INSERT INTO financials.expense (amount, date, account_id, description, vendor_id) VALUES (22576.58, '2019-08-05 21:00:39', 25, NULL, 18);
 INSERT INTO financials.expense (amount, date, account_id, description, vendor_id) VALUES (3438.04, '2019-05-10 13:13:21', 26, 'My last expense!  Now I can sleep again!', 19);
+
+-- Creating the qb4j schema and query_templates table.
+
+CREATE SCHEMA qb4j;
+
+CREATE TABLE qb4j.query_templates(
+   id SERIAL PRIMARY KEY,
+
+   name VARCHAR(50) NOT NULL,
+   version INTEGER NOT NULL,
+
+   query_json JSONB NOT NULL,
+
+   discoverable BOOLEAN NOT NULL DEFAULT FALSE,
+
+   created_ts TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   created_by VARCHAR(50) NOT NULL,
+   last_updated_ts TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   last_updated_by VARCHAR(50) NOT NULL,
+
+   UNIQUE (name, version)
+);

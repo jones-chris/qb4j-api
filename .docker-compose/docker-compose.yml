@@ -3,7 +3,8 @@ version: '3.8'
 services:
 
   database:
-    image: postgres:13-alpine
+#    image: postgres:13-alpine
+    image: joneschris/qb4j-postgres:0.0.2
     ports:
       - '5432:5432'
     volumes:

@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
@@ -40,9 +42,10 @@ public class QueryTemplateController {
      * @param name The name of the query template to retrieve.
      * @return The {@link SelectStatement} object with the name parameter.
      */
-    @GetMapping(value = "/{name}")
-    public ResponseEntity<SelectStatement> getQueryTemplateById(@PathVariable String name) {
-        SelectStatement queryTemplate = queryTemplateService.findByName(name);
+    @GetMapping("/{name}")
+    public ResponseEntity<SelectStatement> getQueryTemplateById(@PathVariable String name,
+                                                                @RequestParam int version) {
+        SelectStatement queryTemplate = queryTemplateService.findByName(name, version);
         return ResponseEntity.ok(queryTemplate);
     }
 
@@ -54,15 +57,30 @@ public class QueryTemplateController {
      */
     @PostMapping
     public ResponseEntity<?> saveQueryTemplate(@RequestBody SelectStatement selectStatement) {
-        if (selectStatement.getName() == null) {
-            throw new IllegalStateException("The name of the select statement cannot be null when saving it");
+        if (selectStatement.getMetadata() == null ||
+                selectStatement.getMetadata().getName() == null ||
+                selectStatement.getMetadata().getName().isEmpty()) {
+            throw new IllegalStateException("The name of the select statement cannot be null or an empty string when saving it");
         }
 
         this.queryTemplateService.save(selectStatement);
 
-        // todo:  add a link with the query name ({query_name}_{version}) here.
+        // todo:  add a HATEOAS link with the query name and version here.
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{name}/versions")
+    public ResponseEntity<List<Integer>> getQueryTemplateVersions(@PathVariable String name) {
+        List<Integer> versions = this.queryTemplateService.getVersions(name);
+        return ResponseEntity.ok(versions);
+    }
+
+    @GetMapping("{name}/metadata")
+    public ResponseEntity<SelectStatement.Metadata> getQueryTemplateMetadata(@PathVariable String name,
+                                                                             @RequestParam int version) {
+        SelectStatement.Metadata metadata = this.queryTemplateService.getMetadata(name, version);
+        return ResponseEntity.ok(metadata);
     }
 
 }

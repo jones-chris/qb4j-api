@@ -21,10 +21,6 @@ RUN mkdir /qb4j
 WORKDIR /qb4j
 COPY /target/qb4j-api-${project_version}.jar .
 
-# Create a directory inside /qb4j for the embedded databases.
-RUN mkdir /qb4j/data
-COPY /data /qb4j/data
-
 # The port the API is running on.
 EXPOSE 8080
 # The port you can debug the JVM on.
@@ -32,4 +28,5 @@ EXPOSE 8080
 EXPOSE 5005
 
 # Execute the jar with the qb4j.yml contents passed into the execution as a named argument.
+# todo:  remove the JVM args for port 5005 for prod.
 CMD java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -Dqb4jConfig="$qb4j_config" -DupdateCache="$update_cache" -jar /qb4j/qb4j-api-${project_version}.jar

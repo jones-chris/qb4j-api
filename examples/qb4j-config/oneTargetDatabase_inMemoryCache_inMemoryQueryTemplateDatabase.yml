@@ -1,0 +1,18 @@
+targetDataSources:
+  - name: finance_database
+    url: jdbc:postgresql://database:5432/postgres
+    databaseType: PostgreSQL
+    username: postgres
+    password: example
+    excludeObjects:
+      schemas: [
+        information_schema,
+        public,
+        pg_catalog
+      ]
+      tables: []
+      columns: []
+databaseMetadataCacheSource:
+  cacheType: IN_MEMORY
+queryTemplateDataSource:
+  repositoryType: IN_MEMORY

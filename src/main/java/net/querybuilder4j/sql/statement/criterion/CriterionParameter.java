@@ -2,8 +2,12 @@ package net.querybuilder4j.sql.statement.criterion;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import net.querybuilder4j.sql.statement.column.Column;
+
+import java.sql.Types;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -17,15 +21,16 @@ public class CriterionParameter {
     private String name;
 
     /**
-     * The column of the criteria in table.column format.  For example, "employees.first_name".
+     * The column of the criterion.
      */
     @JsonProperty(value = "column", required = true)
-    private String column;
+    private Column column;
 
     /**
-     * The description of the parameter.
+     * Whether the parameter can accept multiple values.
+     * NOTE:  This field is set by the API logic based on the database metadata cache, not by the client.
      */
-    @JsonProperty(value = "description", required = true)
-    private String description;
+    @JsonProperty(value = "allowsMultipleValues")
+    private boolean allowsMultipleValues;
 
 }

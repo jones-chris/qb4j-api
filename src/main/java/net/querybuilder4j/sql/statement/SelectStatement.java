@@ -26,34 +26,10 @@ import java.util.Map;
 public class SelectStatement {
 
     /**
-     * The name of the SelectStatement.
+     * Metadata about the {@link SelectStatement}.
      */
-    @JsonProperty(value = "name")
-    @Size(max = 50, message = "Select Statement name cannot exceed 50 characters")
-    private String name = "";
-
-    /**
-     * The description of the SelectStatement.
-     */
-    @JsonProperty(value = "description")
-    @Size(max = 1000, message = "Select Statement description cannot exceed 1000 characters")
-    private String description;
-
-    /**
-     * The version of the SelectStatement.
-     */
-    private int version;
-
-    /**
-     * The author of the SelectStatement.
-     */
-    private String author = "qb4j"; // todo:  change this to read the request's JWT once auth is added.
-
-    /**
-     * Whether the SelectStatement can be discovered by users.
-     */
-    @JsonProperty(value = "isDiscoverable")
-    private boolean isDiscoverable;
+    @JsonProperty(value = "metadata")
+    private Metadata metadata;
 
     /**
      * The database metadata object that can be used to find the database that the SelectStatement is intended to be
@@ -63,7 +39,7 @@ public class SelectStatement {
     private Database database;
 
     /**
-     * A {@link List< CommonTableExpression >} or also known as WITH statements.
+     * A {@link List<CommonTableExpression>} or also known as WITH statements.
      */
     @JsonProperty(value = "commonTableExpressions")
     private List<CommonTableExpression> commonTableExpressions = new ArrayList<>();
@@ -143,11 +119,50 @@ public class SelectStatement {
     @JsonProperty(value = "arguments")
     private Map<String, String> criteriaArguments = new HashMap<>();
 
-    /**
-     * The query's criteria parameters.  The key is the name of the parameter to find in the SelectStatement's criteria.
-     * The value is a description of the parameter that users choose in the front end app's UI.
-     */
-    @JsonProperty(value = "parameters")
-    private List<CriterionParameter> criteriaParameters = new ArrayList<>();
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @EqualsAndHashCode
+    @ToString
+    public static class Metadata {
+
+        /**
+         * The name of the SelectStatement.
+         */
+        @JsonProperty(value = "name", required = true)
+        @Size(max = 50, message = "Select Statement name cannot exceed 50 characters")
+        private String name = "";
+
+        /**
+         * The description of the SelectStatement.
+         */
+        @JsonProperty(value = "description", required = true)
+        @Size(max = 1000, message = "Select Statement description cannot exceed 1000 characters")
+        private String description;
+
+        /**
+         * The version of the SelectStatement.
+         */
+        private int version;
+
+        /**
+         * The author of the SelectStatement.
+         */
+        private String author = "qb4j"; // todo:  change this to read the request's JWT once auth is added.
+
+        /**
+         * Whether the SelectStatement can be discovered by users.
+         */
+        @JsonProperty(value = "isDiscoverable", required = true)
+        private boolean isDiscoverable;
+
+        /**
+         * The query's criteria parameters.  The key is the name of the parameter to find in the SelectStatement's criteria.
+         * The value is a description of the parameter that users choose in the front end app's UI.
+         */
+        @JsonProperty(value = "parameters")
+        private List<CriterionParameter> criteriaParameters = new ArrayList<>();
+
+    }
 
 }

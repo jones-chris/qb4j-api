@@ -14,18 +14,11 @@ targetDataSources:
       tables: []
       columns: []
 databaseMetadataCacheSource:
-  # An in-memory cache.
-  cacheType: IN_MEMORY
-
-  # A redis cache for local debugging.
-  #  cacheType: REDIS
-  #  host: localhost
-  #  port: 6379
-
-  # A redis cache without local debugging.
-#  cacheType: REDIS
-#  host: database_metadata_cache
-#  port: 6379
+    cacheType: REDIS
+    host: localhost
+    port: 6379
+    username: my_username
+    passowrd: my_password
 queryTemplateDataSource:
   repositoryType: SQL_DATABASE
   url: jdbc:postgresql://database:5432/postgres

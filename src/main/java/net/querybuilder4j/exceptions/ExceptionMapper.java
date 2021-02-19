@@ -18,7 +18,7 @@ public class ExceptionMapper {
 
     @ExceptionHandler({ CriterionColumnDataTypeAndFilterMismatchException.class, UncleanSqlException.class,
             DatabaseTypeNotRecognizedException.class, SqlTypeNotRecognizedException.class, CacheTypeNotRecognizedException.class,
-            SqlTypeNotRecognizedException.class, UncleanSqlException.class, IllegalArgumentException.class, IllegalStateException.class})
+            SqlTypeNotRecognizedException.class, UncleanSqlException.class, IllegalArgumentException.class, IllegalStateException.class })
     public ResponseEntity<?> handleExceptionsThatShouldReturn400Response(RuntimeException ex, WebRequest request) {
         LOG.error("An exception returning a 400 response occurred ", ex);
 
@@ -28,7 +28,7 @@ public class ExceptionMapper {
     }
 
     @ExceptionHandler({ JsonDeserializationException.class, JsonSerializationException.class, CacheRefreshException.class,
-            CacheMissException.class })
+            CacheMissException.class, QueryTemplateNotFoundException.class })
     public ResponseEntity<?> handleExceptionsThatShouldReturn500Response(RuntimeException ex, WebRequest request) {
         LOG.error("An exception returning a 500 response occurred ", ex);
 

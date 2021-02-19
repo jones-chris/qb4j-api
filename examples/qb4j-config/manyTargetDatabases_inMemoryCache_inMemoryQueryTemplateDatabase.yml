@@ -1,0 +1,29 @@
+targetDataSources:
+  - name: hr_database
+    url: jdbc:mysql://hr_database:3306/qb4j # The host name is `hr_database` so that docker-compose can resolve the IP on the default docker network it creates.
+    driverClassName: com.mysql.cj.jdbc.Driver
+    databaseType: MySql
+    username: root
+    password: qb4j
+    excludeObjects:
+      schemas: []
+      tables: []
+      columns: []
+  - name: finance_database
+    url: jdbc:postgresql://finance_database:5432/postgres
+    driverClassName: org.postgresql.Driver
+    databaseType: PostgreSQL
+    username: postgres
+    password: example
+    excludeObjects:
+      schemas: [
+        information_schema,
+        public,
+        pg_catalog
+      ]
+      tables: []
+      columns: []
+databaseMetadataCacheSource:
+  cacheType: IN_MEMORY
+queryTemplateDataSource:
+  repositoryType: IN_MEMORY
