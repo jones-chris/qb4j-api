@@ -12,7 +12,7 @@ services:
         max_attempts: 2
 
   finance_database:
-    image: joneschris/qb4j-postgres:0.0.2
+    image: joneschris/qb4j-postgres:0.0.3
     ports:
       - '5432:5432'
     environment:
