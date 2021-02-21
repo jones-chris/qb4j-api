@@ -11,6 +11,7 @@ echo "DOCKER_SWARM_YAML is: "
 cat ./cicd/deployment/swarm/docker-swarm.yml
 
 scp ./cicd/deployment/swarm/docker-swarm.yml "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net":/home/ubuntu/swarm/cicd/deployment/swarm
+scp ./cicd/deployment/swarm/swarm-qb4j.yml "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net":/home/ubuntu/swarm/cicd/deployment/swarm
 
 ssh "$AWS_LIGHTSAIL_USERNAME@dev.api.querybuilder4j.net" /bin/bash << EOF
   export PROJECT_VERSION=$PROJECT_VERSION
