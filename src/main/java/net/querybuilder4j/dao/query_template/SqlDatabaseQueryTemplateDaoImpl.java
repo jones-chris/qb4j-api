@@ -9,10 +9,13 @@ import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
@@ -100,7 +103,14 @@ public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
                         "name", name,
                         "version", version
                 ),
-                SelectStatement.Metadata.class
+                (resultSet, i) -> {
+                    String metadataJson = resultSet.getString(1);
+                    try {
+                        return this.objectMapper.readValue(metadataJson, SelectStatement.Metadata.class);
+                    } catch (JsonProcessingException e) {
+                        throw new JsonDeserializationException("Could not deserialize " + name + " and version " + version);
+                    }
+                }
         );
     }
 
