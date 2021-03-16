@@ -72,10 +72,11 @@ public class SqlPrimer {
     }
 
     /**
-     * Interpolates the SelectStatement's Criteria with the SelectStatement's Common Table Expressions and Criteria
-     * Arguments.
+     * Interpolates the SelectStatement's Criteria with the SelectStatement's Criteria Arguments.
+     *
+     * @param selectStatement {@link SelectStatement}
      */
-    public static void interpolateCriteriaParameters(SelectStatement selectStatement) {
+    public static void interpolateRuntimeArguments(SelectStatement selectStatement) {
         Map<String, String> runtimeArguments = selectStatement.getCriteriaArguments();
 
         // For each criterion...
@@ -101,9 +102,20 @@ public class SqlPrimer {
                                 }
                         );
             });
+        });
+    }
 
+    /**
+     * Interpolates the SelectStatement's Criteria with a "SELECT * FROM" with the relevant Common Table Expressions
+     * from the SelectStatement.
+     *
+     * @param selectStatement {@link SelectStatement}
+     */
+    public static void interpolateSubQueries(SelectStatement selectStatement) {
+        // For each criterion...
+        selectStatement.getCriteria().forEach(criterion -> {
             // For each sub query...
-            final String sql = "(SELECT * FROM %s)";
+            final String sql = "SELECT * FROM %s";
             criterion.getFilter().getSubQueries().forEach(subQuery -> {
                 // Find the Common Table Expression with the same name as the sub query...
                 selectStatement.getCommonTableExpressions().stream()
@@ -112,14 +124,11 @@ public class SqlPrimer {
                         .ifPresentOrElse(
                                 // If present, create the sub query SQL and add it to the values...
                                 commonTableExpression -> {
-                                    if (commonTableExpression.isBuilt()) {
-                                        criterion.getFilter().getValues().add(
-                                                String.format(sql, commonTableExpression.getName())
-                                        );
-                                    } else {
-                                        throw new IllegalStateException("Common Table Expression, " + commonTableExpression.getName() +
-                                                " is not built yet");
-                                    }
+                                    SqlValidator.assertSqlIsClean(commonTableExpression.getName());
+
+                                    criterion.getFilter().getValues().add(
+                                            String.format(sql, commonTableExpression.getName())
+                                    );
                                 },
                                 // If not present, throw an exception.
                                 () -> {

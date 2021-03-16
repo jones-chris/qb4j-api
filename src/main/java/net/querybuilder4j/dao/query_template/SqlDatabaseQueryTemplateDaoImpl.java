@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
 
@@ -136,42 +137,46 @@ public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
         }
     }
 
-    @Override
-    public Map<String, SelectStatement> findByNames(List<String> names) {
-        // Check that the names parameter is not null or empty.
-        Objects.requireNonNull(names, "names is null");
-        if (names.isEmpty()) {
-            throw new IllegalArgumentException("names is empty");
-        }
-
-        // Create a parameter map and SQL WHERE clause.
-        Map<String, String> params = new HashMap<>();
-        for (int i=0; i<names.size(); i++) {
-            params.put(":name" + i, names.get(i));
-        }
-        String sqlWhereClause = "WHERE name IN (" + String.join(", ", params.keySet()) + ") ";
-
-        // Query the database.
-        String beginningQueryFragment = this.getFindByNamesSqlQueryStartingFragment();
-        Map<String, Object> retrievedObjects = this.jdbcTemplate.queryForMap(
-                beginningQueryFragment + sqlWhereClause,
-                params
-        );
-
-        // Convert each object to a SelectStatement and return a map with the keys being the query template names and the
-        // values being the the query template's SelectStatement.
-        Map<String, SelectStatement> selectStatements = new HashMap<>();
-        for (Map.Entry<String, Object> entry : retrievedObjects.entrySet()) {
-            try {
-                SelectStatement selectStatement = this.objectMapper.readValue(entry.getValue().toString(), SelectStatement.class);
-                selectStatements.put(entry.getKey(), selectStatement);
-            } catch (JsonProcessingException e) {
-                throw new JsonDeserializationException("Could not deserialize JSON for query template, " + entry.getKey());
-            }
-        }
-
-        return selectStatements;
-    }
+    // todo:  add this method back after producing an MVP.
+//    @Override
+//    public Map<String, SelectStatement> findByNames(List<String> names) {
+//        // Check that the names parameter is not null or empty.
+//        Objects.requireNonNull(names, "names is null");
+//        if (names.isEmpty()) {
+//            throw new IllegalArgumentException("names is empty");
+//        }
+//
+//        // Create a parameter map and SQL WHERE clause.
+//        Map<String, String> params = new HashMap<>();
+//        for (int i=0; i<names.size(); i++) {
+//            params.put("name" + i, names.get(i));
+//        }
+//        String sqlWhereClause = "WHERE name IN (" + params.keySet().stream().map(key -> ":" + key).collect(Collectors.joining(", ")) + ") ";
+//
+//        // Query the database.
+//        String beginningQueryFragment = this.getFindByNamesSqlQueryStartingFragment();
+//        Map<String, Object> retrievedObjects = this.jdbcTemplate.query(
+//                beginningQueryFragment + sqlWhereClause,
+//                params,
+//                (resultSet, i) -> {
+//                    System.out.println(i);
+//                }
+//        );
+//
+//        // Convert each object to a SelectStatement and return a map with the keys being the query template names and the
+//        // values being the the query template's SelectStatement.
+//        Map<String, SelectStatement> selectStatements = new HashMap<>();
+//        for (Map.Entry<String, Object> entry : retrievedObjects.entrySet()) {
+//            try {
+//                SelectStatement selectStatement = this.objectMapper.readValue(entry.getValue().toString(), SelectStatement.class);
+//                selectStatements.put(entry.getKey(), selectStatement);
+//            } catch (JsonProcessingException e) {
+//                throw new JsonDeserializationException("Could not deserialize JSON for query template, " + entry.getKey());
+//            }
+//        }
+//
+//        return selectStatements;
+//    }
 
     private String getSaveSqlQuery() {
         switch (this.databaseType) {
@@ -253,7 +258,7 @@ public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
                 this.databaseType.equals(DatabaseType.MySql) ||
                 this.databaseType.equals(DatabaseType.Oracle) ||
                 this.databaseType.equals(DatabaseType.SqlServer)) {
-            return "SELECT query_json FROM qb4j.query_templates ";
+            return "SELECT name, query_json FROM qb4j.query_templates ";
         } else {
             throw new IllegalArgumentException("No findByNames SQL query fragment for database type, " + this.databaseType);
         }

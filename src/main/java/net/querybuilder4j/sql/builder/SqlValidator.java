@@ -103,8 +103,10 @@ public class SqlValidator {
         // null or an empty string.
         if (! criterion.getOperator().equals(isNotNull) && ! criterion.getOperator().equals(isNull)) {
             if (criterion.getFilter().getValues().isEmpty() || criterion.getFilter().getValues().contains("")) {
-                throw new IllegalStateException("Criterion filter values are empty or contain an empty string but the operator " +
-                        "is not isNull or isNotNull");
+                if (criterion.getFilter().getSubQueries().isEmpty()) {
+                    throw new IllegalStateException("Criterion filter values are empty or contain an empty string but the operator " +
+                            "is not isNull or isNotNull and there are no sub queries");
+                }
             }
         }
 

@@ -9,11 +9,18 @@ import java.util.Map;
 public interface QueryTemplateService {
 
     boolean save(SelectStatement selectStatement);
-    Map<String, SelectStatement> findByNames(List<String> names);
+
+    // todo:  add this method back after producing an MVP.
+//    Map<String, SelectStatement> findByNames(List<String> names);
+
     SelectStatement findByName(String name, int version);
+
     List<String> getNames();
+
     void getCommonTableExpressionSelectStatement(List<CommonTableExpression> commonTableExpressions);
+
     List<Integer> getVersions(String name);
+
     SelectStatement.Metadata getMetadata(String name, int version);
 
 }

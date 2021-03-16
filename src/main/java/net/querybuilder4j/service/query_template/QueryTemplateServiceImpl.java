@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class QueryTemplateServiceImpl implements QueryTemplateService {
@@ -43,10 +41,11 @@ public class QueryTemplateServiceImpl implements QueryTemplateService {
         return queryTemplateDao.save(selectStatement);
     }
 
-    @Override
-    public Map<String, SelectStatement> findByNames(List<String> names) {
-        return this.queryTemplateDao.findByNames(names);
-    }
+    // todo:  add this method back after producing an MVP.
+//    @Override
+//    public Map<String, SelectStatement> findByNames(List<String> names) {
+//        return this.queryTemplateDao.findByNames(names);
+//    }
 
     @Override
     public SelectStatement findByName(String name, int version) {
@@ -67,16 +66,13 @@ public class QueryTemplateServiceImpl implements QueryTemplateService {
     @Override
     public void getCommonTableExpressionSelectStatement(List<CommonTableExpression> commonTableExpressions) {
         if (! commonTableExpressions.isEmpty()) {
-            List<String> commonTableExpressionNames = commonTableExpressions.stream()
-                    .map(CommonTableExpression::getName)
-                    .collect(Collectors.toList());
-
-            Map<String, SelectStatement> selectStatements = this.queryTemplateDao.findByNames(commonTableExpressionNames);
-
             commonTableExpressions.forEach(commonTableExpression -> {
-                // Set each Common Table Expression's SelectStatement.
-                SelectStatement selectStatement = selectStatements.get(commonTableExpression.getName());
+                SelectStatement selectStatement = this.queryTemplateDao.findByName(
+                        commonTableExpression.getQueryName(),
+                        commonTableExpression.getVersion());
+
                 selectStatement.setCriteriaArguments(commonTableExpression.getParametersAndArguments());
+
                 commonTableExpression.setSelectStatement(selectStatement);
             });
         }

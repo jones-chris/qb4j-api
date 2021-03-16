@@ -34,6 +34,12 @@ public class CommonTableExpression implements SqlRepresentation {
     @Setter
     private String queryName;
 
+    @JsonProperty(value = "version")
+    @NotNull
+    @Getter
+    @Setter
+    private int version;
+
     /**
      * A {@link Map} with the parameters being the keys and the arguments being the values.
      */
@@ -61,17 +67,15 @@ public class CommonTableExpression implements SqlRepresentation {
 
     @Override
     public String toSql(char beginningDelimiter, char endingDelimiter) {
-        if (! this.isBuilt()) {
+        if (this.sql == null || this.sql.trim().equals("")) {
             throw new IllegalStateException("Common Table Expression's sql is null, a blank string, or an empty string");
         }
 
-        StringBuilder sb = new StringBuilder(" ")
-                .append(this.name)
-                .append(" AS (")
-                .append(this.sql)
-                .append(")");
-
-        return sb.toString();
+        return " " +
+                this.name +
+                " AS (" +
+                this.sql +
+                ")";
     }
 
     public boolean isBuilt() {

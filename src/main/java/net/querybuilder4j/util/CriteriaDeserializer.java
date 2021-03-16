@@ -61,7 +61,8 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
 
         // Filter
         Filter filter = new Filter();
-        JsonNode filterValues = criterionJson.get("filter").get("values");
+        JsonNode filterNode = criterionJson.get("filter");
+        JsonNode filterValues = filterNode.get("values");
         if (! filterValues.isArray()) {
             throw new JsonDeserializationException("criterion's filter's values must be an array");
         }
@@ -69,12 +70,12 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
         for (JsonNode value : filterValues) {
             String valueText = value.asText();
 
-            // Parameters
+            // Set the Parameters if they come over from the UI as a Value with the '@' prefix.
             if (valueText.startsWith("@")) {
                 String valueWithoutPrefix = valueText.substring(1); // Strip the '@' at the beginning of the value.
                 filter.getParameters().add(valueWithoutPrefix);
             }
-            // Sub Queries
+            // Set the Sub Queries if they come over from the UI as a Value with the '$' prefix.
             else if (valueText.startsWith("$")) {
                 String valueWithoutPrefix = valueText.substring(1); // Strip the '$' at the beginning of the value.
                 filter.getSubQueries().add(valueWithoutPrefix);
@@ -85,12 +86,38 @@ public class CriteriaDeserializer extends StdDeserializer<List<Criterion>> {
             }
         }
 
+        // Add the parameters that have already been processed and set in the parameters array in a previous request by
+        // the above logic.
+        JsonNode filterParams = filterNode.get("parameters");
+        if (filterParams != null) {
+            if (! filterParams.isArray()) {
+                throw new JsonDeserializationException("criterion's filter's parameters must be an array");
+            }
+
+            for (JsonNode parameter : filterParams) {
+                filter.getParameters().add(parameter.asText());
+            }
+        }
+
+        // Add the sub queries that have already been processed and set in the subQueries array in a previous request by
+        // the above logic.
+        JsonNode filterSubQueries = filterNode.get("subQueries");
+        if (filterSubQueries != null) {
+            if (! filterSubQueries.isArray()) {
+                throw new JsonDeserializationException("criterion's filter's subQueries must be an array");
+            }
+
+            for (JsonNode subQuery : filterSubQueries) {
+                filter.getSubQueries().add(subQuery.asText());
+            }
+        }
+
         // Id
         int id = criterionJson.get("id").asInt();
 
         // Find parent criterion.
         Criterion parentCriterion = null;
-        if (! criterionJson.get("parentId").isNull()) {
+        if (criterionJson.get("parentId") != null && ! criterionJson.get("parentId").isNull()) {
             int parentId = criterionJson.get("parentId").asInt();
 
             List<Criterion> flattenedCriteria = new ArrayList<>();

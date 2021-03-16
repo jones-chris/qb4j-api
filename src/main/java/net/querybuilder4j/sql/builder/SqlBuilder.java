@@ -64,14 +64,20 @@ public abstract class SqlBuilder {
         SqlPrimer.addExcludingJoinCriteria(this.selectStatement);
         SqlPrimer.addSuppressNullsCriteria(this.selectStatement);
 
-        // Get SelectStatement's Common Table Expressions from the database and build them.
+        // Get SelectStatement's Common Table Expressions from the database.
         this.queryTemplateService.getCommonTableExpressionSelectStatement(this.selectStatement.getCommonTableExpressions());
 
-        // Interpolate the SelectStatement's Common Table Expressions and Criteria Arguments into the Criteria.
-        SqlPrimer.interpolateCriteriaParameters(this.selectStatement);
+        // Interpolate the runtime arguments into the SelectStatement's criteria before validation.
+        SqlPrimer.interpolateRuntimeArguments(this.selectStatement);
 
         // Validate selectStatement.
         SqlValidator.assertIsValid(this.selectStatement, this.databaseMetadataCacheDao);
+
+        /*
+        Interpolate the sub queries into the SelectStatement's criteria after validation so that SQL keywords like
+        "SELECT", "*", and "FROM" do not raise an exception when getting the results of a Common Table Expression.
+         */
+        SqlPrimer.interpolateSubQueries(selectStatement);
 
         return this;
     }

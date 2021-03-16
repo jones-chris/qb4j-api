@@ -9,11 +9,17 @@ import java.util.Optional;
 public interface QueryTemplateDao {
 
     SelectStatement findByName(String name, int version);
-    Map<String, SelectStatement> findByNames(List<String> names);
+
+    // todo:  add this method back after producing an MVP.
+//    Map<String, SelectStatement> findByNames(List<String> names);
     boolean save(SelectStatement selectStatement);
+
     List<String> listNames();
+
     Optional<Integer> getNewestVersion(String name);
+
     List<Integer> getVersions(String name);
+
     SelectStatement.Metadata getMetadata(String name, int version);
 
 }

@@ -21,34 +21,45 @@ import static org.junit.Assert.*;
 public class SqlPrimerTest {
 
     @Test
-    public void interpolateCriteriaParameters_noParametersMissingAndCommonTableExpressionsAreAllBuilt() {
-        List<String> subQueries = List.of("subQuery1", "subQuery2");
+    public void interpolateRuntimeArguments_noParametersMissingAndCommonTableExpressionsAreAllBuilt() {
         List<String> parameters = List.of("parameterName1", "parameterName2");
-        Filter filter = new Filter(new ArrayList<>(), subQueries, parameters);
-        SelectStatement selectStatement = buildSelectStatement(subQueries, parameters, filter);
+        Filter filter = new Filter(new ArrayList<>(), List.of(), parameters);
+        SelectStatement selectStatement = buildSelectStatement(List.of(), parameters, filter);
 
-        SqlPrimer.interpolateCriteriaParameters(selectStatement);
+        SqlPrimer.interpolateRuntimeArguments(selectStatement);
 
         List<String> values = selectStatement.getCriteria().get(0).getFilter().getValues();
-        assertEquals(4, values.size());
-        assertTrue(values.contains(String.format("(SELECT * FROM %s)", selectStatement.getCommonTableExpressions().get(0).getName())));
-        assertTrue(values.contains(String.format("(SELECT * FROM %s)", selectStatement.getCommonTableExpressions().get(1).getName())));
+        assertEquals(2, values.size());
         assertTrue(values.contains(selectStatement.getCriteriaArguments().get("parameterName1")));
         assertTrue(values.contains(selectStatement.getCriteriaArguments().get("parameterName2")));
     }
 
+    @Test
+    public void interpolateSubQueries_commonTableExpressionsAreAllBuilt() {
+        List<String> subQueries = List.of("subQuery1", "subQuery2");
+        Filter filter = new Filter(new ArrayList<>(), subQueries, List.of());
+        SelectStatement selectStatement = buildSelectStatement(subQueries, List.of(), filter);
+
+        SqlPrimer.interpolateSubQueries(selectStatement);
+
+        List<String> values = selectStatement.getCriteria().get(0).getFilter().getValues();
+        assertEquals(2, values.size());
+        assertTrue(values.contains(String.format("(SELECT * FROM %s)", selectStatement.getCommonTableExpressions().get(0).getName())));
+        assertTrue(values.contains(String.format("(SELECT * FROM %s)", selectStatement.getCommonTableExpressions().get(1).getName())));
+    }
+
     @Test(expected = IllegalStateException.class)
-    public void interpolateCriteriaParameters_parametersMissingThrowsIllegalArgumentException() {
+    public void interpolateRuntimeArguments_parametersMissingThrowsIllegalArgumentException() {
         List<String> parameters = List.of("parameterName1", "parameterName2");
         Filter filter = new Filter(new ArrayList<>(), List.of(), parameters);
         SelectStatement selectStatement = buildSelectStatement(List.of(), parameters, filter);
         selectStatement.getCriteriaArguments().remove(parameters.get(0)); // Remove the argument for "parameterName1"
 
-        SqlPrimer.interpolateCriteriaParameters(selectStatement);
+        SqlPrimer.interpolateRuntimeArguments(selectStatement);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void interpolateCriteriaParameters_subQueriesAreMissingThrowsIllegalArgumentException() {
+    public void interpolateSubQueries_subQueriesAreMissingThrowsIllegalArgumentException() {
         List<String> subQueries = List.of("subQuery1", "subQuery2");
         Filter filter = new Filter(new ArrayList<>(), subQueries, List.of());
         List<CommonTableExpression> commonTableExpressions = TestUtils.buildCommonTableExpressions(subQueries);
@@ -56,31 +67,7 @@ public class SqlPrimerTest {
         SelectStatement selectStatement = buildSelectStatement(subQueries, List.of(), filter);
         selectStatement.setCommonTableExpressions(commonTableExpressions);
 
-        SqlPrimer.interpolateCriteriaParameters(selectStatement);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void interpolateCriteriaParameters_subQueryHasNullSqlThrowsIllegalArgumentException() {
-        List<String> subQueries = List.of("subQuery1", "subQuery2");
-        Filter filter = new Filter(new ArrayList<>(), subQueries, List.of());
-        List<CommonTableExpression> commonTableExpressions = TestUtils.buildCommonTableExpressions(subQueries);
-        commonTableExpressions.get(0).setSql(null); // Set the SQL of the first common table expression to null.
-        SelectStatement selectStatement = this.buildSelectStatement(subQueries, List.of(), filter);
-        selectStatement.setCommonTableExpressions(commonTableExpressions);
-
-        SqlPrimer.interpolateCriteriaParameters(selectStatement);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void interpolateCriteriaParameters_subQueryHasEmptySqlStringThrowsIllegalArgumentException() {
-        List<String> subQueries = List.of("subQuery1", "subQuery2");
-        Filter filter = new Filter(new ArrayList<>(), subQueries, List.of());
-        List<CommonTableExpression> commonTableExpressions = TestUtils.buildCommonTableExpressions(subQueries);
-        commonTableExpressions.get(0).setSql(" "); // Set the SQL of the first common table expression to " ".
-        SelectStatement selectStatement = this.buildSelectStatement(subQueries, List.of(), filter);
-        selectStatement.setCommonTableExpressions(commonTableExpressions);
-
-        SqlPrimer.interpolateCriteriaParameters(selectStatement);
+        SqlPrimer.interpolateSubQueries(selectStatement);
     }
 
     private SelectStatement buildSelectStatement(List<String> subQueries, List<String> parameters, Filter filter) {

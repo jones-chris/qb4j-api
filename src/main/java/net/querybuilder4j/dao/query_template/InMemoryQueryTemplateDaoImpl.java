@@ -18,26 +18,26 @@ public class InMemoryQueryTemplateDaoImpl implements QueryTemplateDao {
                 .orElseThrow(() -> new QueryTemplateNotFoundException(name));
     }
 
-    @Override
-    public Map<String, SelectStatement> findByNames(List<String> names) {
-        Map<String, SelectStatement> templates = new HashMap<>();
-
-        // todo:  Research if there is a more efficient way to do this where a new stream is not being created for each
-        // todo:  ...iteration of the forEach loop.
-        names.forEach(name -> {
-            this.queryTemplates.stream()
-                    .filter(template -> template.getMetadata().getName().equals(name))
-                    .findFirst()
-                    .ifPresentOrElse(
-                            (template) -> templates.put(name, template),
-                            () -> {
-                                throw new QueryTemplateNotFoundException(name);
-                            }
-                    );
-        });
-
-        return templates;
-    }
+//    @Override
+//    public Map<String, SelectStatement> findByNames(List<String> names) {
+//        Map<String, SelectStatement> templates = new HashMap<>();
+//
+//        // todo:  Research if there is a more efficient way to do this where a new stream is not being created for each
+//        // todo:  ...iteration of the forEach loop.
+//        names.forEach(name -> {
+//            this.queryTemplates.stream()
+//                    .filter(template -> template.getMetadata().getName().equals(name))
+//                    .findFirst()
+//                    .ifPresentOrElse(
+//                            (template) -> templates.put(name, template),
+//                            () -> {
+//                                throw new QueryTemplateNotFoundException(name);
+//                            }
+//                    );
+//        });
+//
+//        return templates;
+//    }
 
     @Override
     public boolean save(SelectStatement selectStatement) {
