@@ -287,7 +287,7 @@ public class CriteriaTreeFlattener {
      */
     private boolean isSubQuery(String filterItem) {
         if (filterItem.length() > 0) {
-            return filterItem.startsWith("(") && filterItem.contains("SELECT * FROM") && filterItem.endsWith(")");
+            return filterItem.contains("SELECT * FROM");
         }
 
         return false;

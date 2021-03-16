@@ -118,7 +118,7 @@ public abstract class SqlBuilder {
         boolean isDistinct = this.selectStatement.isDistinct();
 
         if (! columns.isEmpty()) {
-            String startSql = (isDistinct) ? "SELECT DISTINCT " : "SELECT ";
+            String startSql = (isDistinct) ? " SELECT DISTINCT " : " SELECT ";
 
             StringBuilder sb = new StringBuilder(startSql);
 
