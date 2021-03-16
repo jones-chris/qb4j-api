@@ -44,8 +44,8 @@ public class SqlPrimerTest {
 
         List<String> values = selectStatement.getCriteria().get(0).getFilter().getValues();
         assertEquals(2, values.size());
-        assertTrue(values.contains(String.format("(SELECT * FROM %s)", selectStatement.getCommonTableExpressions().get(0).getName())));
-        assertTrue(values.contains(String.format("(SELECT * FROM %s)", selectStatement.getCommonTableExpressions().get(1).getName())));
+        assertTrue(values.contains(String.format("SELECT * FROM %s", selectStatement.getCommonTableExpressions().get(0).getName())));
+        assertTrue(values.contains(String.format("SELECT * FROM %s", selectStatement.getCommonTableExpressions().get(1).getName())));
     }
 
     @Test(expected = IllegalStateException.class)
