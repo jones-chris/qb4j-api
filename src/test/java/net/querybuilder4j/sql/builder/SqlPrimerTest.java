@@ -30,8 +30,8 @@ public class SqlPrimerTest {
 
         List<String> values = selectStatement.getCriteria().get(0).getFilter().getValues();
         assertEquals(2, values.size());
-        assertTrue(values.contains(selectStatement.getCriteriaArguments().get("parameterName1")));
-        assertTrue(values.contains(selectStatement.getCriteriaArguments().get("parameterName2")));
+        assertTrue(values.contains(selectStatement.getCriteriaArguments().get("parameterName1").get(0)));
+        assertTrue(values.contains(selectStatement.getCriteriaArguments().get("parameterName2").get(0)));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class SqlPrimerTest {
         selectStatement.setCriteria(List.of(criterion));
 
         // Criteria Arguments
-        Map<String, String> criteriaArguments = buildRuntimeArguments(parameters);
+        Map<String, List<String>> criteriaArguments = buildRuntimeArguments(parameters);
         selectStatement.setCriteriaArguments(criteriaArguments);
 
         return selectStatement;

@@ -117,7 +117,7 @@ public class SelectStatement {
      * value is what will be passed into the query criteria.
      */
     @JsonProperty(value = "arguments")
-    private Map<String, String> criteriaArguments = new HashMap<>();
+    private Map<String, List<String>> criteriaArguments = new HashMap<>();
 
     @NoArgsConstructor
     @Getter
@@ -162,6 +162,26 @@ public class SelectStatement {
          */
         @JsonProperty(value = "parameters")
         private List<CriterionParameter> criteriaParameters = new ArrayList<>();
+
+        /**
+         * The number of columns this query returns.
+         */
+        @JsonProperty(value = "numberOfColumnsReturned", required = true)
+        @Size(min = 1, message = "Select Statement must return at least 1 column")
+        private int numberOfColumnsReturned;
+
+        /**
+         * The maximum number of rows that could be returned.  This is the same as {@link SelectStatement#limit}.
+         */
+        @JsonProperty(value = "maxNumberOfRowsReturned", required = true)
+        @Size(min = 1, message = "Select Statement must return at least 1 row")
+        private long maxNumberOfRowsReturned;
+
+        /**
+         * The columns that the query returns.  This is the same as {@link SelectStatement#columns}.
+         */
+        @JsonProperty(value = "columns", required = true)
+        private List<Column> columns;
 
     }
 

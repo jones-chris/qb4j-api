@@ -172,7 +172,6 @@ public class SqlValidator {
         }
 
         return sql;
-
     }
 
     public static void assertSqlIsClean(String str) {
@@ -189,15 +188,13 @@ public class SqlValidator {
             }
         }
 
-        // "\\b%s\\b" worked
         for (String keyword : ansiKeywords) {
-            Pattern pattern = Pattern.compile(String.format("(^|\\W)\\Q%s\\E\\W", keyword), Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(upperCaseStr);
-            if (matcher.find()) {
+            String upperCaseKeywordWithTrailingSpace = keyword.toUpperCase() + " ";
+            String upperCaseKeywordWithStartingSpace = " " + keyword.toUpperCase();
+            if (upperCaseStr.contains(upperCaseKeywordWithStartingSpace) || upperCaseStr.contains(upperCaseKeywordWithTrailingSpace)) {
                 throw new UncleanSqlException();
             }
         }
-
     }
 
     public static void assertSqlIsClean(Criterion criterion) throws IllegalArgumentException {

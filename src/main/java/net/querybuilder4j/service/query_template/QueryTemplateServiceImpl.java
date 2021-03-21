@@ -27,6 +27,11 @@ public class QueryTemplateServiceImpl implements QueryTemplateService {
 
     @Override
     public boolean save(SelectStatement selectStatement) {
+        // Set metadata.
+        selectStatement.getMetadata().setNumberOfColumnsReturned(selectStatement.getColumns().size());
+        selectStatement.getMetadata().setMaxNumberOfRowsReturned(selectStatement.getLimit());
+        selectStatement.getMetadata().setColumns(selectStatement.getColumns());
+
         // Create metadata for criteria parameters.
         this.setSelectStatementCriteriaParameters(selectStatement);
 

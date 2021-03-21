@@ -8,6 +8,7 @@ import net.querybuilder4j.sql.statement.SelectStatement;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @NoArgsConstructor
@@ -46,7 +47,7 @@ public class CommonTableExpression implements SqlRepresentation {
     @JsonProperty(value = "parametersAndArguments")
     @Getter
     @Setter
-    private Map<String, String> parametersAndArguments = new HashMap<>();
+    private Map<String, List<String>> parametersAndArguments = new HashMap<>();
 
     /**
      * The Common Table Expression's {@link SelectStatement}.

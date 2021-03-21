@@ -77,24 +77,26 @@ public class SqlPrimer {
      * @param selectStatement {@link SelectStatement}
      */
     public static void interpolateRuntimeArguments(SelectStatement selectStatement) {
-        Map<String, String> runtimeArguments = selectStatement.getCriteriaArguments();
+        Map<String, List<String>> runtimeParametersAndArguments = selectStatement.getCriteriaArguments();
 
         // For each criterion...
         selectStatement.getCriteria().forEach(criterion -> {
             // For each parameter...
             criterion.getFilter().getParameters().forEach(parameter -> {
                 // Get the runtime arg...
-                Optional.ofNullable(runtimeArguments.get(parameter))
+                Optional.ofNullable(runtimeParametersAndArguments.get(parameter))
                         .ifPresentOrElse(
                                 // If present and the runtime arg is sub query, then add the sub query name to sub queries...
-                                runtimeArgument -> {
-                                    if (runtimeArgument.startsWith("$")) {
-                                        String subQueryName = runtimeArgument.substring(1);
-                                        criterion.getFilter().getSubQueries().add(subQueryName);
-                                    } else {
-                                        // If present and the runtime arg is not sub query, then add the argument to values...
-                                        criterion.getFilter().getValues().add(runtimeArgument);
-                                    }
+                                runtimeArguments -> {
+                                    runtimeArguments.forEach(runtimeArgument -> {
+                                        if (runtimeArgument.startsWith("$")) {
+                                            String subQueryName = runtimeArgument.substring(1);
+                                            criterion.getFilter().getSubQueries().add(subQueryName);
+                                        } else {
+                                            // If present and the runtime arg is not sub query, then add the argument to values...
+                                            criterion.getFilter().getValues().add(runtimeArgument);
+                                        }
+                                    });
                                 },
                                 // If not present, throw an exception.
                                 () -> {

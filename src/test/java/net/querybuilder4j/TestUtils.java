@@ -36,12 +36,12 @@ public class TestUtils {
         return commonTableExpressions;
     }
 
-    public static Map<String, String> buildRuntimeArguments(List<String> parameters) {
+    public static Map<String, List<String>> buildRuntimeArguments(List<String> parameters) {
         return parameters.stream()
+                .map(parameter -> parameter + "_arg")
                 .collect(
-                        Collectors.toMap(
-                                s -> s, // The parameter is the key.
-                                s -> s + "_arg" // The value is "{key}_arg".
+                        Collectors.groupingBy(
+                                s -> s.substring(0, s.indexOf("_arg"))
                         )
                 );
     }
