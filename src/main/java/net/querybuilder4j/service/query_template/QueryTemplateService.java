@@ -1,13 +1,26 @@
 package net.querybuilder4j.service.query_template;
 
-import net.querybuilder4j.model.select_statement.SelectStatement;
+import net.querybuilder4j.sql.statement.SelectStatement;
+import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
 
 import java.util.List;
+import java.util.Map;
 
 public interface QueryTemplateService {
 
-    boolean save(String primaryKey, String json);
-    SelectStatement findByName(String name);
-    List<String> getNames(Integer limit, Integer offset, boolean ascending) throws Exception;
+    boolean save(SelectStatement selectStatement);
+
+    // todo:  add this method back after producing an MVP.
+//    Map<String, SelectStatement> findByNames(List<String> names);
+
+    SelectStatement findByName(String name, int version);
+
+    List<String> getNames();
+
+    void getCommonTableExpressionSelectStatement(List<CommonTableExpression> commonTableExpressions);
+
+    List<Integer> getVersions(String name);
+
+    SelectStatement.Metadata getMetadata(String name, int version);
 
 }

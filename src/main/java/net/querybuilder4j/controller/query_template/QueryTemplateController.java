@@ -1,15 +1,15 @@
 package net.querybuilder4j.controller.query_template;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.querybuilder4j.model.select_statement.SelectStatement;
 import net.querybuilder4j.service.query_template.QueryTemplateService;
+import net.querybuilder4j.sql.statement.SelectStatement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
@@ -18,24 +18,21 @@ public class QueryTemplateController {
 
     private QueryTemplateService queryTemplateService;
 
+
     @Autowired
     public QueryTemplateController(QueryTemplateService queryTemplateService) {
         this.queryTemplateService = queryTemplateService;
     }
 
     /**
-     * Gets the query template names given a limit, offset, and and ordering (ascending vs descending).
+     * Get query template names.
      *
-     * @param limit The maximum number of query template names to retrieve (used for pagination).
-     * @param offset The query template name record number that the results should start at (used for pagination).
-     * @param ascending Whether the query that retrieves the query template names should be in ascending or descending order.
-     * @return A ResponseEntity object containing a List of Strings with each String being the name of a query template.
+     * @return A {@link ResponseEntity} containing a {@link List<String>} with each {@link String} being the name of a
+     * query template.
      */
-    @GetMapping(value = "")
-    public ResponseEntity<List<String>> getQueryTemplates(@RequestParam(required = false) Integer limit,
-                                                          @RequestParam(required = false) Integer offset,
-                                                          @RequestParam(required = false) boolean ascending) throws Exception {
-        List<String> queryTemplateNames = queryTemplateService.getNames(limit, offset, ascending);
+    @GetMapping
+    public ResponseEntity<List<String>> getQueryTemplates() {
+        List<String> queryTemplateNames = queryTemplateService.getNames();
         return ResponseEntity.ok(queryTemplateNames);
     }
 
@@ -43,37 +40,47 @@ public class QueryTemplateController {
      * Get a query template by its unique name.
      *
      * @param name The name of the query template to retrieve.
-     * @return The SelectStatement object with the name parameter.
+     * @return The {@link SelectStatement} object with the name parameter.
      */
-    @GetMapping(value = "/{name}")
-    public ResponseEntity<SelectStatement> getQueryTemplateById(@PathVariable String name) {
-        SelectStatement queryTemplate = queryTemplateService.findByName(name);
+    @GetMapping("/{name}")
+    public ResponseEntity<SelectStatement> getQueryTemplateById(@PathVariable String name,
+                                                                @RequestParam int version) {
+        SelectStatement queryTemplate = queryTemplateService.findByName(name, version);
         return ResponseEntity.ok(queryTemplate);
     }
 
     /**
-     * Save a SelectStatement object.
+     * Save a {@link SelectStatement} object.
      *
-     * @param selectStatement The SelectStatement object to save.
+     * @param selectStatement The {@link SelectStatement} object to save.
      * @return A ResponseEntity object.
      */
-    @PostMapping(value = "/")
+    @PostMapping
     public ResponseEntity<?> saveQueryTemplate(@RequestBody SelectStatement selectStatement) {
-        if (selectStatement.getName() == null) {
-            throw new RuntimeException("The name of the select statement cannot be null when saving the statement " +
-                    "as a query template");
+        if (selectStatement.getMetadata() == null ||
+                selectStatement.getMetadata().getName() == null ||
+                selectStatement.getMetadata().getName().isEmpty()) {
+            throw new IllegalStateException("The name of the select statement cannot be null or an empty string when saving it");
         }
 
-        String json;
-        try {
-            json = new ObjectMapper().writeValueAsString(selectStatement);
-        } catch (JsonProcessingException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
+        this.queryTemplateService.save(selectStatement);
 
-        queryTemplateService.save(selectStatement.getName(), json);
+        // todo:  add a HATEOAS link with the query name and version here.
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{name}/versions")
+    public ResponseEntity<List<Integer>> getQueryTemplateVersions(@PathVariable String name) {
+        List<Integer> versions = this.queryTemplateService.getVersions(name);
+        return ResponseEntity.ok(versions);
+    }
+
+    @GetMapping("{name}/metadata")
+    public ResponseEntity<SelectStatement.Metadata> getQueryTemplateMetadata(@PathVariable String name,
+                                                                             @RequestParam int version) {
+        SelectStatement.Metadata metadata = this.queryTemplateService.getMetadata(name, version);
+        return ResponseEntity.ok(metadata);
     }
 
 }

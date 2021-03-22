@@ -1,9 +1,9 @@
 package net.querybuilder4j.service.database.metadata;
 
-import net.querybuilder4j.model.Column;
-import net.querybuilder4j.model.Database;
-import net.querybuilder4j.model.Schema;
-import net.querybuilder4j.model.Table;
+import net.querybuilder4j.sql.statement.column.Column;
+import net.querybuilder4j.sql.statement.database.Database;
+import net.querybuilder4j.sql.statement.schema.Schema;
+import net.querybuilder4j.sql.statement.table.Table;
 
 import java.util.List;
 import java.util.Set;

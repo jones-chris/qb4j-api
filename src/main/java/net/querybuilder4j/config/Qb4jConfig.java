@@ -1,7 +1,10 @@
 package net.querybuilder4j.config;
 
-import net.querybuilder4j.cache.CacheType;
+import lombok.*;
+import net.querybuilder4j.dao.database.metadata.CacheType;
 import net.querybuilder4j.constants.DatabaseType;
+import net.querybuilder4j.dao.query_template.QueryTemplateRepositoryType;
+import net.querybuilder4j.exceptions.Qb4jConfigException;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
@@ -11,13 +14,16 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
 public class Qb4jConfig {
 
     private List<TargetDataSource> targetDataSources;
     private QueryTemplateDataSource queryTemplateDataSource;
     private DatabaseMetadataCacheSource databaseMetadataCacheSource;
-
-    public Qb4jConfig() {}
 
     public Qb4jConfig(List<TargetDataSource> targetDataSources,
                       QueryTemplateDataSource  queryTemplateDataSource) {
@@ -25,151 +31,90 @@ public class Qb4jConfig {
         this.queryTemplateDataSource = queryTemplateDataSource;
     }
 
-    public List<TargetDataSource> getTargetDataSources() {
-        return targetDataSources;
-    }
-
-    public void setTargetDataSources(List<TargetDataSource> targetDataSources) {
-        this.targetDataSources = targetDataSources;
-    }
-
-    public QueryTemplateDataSource getQueryTemplateDataSource() {
-        return queryTemplateDataSource;
-    }
-
-    public void setQueryTemplateDataSource(QueryTemplateDataSource queryTemplateDataSource) {
-        this.queryTemplateDataSource = queryTemplateDataSource;
-    }
-
-    public DatabaseMetadataCacheSource getDatabaseMetadataCacheSource() {
-        return databaseMetadataCacheSource;
-    }
-
-    public void setDatabaseMetadataCacheSource(DatabaseMetadataCacheSource databaseMetadataCacheSource) {
-        this.databaseMetadataCacheSource = databaseMetadataCacheSource;
-    }
-
     public List<DataSource> getTargetDataSourcesAsDataSource() {
-        return this.targetDataSources.stream().map(TargetDataSource::getDataSource).collect(Collectors.toList());
+        return this.targetDataSources.stream()
+                .map(TargetDataSource::getDataSource)
+                .collect(Collectors.toList());
     }
 
     public TargetDataSource getTargetDataSource(String name) {
         return this.targetDataSources.stream()
                 .filter(source -> source.getName().equals(name))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> {
+                    throw new Qb4jConfigException("Could not find a target data source named, " + name + ", to create a DataSource for");
+                });
     }
 
     public DataSource getTargetDataSourceAsDataSource(String targetDatabaseName) {
-        Optional<TargetDataSource> matchingTargetDataSources = targetDataSources.stream()
-                .filter(source -> source.getName().equals(targetDatabaseName))
-                .findFirst();
-
-        if (matchingTargetDataSources.isPresent()) {
-            TargetDataSource targetDataSource = matchingTargetDataSources.get();
-            return targetDataSource.getDataSource();
-        } else {
-            throw new IllegalArgumentException(String.format("Cannot find target data source with name, %s", targetDatabaseName));
-        }
+       return targetDataSources.stream()
+               .filter(source -> source.getName().equals(targetDatabaseName))
+               .findFirst()
+               .map(TargetDataSource::getDataSource)
+               .orElseThrow(() -> {
+                   throw new IllegalArgumentException(String.format("Cannot find target data source with name, %s", targetDatabaseName));
+               });
     }
 
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    @ToString
     public static class TargetDataSource {
 
+        @Getter
+        @Setter
         private String name;
+
+        @Getter
+        @Setter
         private String url;
-        private String driverClassName;
+
+        @Getter
+        @Setter
         private DatabaseType databaseType;
+
+        @Getter
+        @Setter
         private String username;
+
+        @Getter
+        @Setter
         private String password;
+
+        @Getter
+        @Setter
         private ExcludeObjects excludeObjects;
+
         private DataSource dataSource;
-
-        public TargetDataSource() {}
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public String getDriverClassName() {
-            return driverClassName;
-        }
-
-        public void setDriverClassName(String driverClassName) {
-            this.driverClassName = driverClassName;
-        }
-
-        public DatabaseType getDatabaseType() {
-            return databaseType;
-        }
-
-        public void setDatabaseType(DatabaseType databaseType) {
-            this.databaseType = databaseType;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public ExcludeObjects getExcludeObjects() {
-            return excludeObjects;
-        }
-
-        public void setExcludeObjects(ExcludeObjects excludeObjects) {
-            this.excludeObjects = excludeObjects;
-        }
 
         public DataSource getDataSource() {
             if (this.dataSource == null) {
                 BasicDataSource ds = new BasicDataSource();
-                ds.setDriverClassName(driverClassName);
                 ds.setUrl(url);
                 ds.setUsername(username);
                 ds.setPassword(password);
+
+                // todo:  Add more driver mappings here when more database types are supported.
+                if(this.databaseType.equals(DatabaseType.PostgreSQL)) {
+                    ds.setDriverClassName("org.postgresql.Driver");
+                }
+                else if (this.databaseType.equals(DatabaseType.MySql)) {
+                    ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+                }
+                else if (this.databaseType.equals(DatabaseType.Sqlite)) {
+                    ds.setDriverClassName("org.sqlite.JDBC");
+                }
 
                 this.dataSource = ds;
             }
             return this.dataSource;
         }
 
-        public Properties getProperties() {
-            Properties properties = new Properties();
-            properties.setProperty("driver-class-name", driverClassName);
-            properties.setProperty("url", url);
-            if (username != null) {
-                properties.setProperty("username", username);
-            }
-            if (password != null) {
-                properties.setProperty("password", password);
-            }
-            properties.setProperty("databaseType", databaseType.toString());
-
-            return properties;
-        }
-
+        @NoArgsConstructor
+        @Getter
+        @Setter
+        @EqualsAndHashCode
+        @ToString
         public static class ExcludeObjects {
 
             /**
@@ -187,80 +132,53 @@ public class Qb4jConfig {
              */
             private List<String> columns = new ArrayList<>();
 
-            public List<String> getSchemas() {
-                return schemas;
-            }
-
-            public void setSchemas(List<String> schemas) {
-                this.schemas = schemas;
-            }
-
-            public List<String> getTables() {
-                return tables;
-            }
-
-            public void setTables(List<String> tables) {
-                this.tables = tables;
-            }
-
-            public List<String> getColumns() {
-                return columns;
-            }
-
-            public void setColumns(List<String> columns) {
-                this.columns = columns;
-            }
         }
     }
 
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    @ToString
     public static class QueryTemplateDataSource {
+
+        @Getter
+        @Setter
+        private QueryTemplateRepositoryType repositoryType;
+
+        @Getter
+        @Setter
         private String url;
-        private String driverClassName;
+
+        @Getter
+        @Setter
+        private DatabaseType databaseType;
+
+        @Getter
+        @Setter
         private String username;
+
+        @Getter
+        @Setter
         private String password;
+
         private DataSource dataSource;
-
-        public QueryTemplateDataSource() {}
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public String getDriverClassName() {
-            return driverClassName;
-        }
-
-        public void setDriverClassName(String driverClassName) {
-            this.driverClassName = driverClassName;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
 
         public DataSource getDataSource() {
             if (this.dataSource == null) {
                 BasicDataSource ds = new BasicDataSource();
-                ds.setDriverClassName(driverClassName);
                 ds.setUrl(url);
                 ds.setUsername(username);
                 ds.setPassword(password);
+
+                // todo:  Add more driver mappings here when more database types are supported.
+                if(this.databaseType.equals(DatabaseType.PostgreSQL)) {
+                    ds.setDriverClassName("org.postgresql.Driver");
+                }
+                else if (this.databaseType.equals(DatabaseType.MySql)) {
+                    ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+                }
+                else if (this.databaseType.equals(DatabaseType.Sqlite)) {
+                    ds.setDriverClassName("org.sqlite.JDBC");
+                }
 
                 this.dataSource = ds;
             }
@@ -268,54 +186,23 @@ public class Qb4jConfig {
         }
     }
 
+    @NoArgsConstructor
+    @EqualsAndHashCode
+    @ToString
+    @Getter
+    @Setter
     public static class DatabaseMetadataCacheSource {
+
         private CacheType cacheType;
+
         private String host;
+
         private int port;
+
         private String username;
+
         private String password;
 
-        public DatabaseMetadataCacheSource() {}
-
-        public CacheType getCacheType() {
-            return cacheType;
-        }
-
-        public void setCacheType(CacheType cacheType) {
-            this.cacheType = cacheType;
-        }
-
-        public String getHost() {
-            return host;
-        }
-
-        public void setHost(String host) {
-            this.host = host;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public void setPort(int port) {
-            this.port = port;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
     }
 
 }

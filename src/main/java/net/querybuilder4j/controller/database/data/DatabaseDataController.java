@@ -1,17 +1,13 @@
 package net.querybuilder4j.controller.database.data;
 
-import net.querybuilder4j.model.QueryResult;
-import net.querybuilder4j.model.select_statement.SelectStatement;
 import net.querybuilder4j.service.database.data.DatabaseDataService;
-import net.querybuilder4j.sql_builder.SqlBuilder;
-import net.querybuilder4j.sql_builder.SqlBuilderFactory;
+import net.querybuilder4j.sql.builder.SqlBuilder;
+import net.querybuilder4j.sql.builder.SqlBuilderFactory;
+import net.querybuilder4j.sql.statement.SelectStatement;
+import net.querybuilder4j.util.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
@@ -70,12 +66,6 @@ public class DatabaseDataController {
         QueryResult queryResult = databaseDataService.executeQuery(database, sql);
 
         return ResponseEntity.ok(queryResult);
-    }
-
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<?> handleException(HttpServletRequest request, Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Collections.singletonMap("message", ex.getMessage()));
     }
 
 }

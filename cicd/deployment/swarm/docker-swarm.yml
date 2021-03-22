@@ -12,7 +12,7 @@ services:
         max_attempts: 2
 
   finance_database:
-    image: joneschris/qb4j-postgres:latest
+    image: joneschris/qb4j-postgres:0.0.3
     ports:
       - '5432:5432'
     environment:
@@ -23,14 +23,14 @@ services:
         condition: on-failure
         max_attempts: 2
 
-#  database_metadata_cache:
-#    image: redis:latest
-#    ports:
-#      - '6379:6379'
-#    deploy:
-#      restart_policy:
-#        condition: on-failure
-#        max_attempts: 3
+  #  database_metadata_cache:
+  #    image: redis:latest
+  #    ports:
+  #      - '6379:6379'
+  #    deploy:
+  #      restart_policy:
+  #        condition: on-failure
+  #        max_attempts: 3
 
   api:
     image: "joneschris/qb4j-api:${PROJECT_VERSION}"
@@ -42,7 +42,7 @@ services:
     depends_on:
       - hr_database
       - finance_database
-#      - database_metadata_cache
+    #      - database_metadata_cache
     deploy:
       replicas: 2
       restart_policy:

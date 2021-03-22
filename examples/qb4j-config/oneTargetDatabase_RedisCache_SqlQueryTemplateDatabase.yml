@@ -1,0 +1,27 @@
+targetDataSources:
+  - name: finance_database
+    url: jdbc:postgresql://database:5432/postgres
+    databaseType: PostgreSQL
+    username: postgres
+    password: example
+    excludeObjects:
+      schemas: [
+        information_schema,
+        public,
+        pg_catalog,
+        qb4j
+      ]
+      tables: []
+      columns: []
+databaseMetadataCacheSource:
+    cacheType: REDIS
+    host: localhost
+    port: 6379
+    username: my_username
+    passowrd: my_password
+queryTemplateDataSource:
+  repositoryType: SQL_DATABASE
+  url: jdbc:postgresql://database:5432/postgres
+  databaseType: PostgreSQL
+  username: postgres
+  password: example

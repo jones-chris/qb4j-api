@@ -1,7 +1,7 @@
 package net.querybuilder4j.service.database.data;
 
 import net.querybuilder4j.dao.database.data.DatabaseDataDao;
-import net.querybuilder4j.model.QueryResult;
+import net.querybuilder4j.util.QueryResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
