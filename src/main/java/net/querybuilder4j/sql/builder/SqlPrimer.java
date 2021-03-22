@@ -3,15 +3,14 @@ package net.querybuilder4j.sql.builder;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.criterion.Conjunction;
+import net.querybuilder4j.sql.statement.criterion.CriteriaTreeFlattener;
 import net.querybuilder4j.sql.statement.criterion.Criterion;
 import net.querybuilder4j.sql.statement.criterion.Operator;
 import net.querybuilder4j.sql.statement.join.Join;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.querybuilder4j.sql.statement.join.Join.JoinType.*;
 
@@ -114,8 +113,18 @@ public class SqlPrimer {
      * @param selectStatement {@link SelectStatement}
      */
     public static void interpolateSubQueries(SelectStatement selectStatement) {
+        // Flatten the criteria first into a single list first.
+        List<Criterion> flattenedCriteria = CriteriaTreeFlattener.flattenCriteria(
+                selectStatement.getCriteria(),
+                new HashMap<>()
+        ).values()
+                .stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+
         // For each criterion...
-        selectStatement.getCriteria().forEach(criterion -> {
+        flattenedCriteria.forEach(criterion -> {
             // For each sub query...
             final String sql = "SELECT * FROM %s";
             criterion.getFilter().getSubQueries().forEach(subQuery -> {
