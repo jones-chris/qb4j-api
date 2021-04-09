@@ -38,20 +38,9 @@ public class SqlValidator {
     // If any of these characters are contained in SelectStatement, then return false.
     private static final String[] forbiddenMarks = new String[] {";", "`", "\""};
 
-    // Ansi keywords per https://docs.snowflake.net/manuals/sql-reference/reserved-keywords.html.  I did not include 'TRUE' and
-    //   'FALSE' from the link's list because those are valid SelectStatement filters.
-    // If any of these strings are contained in SelectStatement, then return false.
-    // Did not include "AND", because this is a common word in filters.
-    private static final String[] ansiKeywords = new String[] {"ALL", "ALTER", "ANY", "AS", "ASC", "BETWEEN",
-            "BY", "CASE", "CAST", "CHECK", "CLUSTER", "COLUMN", "CONNECT", "CREATE", "CROSS", "CURRENT_DATE",
-            "CURRENT_ROLE", "CURRENT_USER", "CURRENT_TIME", "CURRENT_TIMESTAMP", "DELETE", "DESC", "DISTINCT",
-            "DROP", "ELSE", "EXCLUSIVE", "EXISTS", "FOR", "FROM", "FULL", "GRANT", "GROUP",
-            "HAVING", "IDENTIFIED", "ILIKE", "IMMEDIATE", "IN", "INCREMENT", "INNER", "INSERT", "INTERSECT",
-            "INTO", "IS", "JOIN", "LATERAL", "LEFT", "LIKE", "LOCK", "LONG", "MAXEXTENTS", "MINUS", "MODIFY",
-            "NATURAL", "NOT", "NULL", "OF", "ON", "OPTION", "OR", "REGEXP", "RENAME", "REVOKE", "RIGHT",
-            "RLIKE", "ROW", "ROWS", "SAMPLE", "SELECT", "SET", "SOME", "START", "TABLE", "TABLESAMPLE",
-            "THEN", "TO", "TRIGGER", "UNION", "UNIQUE", "UPDATE", "USING", "VALUES", "VIEW", "WHEN",
-            "WHENEVER", "WHERE", "WITH"
+    // Forbidden ANSI keywords that retrieve or change data.  These should not be present in the criterion filter values.
+    private static final String[] ansiKeywords = new String[] {
+            "UPDATE", "INSERT", "DROP", "DELETE", "SELECT"
     };
 
     public static void assertIsValid(SelectStatement selectStatement, DatabaseMetadataCacheDao databaseMetadataCacheDao) {

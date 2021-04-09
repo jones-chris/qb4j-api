@@ -75,7 +75,7 @@ public abstract class SqlBuilder {
 
         /*
         Interpolate the sub queries into the SelectStatement's criteria after validation so that SQL keywords like
-        "SELECT", "*", and "FROM" do not raise an exception when getting the results of a Common Table Expression.
+        "SELECT" and "*" do not raise an exception when getting the results of a Common Table Expression.
          */
         SqlPrimer.interpolateSubQueries(selectStatement);
 
