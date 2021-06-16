@@ -1,0 +1,11 @@
+#statementButtonsDiv button {
+    margin: 10px;
+}
+
+.divider{
+    margin-left: 5px;
+    margin-right: 5px;
+    height: 10px;
+    width: 1px;
+    background-color: red;
+}

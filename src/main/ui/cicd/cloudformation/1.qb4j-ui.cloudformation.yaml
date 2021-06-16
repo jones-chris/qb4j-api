@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: ''
+
+Mappings:
+  # https://docs.aws.amazon.com/general/latest/gr/s3.html#s3_website_region_endpoints
+  S3WebsiteEndpoints:
+    us-east-2:
+      Endpoint: s3-website.us-east-2.amazonaws.com
+      HostedZoneId: Z2O1EMRO9K5GLX
+    us-east-1:
+      Endpoint: s3-website-us-east-1.amazonaws.com
+      HostedZoneId: Z3AQBSTGFYJSTF
+    us-west-1:
+      Endpoint: s3-website-us-west-1.amazonaws.com
+      HostedZoneId: Z2F56UZL2M1ACD
+    us-west-2:
+      Endpoint: s3-website-us-west-2.amazonaws.com
+      HostedZoneId: Z3BJ6K6RIION7M
+
+Resources:
+
+  # The S3 bucket that will contain the React build files and will serve up the static website.
+  Querybuilder4jS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: querybuilder4j.net
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      AccessControl: PublicRead
+
+  # The S3 Bucket that will redirect to the above bucket.  This bucket only exists so that the `www` prefix/subdomain
+  # can have a Route53 record set.
+  WwwQuerybuilder4jS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: www.querybuilder4j.net
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        RedirectAllRequestsTo:
+          HostName: querybuilder4j.net
+          Protocol: http
+      AccessControl: PublicRead
+
+  # An S3 bucket policy that grants public read access to the `querybuilder4j.net` S3 bucket.
+  PublicReadRootS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Querybuilder4jS3Bucket
+      PolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Action:
+              - 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${Querybuilder4jS3Bucket}/*'
+            Principal: '*'
+
+  # An S3 bucket policy that grants public read access to the `www.querybuilder4j.net` S3 bucket.
+  PublicReadWwwS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WwwQuerybuilder4jS3Bucket
+      PolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Action:
+              - 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${WwwQuerybuilder4jS3Bucket}/*'
+            Principal: '*'
+
+  # The hosted zone for the `querybuilder4j.net` Route53 registered domain.
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: querybuilder4j.net
+
+  # The Route53 record set that creates an Alias record to send traffic to the `querybuilder4j.net` S3 bucket where the
+  # static website is hosted.
+  Querybuilder4jNetRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: The Alias record that directs traffic to the querybuilder4j.net S3 bucket.
+      Name: querybuilder4j.net.
+      Type: A
+      HostedZoneId: !Ref HostedZone
+      AliasTarget:
+        DNSName: !FindInMap [S3WebsiteEndpoints, !Ref 'AWS::Region', Endpoint]
+        EvaluateTargetHealth: false
+        HostedZoneId: !FindInMap [S3WebsiteEndpoints, !Ref 'AWS::Region', HostedZoneId]
+    DependsOn:
+      - HostedZone
+      - Querybuilder4jS3Bucket
+
+  # The Route53 record set that creates an Alias record to send traffic to the `www.querybuilder4j.net` S3 bucket which
+  # redirects traffic to the `querybuilder4j.net` S3 bucket that hosts the static website.
+  WwwQuerybuilder4jNetRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: www.querybuilder4j.net.
+      Type: A
+      HostedZoneId: !Ref HostedZone
+      AliasTarget:
+        DNSName: !FindInMap [S3WebsiteEndpoints, !Ref 'AWS::Region', Endpoint]
+        EvaluateTargetHealth: false
+        HostedZoneId: !FindInMap [S3WebsiteEndpoints, !Ref 'AWS::Region', HostedZoneId]
+    DependsOn:
+      - HostedZone
+      - WwwQuerybuilder4jS3Bucket

@@ -1,0 +1,23 @@
+#schemasDiv {
+    clear: both;
+    float: left;
+    width: 50%;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+#schemasDiv select {
+    width: 100%;
+}
+
+#tablesDiv {
+    display: grid;
+    padding-left: 10%;
+    float: right;
+    padding-right: 10%;
+    width: 50%;
+}
+
+#tablesDiv select {
+    width: 100%;
+}

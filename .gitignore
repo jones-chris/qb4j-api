@@ -1,7 +1,14 @@
+# Build/artifact directory
 /target
 
 *.iml
 
+# Mac
 .DS_Store
 
+# IntelliJ
 /.idea
+
+# UI directories
+/src/main/ui/node_modules
+/src/main/ui/build
