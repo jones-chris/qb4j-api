@@ -1,0 +1,121 @@
+.column-members-modal {
+    clear: both;
+    text-align: center;
+    padding-top: 20px;
+    z-index: 3;
+    /*display: none;*/
+    padding-top: 100px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.column-members-modal table {
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+.column-members-modal-content {
+    margin: auto;
+    background-color: #fff;
+    position: relative;
+    padding: 0;
+    outline: 0;
+    width: 70%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.column-members-modal-close-button {
+    float: right;
+    margin-right: 15px;
+}
+
+.column-members-modal-pagination {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.column-members-modal-members {
+    margin-top: 20px;
+}
+
+.column-members-modal-members select {
+    width: 200px;
+    float: left;
+}
+
+.column-members-modal-available-members {
+    padding-left: 20%;
+    display: inline-grid;
+    float: left;
+    width: 45%;
+}
+
+.column-members-modal-add-remove-members {
+    display: grid;
+    float: left;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 60px;
+}
+
+.column-members-modal-add-remove-members * {
+    margin-bottom: 10px;
+}
+
+.column-members-modal-selected-members {
+    display: inline-grid;
+    width: 45%;
+    padding-right: 20%;
+}
+
+.column-members-modal-up-down-members {
+    display: grid;
+    float: left;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 60px;
+}
+
+.column-members-modal-up-down-members * {
+    margin-bottom: 10px;
+}
+
+.column-members-modal-submit {
+    clear: both;
+    padding-top: 20px;
+}
+
+.column-members-modal-submit * {
+    margin-right: 10px;
+}
+
+.column-members-selection {
+    width: 100%;
+    overflow: hidden;
+}
+
+.column-members-selection-button-div {
+    float: left;
+    width: 10%;
+    padding-top: 10%;
+}
+
+.column-members-selection-button {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.hover-pointer {
+    cursor: pointer;
+}
+
+/*.warning {*/
+/*    color: red;*/
+/*}*/

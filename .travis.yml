@@ -8,6 +8,10 @@ cache:
   directories:
     - $HOME/.m2
 
+env:
+  # Don't treat react-scripts build warnings as errors.
+  CI: false
+
 os:
   - linux
 
