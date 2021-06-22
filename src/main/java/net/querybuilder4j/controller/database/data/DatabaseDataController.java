@@ -60,10 +60,16 @@ public class DatabaseDataController {
     @PostMapping(value = "/{database}/query")
     public ResponseEntity<QueryResult> getQueryResults(@PathVariable String database,
                                                        @RequestBody SelectStatement selectStatement) throws Exception {
-        SqlBuilder sqlBuilder = this.sqlBuilderFactory.buildSqlBuilder(selectStatement);
-        String sql = sqlBuilder.buildSql();
+        String sql = this.sqlBuilderFactory
+                .buildSqlBuilder(selectStatement)
+                .buildSql();
 
+        /*
+         Query the database with the generated SQL sting.  Then add the select statement to the object so that the
+         encapsulating UI window has the full context, like column JDBC types.
+         */
         QueryResult queryResult = databaseDataService.executeQuery(database, sql);
+        queryResult.setSelectStatement(selectStatement);
 
         return ResponseEntity.ok(queryResult);
     }
