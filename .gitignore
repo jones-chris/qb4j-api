@@ -12,3 +12,4 @@
 # UI directories
 /src/main/ui/node_modules
 /src/main/ui/build
+/src/main/ui/examples/office-addin/My Office Add-in/node_modules

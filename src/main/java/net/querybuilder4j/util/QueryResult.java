@@ -1,8 +1,7 @@
 package net.querybuilder4j.util;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
+import net.querybuilder4j.sql.statement.SelectStatement;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,16 +12,16 @@ import java.util.List;
  * This class is intended to take a {@link ResultSet} and SQL {@link String} and encapsulates the {@link ResultSet}'s
  * column names, data, and the SQL {@link String}.
  */
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 public class QueryResult {
 
-    private List<String> columns = new ArrayList<>();
+    private SelectStatement selectStatement;
 
-    private List<Object[]> data = new ArrayList<>();
+    private final List<String> columns = new ArrayList<>();
 
-    private String sql;
+    private final List<Object[]> data = new ArrayList<>();
+
+    private final String sql;
 
     public QueryResult(ResultSet resultSet, String sql) throws SQLException {
         // Set `sql` field.
