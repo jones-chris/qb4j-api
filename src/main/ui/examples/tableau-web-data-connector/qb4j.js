@@ -69,14 +69,14 @@
     window.onmessage = (event) => {
         console.log('In onmessage handler');
 
-        if (event.origin === 'http://localhost:8080') {
+        // if (event.origin === 'http://dev.api.querybuilder4j.net/') {
             console.log(event);
 
             localStorage.setItem('qb4j-results', JSON.stringify(event.data));
 
-            tableau.connectionName = "USGS Earthquake Feed"; // This will be the data source name in Tableau
+            tableau.connectionName = "qb4j"; // This will be the data source name in Tableau
             tableau.submit(); // This sends the connector object to Tableau
-        }
+        // }
     }
 
 })();
@@ -84,7 +84,6 @@
 function getTableauDataType(jdbcSqlTypeInt) {
     /*
     Tableau data types as of 6/22/2021:
-
     bool: "bool"
     date: "date"
     datetime: "datetime"
