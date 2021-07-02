@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/jones-chris/qb4j-api.svg?branch=master)](https://travis-ci.com/jones-chris/qb4j-api)
+[![Build Status](https://travis-ci.com/jones-chris/qb.svg?branch=master)](https://travis-ci.com/jones-chris/qb)
 
 # qb (Query Builder)
 
