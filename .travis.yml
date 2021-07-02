@@ -47,7 +47,7 @@ script:
   - PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 
   # Check if a docker image exists for this project version.
-#  - IMAGE_EXISTS=$(docker pull joneschris/qb4j-api:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
+#  - IMAGE_EXISTS=$(docker pull joneschris/qb:"$PROJECT_VERSION" > /dev/null && echo "true" || echo "false")
 #  - |
 #    if [ "$IMAGE_EXISTS" == "true" ]; then
 #      echo "The image, $PROJECT_VERSION, already exists.  You probably need to bump the project's version in the pom.xml."
@@ -58,11 +58,11 @@ script:
   - mvn clean install -Dmaven.javadoc.skip=true
 
   # Build the docker image.
-  - docker image build -t joneschris/qb4j-api:"$PROJECT_VERSION" --build-arg project_version="$PROJECT_VERSION" .
+  - docker image build -t joneschris/qb:"$PROJECT_VERSION" --build-arg project_version="$PROJECT_VERSION" .
 
   # Push docker image to Docker Hub.
   - echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
-  - docker push "$DOCKERHUB_USERNAME/qb4j-api:$PROJECT_VERSION"
+  - docker push "$DOCKERHUB_USERNAME/qb:$PROJECT_VERSION"
 
 deploy:
   # Upload the artifact to S3.  The AWS access key id, secret access key, and default region are exported as environment

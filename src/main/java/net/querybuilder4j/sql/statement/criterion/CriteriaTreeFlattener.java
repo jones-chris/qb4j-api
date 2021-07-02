@@ -27,7 +27,7 @@ public class CriteriaTreeFlattener {
     private int numOfClosingParenthesisInBranch = 0;
 
     /**
-     * The cache of the target data source(s) and query template data source, which is built from the Qb4jConfig.json file.
+     * The cache of the target data source(s) and query template data source, which is built from the QbConfig.yaml file.
      */
     protected DatabaseMetadataCacheDao databaseMetadataCacheDao;
 
