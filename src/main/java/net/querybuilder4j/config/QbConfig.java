@@ -1,17 +1,15 @@
 package net.querybuilder4j.config;
 
 import lombok.*;
-import net.querybuilder4j.dao.database.metadata.CacheType;
 import net.querybuilder4j.constants.DatabaseType;
+import net.querybuilder4j.dao.database.metadata.CacheType;
 import net.querybuilder4j.dao.query_template.QueryTemplateRepositoryType;
-import net.querybuilder4j.exceptions.Qb4jConfigException;
+import net.querybuilder4j.exceptions.QbConfigException;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -19,13 +17,13 @@ import java.util.stream.Collectors;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class Qb4jConfig {
+public class QbConfig {
 
     private List<TargetDataSource> targetDataSources;
     private QueryTemplateDataSource queryTemplateDataSource;
     private DatabaseMetadataCacheSource databaseMetadataCacheSource;
 
-    public Qb4jConfig(List<TargetDataSource> targetDataSources,
+    public QbConfig(List<TargetDataSource> targetDataSources,
                       QueryTemplateDataSource  queryTemplateDataSource) {
         this.targetDataSources = targetDataSources;
         this.queryTemplateDataSource = queryTemplateDataSource;
@@ -42,7 +40,7 @@ public class Qb4jConfig {
                 .filter(source -> source.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> {
-                    throw new Qb4jConfigException("Could not find a target data source named, " + name + ", to create a DataSource for");
+                    throw new QbConfigException("Could not find a target data source named, " + name + ", to create a DataSource for");
                 });
     }
 

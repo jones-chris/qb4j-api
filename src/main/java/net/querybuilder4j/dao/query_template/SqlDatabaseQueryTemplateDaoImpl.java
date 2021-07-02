@@ -2,22 +2,19 @@ package net.querybuilder4j.dao.query_template;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.querybuilder4j.config.Qb4jConfig;
+import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.constants.DatabaseType;
 import net.querybuilder4j.exceptions.JsonDeserializationException;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.util.Utils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
 
@@ -27,10 +24,10 @@ public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public SqlDatabaseQueryTemplateDaoImpl(Qb4jConfig qb4jConfig) {
-        this.databaseType = qb4jConfig.getQueryTemplateDataSource().getDatabaseType();
+    public SqlDatabaseQueryTemplateDaoImpl(QbConfig qbConfig) {
+        this.databaseType = qbConfig.getQueryTemplateDataSource().getDatabaseType();
 
-        DataSource dataSource = qb4jConfig.getQueryTemplateDataSource().getDataSource();
+        DataSource dataSource = qbConfig.getQueryTemplateDataSource().getDataSource();
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 

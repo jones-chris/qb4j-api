@@ -5,12 +5,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.querybuilder4j</groupId>
-    <artifactId>qb4j-api</artifactId>
+    <artifactId>qb</artifactId>
     <version>1.1.0</version>
     <packaging>jar</packaging>
 
-    <name>qb4j-api</name>
-    <description>A REST API to serve database meta data and create and run SQL statements</description>
+    <name>qb</name>
+    <description>A Spring Boot REST API and React front end to enable users to create and execute SELECT SQL statements</description>
 
     <properties>
         <frontend-src-dir>${project.basedir}/src/main/ui</frontend-src-dir>

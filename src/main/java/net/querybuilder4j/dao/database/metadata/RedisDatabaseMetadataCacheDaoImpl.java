@@ -2,7 +2,7 @@ package net.querybuilder4j.dao.database.metadata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.querybuilder4j.config.Qb4jConfig;
+import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.exceptions.CacheJsonDeserializationException;
 import net.querybuilder4j.exceptions.CacheMissException;
 import net.querybuilder4j.sql.statement.column.Column;
@@ -41,27 +41,27 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
     private final int COLUMN_REDIS_DB = 3;
 
     /**
-     * The {@link Qb4jConfig} encapsulating the application context.
+     * The {@link QbConfig} encapsulating the application context.
      */
-    private final Qb4jConfig qb4jConfig;
+    private final QbConfig qbConfig;
 
     /**
      * The Redis/Jedis client.
      */
     private final Jedis jedis;
 
-    public RedisDatabaseMetadataCacheDaoImpl(Qb4jConfig qb4jConfig) {
-        this.qb4jConfig = qb4jConfig;
+    public RedisDatabaseMetadataCacheDaoImpl(QbConfig qbConfig) {
+        this.qbConfig = qbConfig;
 
-        // I know this constructor could just take `host` and `port` as parameters, but I think passing the Qb4jConfig
-        // parameter makes it clearer that this class'/constructor's parameters originate from the Qb4jConfig bean and,
+        // I know this constructor could just take `host` and `port` as parameters, but I think passing the QbConfig
+        // parameter makes it clearer that this class'/constructor's parameters originate from the QbConfig bean and,
         // therefore, it's related qb4j.yml file.
-        String host = this.qb4jConfig.getDatabaseMetadataCacheSource().getHost();
-        int port = this.qb4jConfig.getDatabaseMetadataCacheSource().getPort();
+        String host = this.qbConfig.getDatabaseMetadataCacheSource().getHost();
+        int port = this.qbConfig.getDatabaseMetadataCacheSource().getPort();
         this.jedis = new Jedis(host, port);
 
-        String password = this.qb4jConfig.getDatabaseMetadataCacheSource().getPassword();
-        String username = this.qb4jConfig.getDatabaseMetadataCacheSource().getUsername();
+        String password = this.qbConfig.getDatabaseMetadataCacheSource().getPassword();
+        String username = this.qbConfig.getDatabaseMetadataCacheSource().getUsername();
         if (password != null) {
             if (username == null) {
                 this.jedis.auth(password);
@@ -79,7 +79,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
         // Loop through each database, get the schema, table/view, and column metadata and write it to Redis.
         // TODO:  Make this loop asynchronous for each database?
-        for (Qb4jConfig.TargetDataSource targetDataSource : this.qb4jConfig.getTargetDataSources()) {
+        for (QbConfig.TargetDataSource targetDataSource : this.qbConfig.getTargetDataSources()) {
             // Write the database metadata to Redis.
             this.jedis.select(this.DATABASE_REDIS_DB);
             Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());
@@ -109,7 +109,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public Set<Database> getDatabases() {
-        return this.qb4jConfig.getTargetDataSources().stream()
+        return this.qbConfig.getTargetDataSources().stream()
                 .map(targetDataSource -> new Database(targetDataSource.getName(), targetDataSource.getDatabaseType()))
                 .collect(Collectors.toSet());
     }

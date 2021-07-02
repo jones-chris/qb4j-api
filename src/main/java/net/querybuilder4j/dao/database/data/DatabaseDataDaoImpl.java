@@ -1,6 +1,6 @@
 package net.querybuilder4j.dao.database.data;
 
-import net.querybuilder4j.config.Qb4jConfig;
+import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.constants.DatabaseType;
 import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCacheDao;
 import net.querybuilder4j.sql.builder.SqlBuilderFactory;
@@ -23,23 +23,26 @@ import java.sql.Statement;
 @Repository
 public class DatabaseDataDaoImpl implements DatabaseDataDao {
 
-    private Qb4jConfig qb4jConfig;
+    private QbConfig qbConfig;
 
     private DatabaseMetadataCacheDao databaseMetadataCacheDao;
 
     private SqlBuilderFactory sqlBuilderFactory;
 
     @Autowired
-    public DatabaseDataDaoImpl(Qb4jConfig qb4jConfig, DatabaseMetadataCacheDao databaseMetadataCacheDao,
-                               SqlBuilderFactory sqlBuilderFactory) {
-        this.qb4jConfig = qb4jConfig;
+    public DatabaseDataDaoImpl(
+            QbConfig qbConfig,
+            DatabaseMetadataCacheDao databaseMetadataCacheDao,
+            SqlBuilderFactory sqlBuilderFactory
+    ) {
+        this.qbConfig = qbConfig;
         this.databaseMetadataCacheDao = databaseMetadataCacheDao;
         this.sqlBuilderFactory = sqlBuilderFactory;
     }
 
     @Override
     public QueryResult executeQuery(String databaseName, String sql) throws Exception {
-        DataSource dataSource = qb4jConfig.getTargetDataSourceAsDataSource(databaseName);
+        DataSource dataSource = qbConfig.getTargetDataSourceAsDataSource(databaseName);
 
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
@@ -76,7 +79,7 @@ public class DatabaseDataDaoImpl implements DatabaseDataDao {
         String sql = this.sqlBuilderFactory.buildSqlBuilder(selectStatement)
                 .buildSql();
 
-        DataSource dataSource = qb4jConfig.getTargetDataSourceAsDataSource(databaseName);
+        DataSource dataSource = qbConfig.getTargetDataSourceAsDataSource(databaseName);
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery(sql);

@@ -1,6 +1,6 @@
 package net.querybuilder4j.dao.database.metadata;
 
-import net.querybuilder4j.config.Qb4jConfig;
+import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.exceptions.CacheRefreshException;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheDao {
 
-    private final Qb4jConfig qb4jConfig;
+    private final QbConfig qbConfig;
 
     private Set<Database> cache = new HashSet<>();
 
@@ -24,13 +24,13 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
         return cache;
     }
 
-    public InMemoryDatabaseMetadataCacheDaoImpl(Qb4jConfig qb4jConfig) {
-        this.qb4jConfig = qb4jConfig;
+    public InMemoryDatabaseMetadataCacheDaoImpl(QbConfig qbConfig) {
+        this.qbConfig = qbConfig;
         refreshCache();  // Populate cache on cache instantiation - which should occur at app start up.
     }
 
     /**
-     * Run every 24 hours thereafter.  This method walks the qb4j target databases that are included in the qb4jConfig
+     * Run every 24 hours thereafter.  This method walks the qb4j target databases that are included in the qbConfig
      * and saves the target database metadata (databases, schemas, tables, and columns) to this class' `cache` field.
      * This class eager loads this metadata.
      *
@@ -41,7 +41,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
     public void refreshCache() throws CacheRefreshException {
         List<Database> databases = new ArrayList<>();
 
-        for (Qb4jConfig.TargetDataSource targetDataSource : this.qb4jConfig.getTargetDataSources()) {
+        for (QbConfig.TargetDataSource targetDataSource : this.qbConfig.getTargetDataSources()) {
             // Get schemas
             List<Schema> schemas = DatabaseMetadataCrawler.getSchemas(targetDataSource);
             Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());

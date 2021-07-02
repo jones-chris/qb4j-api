@@ -1,7 +1,7 @@
 package net.querybuilder4j.util;
 
 import net.querybuilder4j.exceptions.CacheRefreshException;
-import net.querybuilder4j.config.Qb4jConfig;
+import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
@@ -16,13 +16,13 @@ public class DatabaseMetadataCrawler {
 
     /**
      * Queries the target SQL database for schemas (excluding schemas defined in the `excludeObjects#schemas` of the
-     * {@link Qb4jConfig.TargetDataSource#getExcludeObjects()#getSchemas(String)}) as defined in the {@link Qb4jConfig}
+     * {@link QbConfig.TargetDataSource#getExcludeObjects()#getSchemas(String)}) as defined in the {@link QbConfig}
      * and instantiates a {@link Schema} for each schema the query returns.
-     * @param targetDataSource The {@link net.querybuilder4j.config.Qb4jConfig.TargetDataSource} to query for schema metadata.
+     * @param targetDataSource The {@link net.querybuilder4j.config.QbConfig.TargetDataSource} to query for schema metadata.
      * @return {@link List <Schema>} A list of the database schemas.
      * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
      */
-    public static List<Schema> getSchemas(Qb4jConfig.TargetDataSource targetDataSource) throws CacheRefreshException {
+    public static List<Schema> getSchemas(QbConfig.TargetDataSource targetDataSource) throws CacheRefreshException {
         List<Schema> schemas = new ArrayList<>();
         String databaseName = targetDataSource.getName();
 
@@ -54,14 +54,14 @@ public class DatabaseMetadataCrawler {
 
     /**
      * Queries the target SQL database for tables and views (excluding tables and views defined in the
-     * {@link Qb4jConfig.TargetDataSource#getExcludeObjects()#getTablesAndViews(String, String)} (String)}) as defined in
-     * the {@link Qb4jConfig} and instantiates a {@link Table} for each table and view the query returns.
-     * @param targetDataSource The {@link net.querybuilder4j.config.Qb4jConfig.TargetDataSource} to query for table and view metadata.
+     * {@link QbConfig.TargetDataSource#getExcludeObjects()#getTablesAndViews(String, String)} (String)}) as defined in
+     * the {@link QbConfig} and instantiates a {@link Table} for each table and view the query returns.
+     * @param targetDataSource The {@link net.querybuilder4j.config.QbConfig.TargetDataSource} to query for table and view metadata.
      * @param schema The name of the schema to query for table and view metadata.
      * @return {@link List<Table>} A list of the database tables and views.
      * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
      */
-    public static List<Table> getTablesAndViews(Qb4jConfig.TargetDataSource targetDataSource, String schema) throws CacheRefreshException {
+    public static List<Table> getTablesAndViews(QbConfig.TargetDataSource targetDataSource, String schema) throws CacheRefreshException {
         List<Table> tables = new ArrayList<>();
         String databaseName = targetDataSource.getName();
 
@@ -88,15 +88,15 @@ public class DatabaseMetadataCrawler {
 
     /**
      * Queries the target SQL database for columns (excluding columns defined in the
-     * {@link Qb4jConfig.TargetDataSource#getExcludeObjects()#getColumns(String, String, String)}) as defined in
-     * the {@link Qb4jConfig} and instantiates a {@link Column} for each column the query returns.
-     * @param targetDataSource The {@link net.querybuilder4j.config.Qb4jConfig.TargetDataSource} to query for table and view metadata.
+     * {@link QbConfig.TargetDataSource#getExcludeObjects()#getColumns(String, String, String)}) as defined in
+     * the {@link QbConfig} and instantiates a {@link Column} for each column the query returns.
+     * @param targetDataSource The {@link net.querybuilder4j.config.QbConfig.TargetDataSource} to query for table and view metadata.
      * @param schema The name of the schema to query for table and view metadata.
      * @param table The name of the table or view to query for column metatdata.
      * @return {@link List<Column>} A list of the database columns.
      * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
      */
-    public static List<Column> getColumns(Qb4jConfig.TargetDataSource targetDataSource, String schema, String table) throws CacheRefreshException {
+    public static List<Column> getColumns(QbConfig.TargetDataSource targetDataSource, String schema, String table) throws CacheRefreshException {
         List<Column> columns = new ArrayList<>();
         String databaseName = targetDataSource.getName();
 
