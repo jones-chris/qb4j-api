@@ -103,24 +103,24 @@ The example `YAML` file looks like this:
 
 ```yaml
     targetDataSources:
-          - name: my_database
-            url: jdbc:postgresql://localhost:5432/postgres
-            databaseType: [MySql | Oracle | PostgreSQL | Sqlite | SqlServer]
-            username: postgres
-            password: mysecretpassword
-            excludeObjects:
-              schemas: [
-                schema_a,
-                schema_b
-              ]
-              tables: [
-                schema_c.table_a,
-                schema_c.table_b
-              ]
-              columns: [
-                schema_d.table_c.column_a,
-                schema_d.table_c.column_b
-              ]
+      - name: my_database
+        url: jdbc:postgresql://localhost:5432/postgres
+        databaseType: [MySql | Oracle | PostgreSQL | Sqlite | SqlServer]
+        username: postgres
+        password: mysecretpassword
+        excludeObjects:
+          schemas: [
+            schema_a,
+            schema_b
+          ]
+          tables: [
+            schema_c.table_a,
+            schema_c.table_b
+          ]
+          columns: [
+            schema_d.table_c.column_a,
+            schema_d.table_c.column_b
+          ]
 
     databaseMetadataCacheSource:
       cacheType: [IN_MEMORY | REDIS]
