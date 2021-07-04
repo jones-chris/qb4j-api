@@ -101,39 +101,41 @@ their queries.
 
 The example `YAML` file looks like this:
 
+```yaml
     targetDataSources:
-      - name: my_database
-        url: jdbc:postgresql://localhost:5432/postgres
-        databaseType: [MySql | Oracle | PostgreSQL | Sqlite | SqlServer]
-        username: postgres
-        password: mysecretpassword
-        excludeObjects:
-          schemas: [
-            schema_a,
-            schema_b
-          ]
-          tables: [
-            schema_c.table_a,
-            schema_c.table_b
-          ]
-          columns: [
-            schema_d.table_c.column_a,
-            schema_d.table_c.column_b
-          ]
-    
+          - name: my_database
+            url: jdbc:postgresql://localhost:5432/postgres
+            databaseType: [MySql | Oracle | PostgreSQL | Sqlite | SqlServer]
+            username: postgres
+            password: mysecretpassword
+            excludeObjects:
+              schemas: [
+                schema_a,
+                schema_b
+              ]
+              tables: [
+                schema_c.table_a,
+                schema_c.table_b
+              ]
+              columns: [
+                schema_d.table_c.column_a,
+                schema_d.table_c.column_b
+              ]
+
     databaseMetadataCacheSource:
       cacheType: [IN_MEMORY | REDIS]
       host: localhost (can be ommited if cacheType is IN_MEMORY; required if cacheType is REDIS)
       port: 6379 (can be ommited if cacheType is IN_MEMORY; required if cacheType is REDIS)
       username: my_username (can be ommited if cacheType is IN_MEMORY; optional if cacheType is REDIS)
       password: my_password (can be ommited if cacheType is IN_MEMORY; optional if cacheType is REDIS)
-    
+
     queryTemplateDataSource:
       repositoryType: [IN_MEMORY | SQL_DATABASE]
       url: jdbc:mysql://127.0.0.1:3306/qb (can be ommited if repositoryType is IN_MEMORY; required if repositoryType is SQL_DATABASE)
       databaseType: [MySql | Oracle | PostgreSQL | Sqlite | SqlServer] (can be ommited if repositoryType is IN_MEMORY; required if repositoryType is SQL_DATABASE)
       username: root (can be ommited if repositoryType is IN_MEMORY; required if repositoryType is SQL_DATABASE)
       password: password (can be ommited if repositoryType is IN_MEMORY; required if repositoryType is SQL_DATABASE)
+```
 
 ## Database Metadata Caching
 `qb` uses target database metadata such as schema names, table and view names, and column data types to serve this data
@@ -144,6 +146,8 @@ If `qb` queried the target database for this metadata every time a client reques
 JSON-serialized SQL SELECT statement, or build a SQL SELECT statement from a JSON-serialized SQL SELECT statement, it could 
 affect the target database's performance.  To avoid this, when qb starts, it will query the target database for metadata
 and write the metadata to either an in-memory `HashMap` or a Redis cache.  Read below to understand each option.
+
+It's important to note that each `targetDataSource` is not required to be a database.  You are free to define a `targetDataSource` as any number of schemas or tables within a single database.  In addition, you can have these different schemas and tables running in different instances of `qb` behind different URLs, such as `https://my.domain.com/finance` or `https://my.domain.com/hr`.  Therefore, if you have a large database with large amounts of metadata to cache, you can use partition the database using one or both of these strategies so that the cache is smaller and more performant.
 
 ### In memory Cache
 An in-memory cache is best suited for development, small target databases, or when running only 1 Docker container in
