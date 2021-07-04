@@ -147,7 +147,7 @@ JSON-serialized SQL SELECT statement, or build a SQL SELECT statement from a JSO
 affect the target database's performance.  To avoid this, when qb starts, it will query the target database for metadata
 and write the metadata to either an in-memory `HashMap` or a Redis cache.  Read below to understand each option.
 
-It's important to note that each `targetDataSource` is not required to be a database.  You are free to define a `targetDataSource` as any number of schemas or tables within a single database.  In addition, you can have these different schemas and tables running in different instances of `qb` behind different URLs, such as `https://my.domain.com/finance` or `https://my.domain.com/hr`.  Therefore, if you have a large database with large amounts of metadata to cache, you can use partition the database using one or both of these strategies so that the cache is smaller and more performant.
+It's important to note that each `targetDataSource` is not required to be a database.  You are free to define a `targetDataSource` as any number of schemas or tables within a single database.  In addition, you can have these different schemas and tables running in different instances of `qb` behind different URLs, such as `https://my.domain.com/finance` or `https://my.domain.com/hr`.  Therefore, if you have a large database with large amounts of metadata to cache, you can partition the database using one or both of these strategies so that the cache is smaller and more performant.
 
 ### In memory Cache
 An in-memory cache is best suited for development, small target databases, or when running only 1 Docker container in
