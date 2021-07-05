@@ -3,7 +3,7 @@
 # qb (Query Builder)
 
 ## About ![Notebook](https://github.githubassets.com/images/icons/emoji/unicode/1f4d3.png)
-qb stands for Query Builder.
+`qb` stands for Query Builder.
 
 Catchy acronyms for `qb` might be "cubey".  Being that this is a software project, this project gets marketing points 
 if it's name or logo pays homage to the cube/hexagon.
@@ -33,7 +33,7 @@ The following databases are planned to be supported in the future:
 - Oracle
 - SQL Server 
 
-## Use ![Hammer and Wrench](https://github.githubassets.com/images/icons/emoji/unicode/1f6e0.png)
+## Back End Usage ![Hammer and Wrench](https://github.githubassets.com/images/icons/emoji/unicode/1f6e0.png)
 
 #### Introductory Tutorial
 
@@ -137,7 +137,7 @@ The example `YAML` file looks like this:
       password: password (can be ommited if repositoryType is IN_MEMORY; required if repositoryType is SQL_DATABASE)
 ```
 
-## Database Metadata Caching
+### Database Metadata Caching
 `qb` uses target database metadata such as schema names, table and view names, and column data types to serve this data
 to clients, validate JSON-serialized SQL SELECT statements, and build a SQL SELECT statement from the JSON-serialized SQL 
 SELECT statement that can be run against the target database. 
@@ -149,7 +149,7 @@ and write the metadata to either an in-memory `HashMap` or a Redis cache.  Read 
 
 It's important to note that each `targetDataSource` is not required to be a database.  You are free to define a `targetDataSource` as any number of schemas or tables within a single database.  In addition, you can have these different schemas and tables running in different instances of `qb` behind different URLs, such as `https://my.domain.com/finance` or `https://my.domain.com/hr`.  Therefore, if you have a large database with large amounts of metadata to cache, you can partition the database using one or both of these strategies so that the cache is smaller and more performant.
 
-### In memory Cache
+#### In memory Cache
 An in-memory cache is best suited for development, small target databases, or when running only 1 Docker container in
 a container orchestration platform.
 
@@ -181,7 +181,7 @@ queryTemplateDataSource:
 
 ***NOTE:  There are plans to add an API endpoint that will refresh the cache, so that this can be done on-demand.
 
-### Redis Cache
+#### Redis Cache
 A Redis cache is best suited for production or large target databases.
 
 To enable Redis caching, change the `databaseMetadataCacheSource.cacheType` value to `REDIS` (it is case-sensitive):
@@ -226,7 +226,7 @@ When the `update_cache` environment variable is set to `true` (the default is `f
 will read target database metadata and write it to the Redis cache specified in the `qb.yml` file and then exit.  This 
 allows you to set up a scheduled task to initially populate and refresh the Redis cache.
 
-## Query Template Persistence
+### Query Template Persistence
 
 `qb` allows users to save their queries so that they can execute them in the future without having to rebuild them and so 
 that they and other users can use them as sub queries when building other queries.  
@@ -243,11 +243,119 @@ and retrieving queries.
 No other `queryTemplateDataSource` `YAML` properties are needed if the `repositoryType` is `IN_MEMORY`.  If the `repositoryType` 
 is `SQL_DATABASE`, then `url`, `databaseType`, `username`, and `password` are required.
 
+## Front End / UI Usage ![Hammer and Wrench](https://github.githubassets.com/images/icons/emoji/unicode/1f6e0.png)
+
+### Menu Bar Overview
+
+If you are familiar with the syntax of a `SQL SELECT` statement, then the `qb` UI will look familiar.  The UI has 7 tabs
+in the menu bar at the top of the page.  
+
+![UI Menu Bar](./readme-images/ui_menu_bar.png)
+
+Most SQL databases have schemas, which contain tables, which contain columns. 
+
+The tabs try to follow this pattern from left to right:
+
+- `Databases`: A drop down of the databases that the user can query.
+- `Sub Queries`: An accordian-style page that users can use to write Common Table Expressions (CTEs) that are eligible to be used in the `Criteria` tab as sub queries.
+- `Schemas & Tables`: Displays 2 select boxes of the selected database's schemas and tables.
+- `Joins`: If the user selects multiple tables from `Schemas & Tables`, then the tables' join relationships are defined here.
+- `Columns`: Displays 2 select boxes of the selected tables' columns.
+
+The remaining 2 tabs, `Criteria` and `Other Options` are more complex:
+
+- `Criteria`: Allows the user to filter data using nested matching criteria.  In SQL, each criterion is a `WHERE` clause.  Criteria 
+can be nested as deep as the user desires.
+- `Other Options`: This is a miscellaneous catch-all tab for various other options such as limiting the rows returned in the query
+result, choosing only distinct / unique records, suppressing records that have null for selected columns' value, etc.
+
+### Query Guidance Messaging
+
+After each user action, the UI will run validation rules and display a message to the user in an effort to assist them in 
+writing a correct query.   
+
+These Query Guidance Messages can be seen just below the menu bar and are in red text.  For instance, when a user arrives 
+at the UI home page, they will see a Query Guidance Message instructing them to `Select 1 database`:
+
+![Query Guidance Message 1](./readme-images/query_guidance_message_1.png)  
+
+These Query Guidance Messages must be resolved before the user can run their query.  However, a user does not need to resolve 
+these Query Guidance Messages in order to save a query, thus allowing users to save queries as works-in-progress.
+
+The Query Guidance Messages are intended to be living, interactive documentation to help the users unfamiliear with SQL build 
+queries.
+
+### Advanced UI Features
+
+Below are advanced UI features: 
+
+#### Query Parameters
+
+Users can parameterize their queries by prefixing a `@` in front of some text in a criterion's filter text box (think `p@r@meter`).  
+
+![Parameterize a Query](./readme-images/query_parameter.png)
+
+In the example below, we create a parameterized query that gets a customer's name given a parameter that we name `the_customer_id`
+that will be the customer id:
+
+https://user-images.githubusercontent.com/21240865/124415700-64d1d880-dd23-11eb-9d8f-e2d11a29f777.mp4
+
+Continue reading the Saving Queries section to understand how the query parameter will be saved with the query.
+
+#### Saving Queries
+
+When the user saves the query, a query parameter with the name `the_customer_id` will be displayed:
+
+https://user-images.githubusercontent.com/21240865/124415792-8fbc2c80-dd23-11eb-8a7e-f9cadeb35606.mp4
+
+When saving a query, a user has 3 fields to complete:
+
+- `Name`: The name of the query.
+- `Discoverable`: `Yes` if other users can find and use this query.  Otherwise, `No`.
+- `Description`: An optional free-hand text that describes what this query does.
+
+In addition, the Parameters section is not editable, but contains the following information about each parameter in the query:
+
+- `Parameter`:  The query parameter name (the text that is prefixed with `@` in a criterion's filter text box).
+- `Allows Multiple Values`: `true` if multiple values can be passed into the parameter (`1, 2, 3` or `"bob", "sam", "joe"`).  This is `true` if the criterion's operator is `IN` or `NOT IN`.  This is `false` if only a single value can be passed into the parameter (`1` or `"bob"`).  
+- `Data Type`:  The data type of the parameter.
+
+As detailed in the next section on Sub Queries below, other users can then incorporate this query into their own query 
+and pass a value in for the parameter `the_customer_id`.
+
+#### Sub Queries
+
+Users can use other users' queries in their own queries by "importing" them as sub queries.  Similar to how the `@` prefix 
+denotes a query parameter, a `$` prefix denotes a sub query (think `$ub query`).
+
+Picking up where the Saving Queries section above left off, a user can "import" or use the `getCustomerName` query in another query:
+
+https://user-images.githubusercontent.com/21240865/124415811-98146780-dd23-11eb-9882-f515f3d10297.mp4
+
+As you can see at the end of the video above, `qb` logs the API response to the browser's console, which contains the generated SQL.  You
+can see that the SQL includes a Common Table Expression (or CTE) with the name of `theCustomerName`, which is used in the 
+SQL's `WHERE` clause as a sub query.
+
+### Embedding `qb` in an Application
+
+`qb` is intended to be embedded in other applications so that users can query databases through the application of their choice 
+(ex:  Tableau, Excel, ServiceNow, Business Objects, etc) and share/reuse queries across these applications.  
+
+The video above shows that `qb` logs the API response to the browser's console, but it does not show that the same API response
+is posted as a message to `qb`'s parent window, which would be the application it's embedded in.  The application that `qb` is embedded in
+needs to have logic to handle this message.  This logic will differ depending on the application that `qb` is embedded in and
+how the message's data will be handled.
+
+Below are some examples of how to write this logic/code when embedding `qb` in different applications. 
+
+[Web App Example](./src/main/ui/examples/web-app/web-app.html)
+
+[Tableau Web Data Connector Example](./src/main/ui/examples/tableau-web-data-connector)
+
 ## Local Development
 
 #### Compile and Run the API
-To compile the API into a JAR, build a docker image with the JAR in it, and run the API locally run the following command from the project root 
-directory:
+To compile `qb` into a JAR, build a docker image with the JAR in it, and run `qb` locally, do the following:
 
 1) `cd` to the root of this project.
 
