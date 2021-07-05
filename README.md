@@ -5,23 +5,15 @@
 ## About ![Notebook](https://github.githubassets.com/images/icons/emoji/unicode/1f4d3.png)
 `qb` stands for Query Builder.
 
-`qb` seeks to provide a query builder GUI (graphical user interface) "web plug-in" to allow users to create, execute, and share 
-SQL SELECT queries.  To do this, `qb` is a docker image that, when run as a container, runs a Spring Boot REST API that 
-also serves a React front end.   
+`qb` provides a query builder GUI (graphical user interface) that is designed to be embedded in other applications ([a web app](http://querybuilder4j.net/web-app/index.html), [Tableau](http://querybuilder4j.net/tableau/web-data-connector/qb4j.html), Excel, etc) to allow users to create, execute, and share SQL SELECT queries.  
 
-qb's purpose is to read a target database(s) metadata and data and serve it up through a REST API.  In addition, it
-can consume, validate, and run a JSON-serialized `SQL SELECT` statement and pass the query results back
-to the GUI.  
-
-The GUI is intended to be an `iframe` embedded in an application.  When the GUI receives query results
-from the REST API, it will post a message to the parent window, which allows the parent window to 
-consume, analyze, and visualize the data to its users as it sees fit.
+To do this, `qb` is a docker image that, when run as a container, runs a Spring Boot REST API that also serves a React front end / UI.    
 
 #### What databases does qb support?
 
-Currently, `qb` has passed tests to read and query the following databases:
+Currently, `qb` has been successfully tested with the following databases:
 
-- PostgreSQL
+- PostgreSQL (Redshift may work since it's based on PostgreSQL)
 - MySQL
 - SQLite
 
