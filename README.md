@@ -5,9 +5,6 @@
 ## About ![Notebook](https://github.githubassets.com/images/icons/emoji/unicode/1f4d3.png)
 `qb` stands for Query Builder.
 
-Catchy acronyms for `qb` might be "cubey".  Being that this is a software project, this project gets marketing points 
-if it's name or logo pays homage to the cube/hexagon.
-
 `qb` seeks to provide a query builder GUI (graphical user interface) "web plug-in" to allow users to create, execute, and share 
 SQL SELECT queries.  To do this, `qb` is a docker image that, when run as a container, runs a Spring Boot REST API that 
 also serves a React front end.   
