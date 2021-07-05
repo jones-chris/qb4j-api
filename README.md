@@ -298,7 +298,7 @@ Users can parameterize their queries by prefixing a `@` in front of some text in
 In the example below, we create a parameterized query that gets a customer's name given a parameter that we name `the_customer_id`
 that will be the customer id:
 
-(insert video here)
+https://user-images.githubusercontent.com/21240865/124415700-64d1d880-dd23-11eb-9d8f-e2d11a29f777.mp4
 
 Continue reading the Saving Queries section to understand how the query parameter will be saved with the query.
 
@@ -306,7 +306,19 @@ Continue reading the Saving Queries section to understand how the query paramete
 
 When the user saves the query, a query parameter with the name `the_customer_id` will be displayed:
 
-(insert video here)
+https://user-images.githubusercontent.com/21240865/124415792-8fbc2c80-dd23-11eb-8a7e-f9cadeb35606.mp4
+
+When saving a query, a user has 3 fields to complete:
+
+- `Name`: The name of the query.
+- `Discoverable`: `Yes` if other users can find and use this query.  Otherwise, `No`.
+- `Description`: An optional free-hand text that describes what this query does.
+
+In addition, the Parameters section is not editable, but contains the following information about each parameter in the query:
+
+- `Parameter`:  The query parameter name (the text that is prefixed with `@` in a criterion's filter text box).
+- `Allows Multiple Values`: `true` if multiple values can be passed into the parameter (`1, 2, 3` or `"bob", "sam", "joe"`).  This is `true` if the criterion's operator is `IN` or `NOT IN`.  This is `false` if only a single value can be passed into the parameter (`1` or `"bob"`).  
+- `Data Type`:  The data type of the parameter.
 
 As detailed in the next section on Sub Queries below, other users can then incorporate this query into their own query 
 and pass a value in for the parameter `the_customer_id`.
@@ -314,24 +326,24 @@ and pass a value in for the parameter `the_customer_id`.
 #### Sub Queries
 
 Users can use other users' queries in their own queries by "importing" them as sub queries.  Similar to how the `@` prefix 
-denotes a query parameter, a `$` prefix denotes a sub query (think `$ubquery`).
+denotes a query parameter, a `$` prefix denotes a sub query (think `$ub query`).
 
-Picking up where the Saving Queries section left off, a user can "import" or use the `getCustomerName` query:
+Picking up where the Saving Queries section above left off, a user can "import" or use the `getCustomerName` query in another query:
 
-(insert video here) 
+https://user-images.githubusercontent.com/21240865/124415811-98146780-dd23-11eb-9882-f515f3d10297.mp4
 
-As you can see at the end of the video above, the console logs the response from the API, which contains the generated SQL.  You
+As you can see at the end of the video above, `qb` logs the API response to the browser's console, which contains the generated SQL.  You
 can see that the SQL includes a Common Table Expression (or CTE) with the name of `theCustomerName`, which is used in the 
 SQL's `WHERE` clause as a sub query.
 
 ### Embedding `qb` in an Application
 
-`qb` is intended to embedded in other applications so that users can query databases through the application of their choice 
+`qb` is intended to be embedded in other applications so that users can query databases through the application of their choice 
 (ex:  Tableau, Excel, ServiceNow, Business Objects, etc) and share/reuse queries across these applications.  
 
 The video above shows that `qb` logs the API response to the browser's console, but it does not show that the same API response
-as a message to it's parent window, which would be the application it's embedded in.  The application that `qb` is embedded in
-needs to have some logic to handle this message.  This logic will differ depending on the application that `qb` is embedded in and
+is posted as a message to `qb`'s parent window, which would be the application it's embedded in.  The application that `qb` is embedded in
+needs to have logic to handle this message.  This logic will differ depending on the application that `qb` is embedded in and
 how the message's data will be handled.
 
 Below are some examples of how to write this logic/code when embedding `qb` in different applications. 
