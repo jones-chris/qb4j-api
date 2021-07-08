@@ -7,21 +7,21 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MySqlSqlBuilderTest extends SqlBuilderCommonTests {
+public class SqliteSqlBuilderTest extends SqlBuilderCommonTests{
 
-    public MySqlSqlBuilderTest() {
+    public SqliteSqlBuilderTest() {
         super();
 
         this.databaseMetadataCacheDao = Mockito.mock(DatabaseMetadataCacheDao.class);
         this.queryTemplateService = Mockito.mock(QueryTemplateService.class);
         this.sqlBuilder = Mockito.spy(
-                new MySqlSqlBuilder(
+                new SqliteSqlBuilder(
                         this.databaseMetadataCacheDao,
                         this.queryTemplateService
                 )
         );
-        this.beginningDelimiter = '`';
-        this.endingDelimiter = '`';
+        this.beginningDelimiter = '"';
+        this.endingDelimiter = '"';
     }
 
 }
