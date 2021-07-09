@@ -59,10 +59,8 @@ public class SqlBuilderFactoryTest {
                 .thenReturn(database);
         SelectStatement selectStatement = new SelectStatement();
         selectStatement.setDatabase(database);
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -80,10 +78,8 @@ public class SqlBuilderFactoryTest {
                 .thenReturn(database);
         SelectStatement selectStatement = new SelectStatement();
         selectStatement.setDatabase(database);
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -101,10 +97,8 @@ public class SqlBuilderFactoryTest {
                 .thenReturn(database);
         SelectStatement selectStatement = new SelectStatement();
         selectStatement.setDatabase(database);
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -122,10 +116,8 @@ public class SqlBuilderFactoryTest {
                 .thenReturn(database);
         SelectStatement selectStatement = new SelectStatement();
         selectStatement.setDatabase(database);
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -143,10 +135,8 @@ public class SqlBuilderFactoryTest {
                 .thenReturn(database);
         SelectStatement selectStatement = new SelectStatement();
         selectStatement.setDatabase(database);
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")

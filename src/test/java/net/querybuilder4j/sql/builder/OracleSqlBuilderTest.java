@@ -37,10 +37,8 @@ public class OracleSqlBuilderTest extends SqlBuilderCommonTests {
     @Test
     public void createLimitClause_noLimitGeneratesEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -55,10 +53,8 @@ public class OracleSqlBuilderTest extends SqlBuilderCommonTests {
     @Test
     public void createLimitClause_noCriteriaGeneratesStringWithWhereClause() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -79,9 +75,7 @@ public class OracleSqlBuilderTest extends SqlBuilderCommonTests {
     public void createLimitClause_criteriaGeneratesStringWithWhereClause() {
         Column column = new Column("database", "schema", "table", "column", 4, "alias");
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(column)
-        );
+        selectStatement.getColumns().add(column);
         selectStatement.setTable(
                 new Table("database", "schema", "table")
         );
@@ -90,10 +84,8 @@ public class OracleSqlBuilderTest extends SqlBuilderCommonTests {
         Filter filter = new Filter(
                 List.of("1"), List.of(), List.of()
         );
-        selectStatement.setCriteria(
-                List.of(
-                        new Criterion(0, null, Conjunction.And, column, Operator.equalTo, filter, List.of())
-                )
+        selectStatement.getCriteria().add(
+                new Criterion(0, null, Conjunction.And, column, Operator.equalTo, filter, List.of())
         );
         this.sqlBuilder.setStatement(selectStatement);
 
@@ -108,10 +100,8 @@ public class OracleSqlBuilderTest extends SqlBuilderCommonTests {
     @Test
     public void createOffsetClause_noOffsetGeneratesEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -126,10 +116,8 @@ public class OracleSqlBuilderTest extends SqlBuilderCommonTests {
     @Test
     public void createOffsetClause_nonNullOffsetGeneratesNonEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")

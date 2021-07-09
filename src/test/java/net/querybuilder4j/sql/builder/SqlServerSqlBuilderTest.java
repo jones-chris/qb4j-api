@@ -35,10 +35,8 @@ public class SqlServerSqlBuilderTest extends SqlBuilderCommonTests{
     @Test
     public void createLimitClause_noLimitGeneratesEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -53,10 +51,8 @@ public class SqlServerSqlBuilderTest extends SqlBuilderCommonTests{
     @Test
     public void createLimitClause_limitGeneratesNonEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -76,10 +72,8 @@ public class SqlServerSqlBuilderTest extends SqlBuilderCommonTests{
     @Test
     public void createOffsetClause_nullOffsetGeneratesEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
@@ -94,10 +88,8 @@ public class SqlServerSqlBuilderTest extends SqlBuilderCommonTests{
     @Test
     public void createOffsetClause_nonNullOffsetGeneratesNonEmptyString() {
         SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setColumns(
-                List.of(
-                        new Column("database", "schema", "table", "column", 4, "alias")
-                )
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
         );
         selectStatement.setTable(
                 new Table("database", "schema", "table")
