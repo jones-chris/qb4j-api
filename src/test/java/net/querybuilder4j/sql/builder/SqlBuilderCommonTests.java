@@ -1,5 +1,6 @@
 package net.querybuilder4j.sql.builder;
 
+import net.querybuilder4j.TestUtils;
 import net.querybuilder4j.constants.DatabaseType;
 import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCacheDao;
 import net.querybuilder4j.service.query_template.QueryTemplateService;
@@ -49,7 +50,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void setStatement_setsFieldsCorrectly() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
 
         this.sqlBuilder.setStatement(selectStatement);
 
@@ -58,7 +59,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void buildSql_callsAllSqlClauseGenerationMethods() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
 
         this.sqlBuilder.setStatement(selectStatement)
                 .buildSql();
@@ -76,7 +77,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void buildSql_sqlStringContainsBeginningAndEndingDelimitersCharacters() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
 
         String sql = this.sqlBuilder.setStatement(selectStatement)
                 .buildSql();
@@ -86,7 +87,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createCommonTableExpressionClause_emptyListResultsInEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         this.sqlBuilder.setStatement(selectStatement);
 
         this.sqlBuilder.createCommonTableExpressionClause();
@@ -96,11 +97,11 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createCommonTableExpressionClause_nonEmptyListResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         CommonTableExpression commonTableExpression = new CommonTableExpression();
         commonTableExpression.setName("name");
         commonTableExpression.setQueryName("cte1");
-        commonTableExpression.setSelectStatement(this.buildSelectStatement());
+        commonTableExpression.setSelectStatement(TestUtils.buildSelectStatement());
         selectStatement.getCommonTableExpressions().add(commonTableExpression);
         this.sqlBuilder.setStatement(selectStatement);
         when(this.databaseMetadataCacheDao.findDatabases("database"))
@@ -115,7 +116,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createJoinClause_nonEmptyListResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         Join join = new Join();
         join.setJoinType(Join.JoinType.LEFT);
         join.setParentJoinColumns(
@@ -144,7 +145,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createWhereClause_nonEmptyListResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         selectStatement.getCriteria().add(
                 new Criterion(
                         0,
@@ -169,7 +170,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createGroupByClause_isGroupByAndNonEmptyColumnListResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         selectStatement.setGroupBy(true);
         selectStatement.getColumns().add(
                 new Column("database", "schema", "table", "column", 4, "alias")
@@ -183,7 +184,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createOrderByClause_ascendingAndNonEmptyColumnListResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         selectStatement.setOrderBy(true);
         selectStatement.setAscending(true);
         selectStatement.getColumns().add(
@@ -198,7 +199,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createOrderByClause_descendingAndNonEmptyColumnListResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         selectStatement.setOrderBy(true);
         selectStatement.setAscending(false);
         selectStatement.getColumns().add(
@@ -213,7 +214,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createLimitClause_nonNullLimitResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         long limit = 10L;
         selectStatement.setLimit(limit);
         this.sqlBuilder.setStatement(selectStatement);
@@ -225,7 +226,7 @@ public abstract class SqlBuilderCommonTests {
 
     @Test
     public void createOffsetClause_nonNullOffsetResultsInNonEmptyStringBuilder() {
-        SelectStatement selectStatement = this.buildSelectStatement();
+        SelectStatement selectStatement = TestUtils.buildSelectStatement();
         long offset = 10L;
         selectStatement.setOffset(offset);
         this.sqlBuilder.setStatement(selectStatement);
@@ -233,21 +234,6 @@ public abstract class SqlBuilderCommonTests {
         this.sqlBuilder.createOffsetClause();
 
         assertNotEquals("", this.sqlBuilder.stringBuilder.toString());
-    }
-
-    private SelectStatement buildSelectStatement() {
-        SelectStatement selectStatement = new SelectStatement();
-        selectStatement.setDatabase(
-                new Database("database", DatabaseType.MySql)
-        );
-        selectStatement.getColumns().add(
-                new Column("database", "schema", "table", "column", 4, "alias")
-        );
-        selectStatement.setTable(
-                new Table("database", "schema", "table")
-        );
-
-        return selectStatement;
     }
 
     private String getExpectedSql() {

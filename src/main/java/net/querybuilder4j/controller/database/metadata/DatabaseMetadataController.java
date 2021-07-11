@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
+@CrossOrigin(origins = { "http://localhost:3000" }) // Intended for local development.
 @RequestMapping("/metadata")
 public class DatabaseMetadataController {
 
@@ -26,7 +26,7 @@ public class DatabaseMetadataController {
     }
 
     /**
-     * Returns all QueryBuilder4J target data sources.
+     * Returns all qb target data sources.
      *
      * @return A ResponseEntity containing a List of Database objects.
      */
@@ -43,7 +43,7 @@ public class DatabaseMetadataController {
      */
     @GetMapping(value = "/{database}/schema")
     public ResponseEntity<List<Schema>> getSchemas(@PathVariable String database) throws Exception {
-        List<Schema> schemas = databaseMetaDataService.getSchemas(database);
+        List<Schema> schemas = this.databaseMetaDataService.getSchemas(database);
         return ResponseEntity.ok(schemas);
     }
 
@@ -60,7 +60,7 @@ public class DatabaseMetadataController {
         String[] splitSchemas = schemas.split("&");
         List<Table> allTables = new ArrayList<>();
         for (String schema : splitSchemas) {
-            List<Table> tables = databaseMetaDataService.getTablesAndViews(database, schema);
+            List<Table> tables = this.databaseMetaDataService.getTablesAndViews(database, schema);
             allTables.addAll(tables);
         }
 
@@ -77,7 +77,7 @@ public class DatabaseMetadataController {
     public ResponseEntity<List<Column>> getColumns(@RequestBody List<Table> tables) throws Exception {
         List<Column> allColumns = new ArrayList<>();
         for (Table table : tables) {
-            List<Column> columns = databaseMetaDataService.getColumns(table.getDatabaseName(), table.getSchemaName(), table.getTableName());
+            List<Column> columns = this.databaseMetaDataService.getColumns(table.getDatabaseName(), table.getSchemaName(), table.getTableName());
             allColumns.addAll(columns);
         }
 

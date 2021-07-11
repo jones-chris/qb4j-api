@@ -1,11 +1,15 @@
 package net.querybuilder4j;
 
+import net.querybuilder4j.constants.DatabaseType;
+import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.criterion.Conjunction;
 import net.querybuilder4j.sql.statement.criterion.Criterion;
 import net.querybuilder4j.sql.statement.criterion.Filter;
 import net.querybuilder4j.sql.statement.criterion.Operator;
 import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
+import net.querybuilder4j.sql.statement.database.Database;
+import net.querybuilder4j.sql.statement.table.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +48,21 @@ public class TestUtils {
                                 s -> s.substring(0, s.indexOf("_arg"))
                         )
                 );
+    }
+
+    public static SelectStatement buildSelectStatement() {
+        SelectStatement selectStatement = new SelectStatement();
+        selectStatement.setDatabase(
+                new Database("database", DatabaseType.MySql)
+        );
+        selectStatement.getColumns().add(
+                new Column("database", "schema", "table", "column", 4, "alias")
+        );
+        selectStatement.setTable(
+                new Table("database", "schema", "table")
+        );
+
+        return selectStatement;
     }
 
 }

@@ -73,7 +73,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
     }
 
     @Override
-    public void refreshCache() throws Exception {
+    public void refreshCache() {
         // Clear all Redis databases.
         this.jedis.flushAll();
 

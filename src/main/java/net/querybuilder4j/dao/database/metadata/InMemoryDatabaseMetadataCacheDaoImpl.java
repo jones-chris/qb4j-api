@@ -1,6 +1,7 @@
 package net.querybuilder4j.dao.database.metadata;
 
 import net.querybuilder4j.config.QbConfig;
+import net.querybuilder4j.exceptions.CacheMissException;
 import net.querybuilder4j.exceptions.CacheRefreshException;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
@@ -149,12 +150,12 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
     }
 
     @Override
-    public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) throws Exception {
+    public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) {
         return this.findColumns(databaseName, schemaName, tableName)
                 .stream()
                 .filter(column -> column.getColumnName().equals(columnName))
                 .findFirst()
-                .orElseThrow(Exception::new);
+                .orElseThrow(CacheMissException::new);
     }
 
 }
