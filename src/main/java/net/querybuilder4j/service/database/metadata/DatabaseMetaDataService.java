@@ -11,8 +11,8 @@ import java.util.Set;
 public interface DatabaseMetaDataService {
 
     Set<Database> getDatabases();
-    List<Schema> getSchemas(String databaseName) throws Exception;
-    List<Table> getTablesAndViews(String databaseName, String schema) throws Exception;
-    List<Column> getColumns(String databaseName, String schema, String table) throws Exception;
+    List<Schema> getSchemas(String databaseName);
+    List<Table> getTablesAndViews(String databaseName, String schema);
+    List<Column> getColumns(String databaseName, String schema, String table) ;
 
 }

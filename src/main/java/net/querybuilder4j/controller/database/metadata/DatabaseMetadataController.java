@@ -42,7 +42,7 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Schema objects.
      */
     @GetMapping(value = "/{database}/schema")
-    public ResponseEntity<List<Schema>> getSchemas(@PathVariable String database) throws Exception {
+    public ResponseEntity<List<Schema>> getSchemas(@PathVariable String database) {
         List<Schema> schemas = this.databaseMetaDataService.getSchemas(database);
         return ResponseEntity.ok(schemas);
     }
@@ -55,8 +55,10 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Table objects.
      */
     @GetMapping(value = "/{database}/{schemas}/table-and-view")
-    public ResponseEntity<List<Table>> getTablesAndViews(@PathVariable String database,
-                                                         @PathVariable String schemas) throws Exception {
+    public ResponseEntity<List<Table>> getTablesAndViews(
+            @PathVariable String database,
+            @PathVariable String schemas
+    ) {
         String[] splitSchemas = schemas.split("&");
         List<Table> allTables = new ArrayList<>();
         for (String schema : splitSchemas) {
@@ -74,7 +76,7 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Column objects.
      */
     @PostMapping(value = "/{database}/{schema}/{tables}/column")
-    public ResponseEntity<List<Column>> getColumns(@RequestBody List<Table> tables) throws Exception {
+    public ResponseEntity<List<Column>> getColumns(@RequestBody List<Table> tables) {
         List<Column> allColumns = new ArrayList<>();
         for (Table table : tables) {
             List<Column> columns = this.databaseMetaDataService.getColumns(table.getDatabaseName(), table.getSchemaName(), table.getTableName());

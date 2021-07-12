@@ -57,6 +57,10 @@ script:
   # Build the uber jar and run unit tests.
   - mvn clean install -Dmaven.javadoc.skip=true
 
+  # Send unit test reports to Code Cov.
+  - curl -s https://codecov.io/bash > codecov.sh
+  - bash codecov.sh -t $CODECOV_TOKEN
+
   # Build the docker image.
   - docker image build -t joneschris/qb:"$PROJECT_VERSION" --build-arg project_version="$PROJECT_VERSION" .
 

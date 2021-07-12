@@ -12,12 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
+@CrossOrigin(origins = { "http://localhost:3000" }) // Intended for local development,
 @RequestMapping("/query-template")
 public class QueryTemplateController {
 
     private QueryTemplateService queryTemplateService;
-
 
     @Autowired
     public QueryTemplateController(QueryTemplateService queryTemplateService) {

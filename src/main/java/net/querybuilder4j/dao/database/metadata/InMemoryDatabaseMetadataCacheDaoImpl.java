@@ -82,7 +82,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
         return this.cache.stream()
                 .filter(database -> database.getDatabaseName().equals(databaseName))
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
                 .filter(schema -> schema.getSchemaName().equals(schemaName))
                 .map(Schema::getTables)
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
                 .filter(table -> table.getTableName().equals(tableName))
                 .map(Table::getColumns) // todo: sort alphabetically.
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
                 .filter(col -> col.getColumnName().equals(columnName))
                 .map(Column::getDataType)
                 .findFirst()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override

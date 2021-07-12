@@ -126,7 +126,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
     public List<Schema> findSchemas(String databaseName) {
         this.jedis.select(this.SCHEMA_REDIS_DB);
 
-        // Get all Redis keys that start with `{datbabaseName}.*` (notice the trailing period before `*`.
+        // Get all Redis keys that start with `{databaseName}.*` (notice the trailing period before `*`.
         String databaseKeyPattern = databaseName + ".*";
         Set<String> schemasRedisKeys = this.jedis.keys(databaseKeyPattern);
 
