@@ -1,9 +1,6 @@
 package net.querybuilder4j.dao.database.metadata;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.querybuilder4j.config.QbConfig;
-import net.querybuilder4j.exceptions.CacheJsonDeserializationException;
 import net.querybuilder4j.exceptions.CacheMissException;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
@@ -13,7 +10,6 @@ import net.querybuilder4j.util.DatabaseMetadataCrawler;
 import net.querybuilder4j.util.Utils;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

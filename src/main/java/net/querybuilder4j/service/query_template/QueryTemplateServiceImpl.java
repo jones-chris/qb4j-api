@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class QueryTemplateServiceImpl implements QueryTemplateService {
@@ -28,8 +29,18 @@ public class QueryTemplateServiceImpl implements QueryTemplateService {
     @Override
     public boolean save(SelectStatement selectStatement) {
         // Set metadata.
+        Objects.requireNonNull(selectStatement, "selectStatement is null");
+        Objects.requireNonNull(selectStatement.getMetadata(), "selectStatement.metadata is null");
+        Objects.requireNonNull(selectStatement.getColumns(), "selectStatement.columns is null");
+
+        long limit = 10L; // todo:  This is the default limit.  Make this configurable in the future.
+        if (selectStatement.getLimit() != null) {
+            limit = selectStatement.getLimit();
+        }
+
         selectStatement.getMetadata().setNumberOfColumnsReturned(selectStatement.getColumns().size());
-        selectStatement.getMetadata().setMaxNumberOfRowsReturned(selectStatement.getLimit());
+        selectStatement.setLimit(limit);
+        selectStatement.getMetadata().setMaxNumberOfRowsReturned(limit);
         selectStatement.getMetadata().setColumns(selectStatement.getColumns());
 
         // Create metadata for criteria parameters.
@@ -74,7 +85,8 @@ public class QueryTemplateServiceImpl implements QueryTemplateService {
             commonTableExpressions.forEach(commonTableExpression -> {
                 SelectStatement selectStatement = this.queryTemplateDao.findByName(
                         commonTableExpression.getQueryName(),
-                        commonTableExpression.getVersion());
+                        commonTableExpression.getVersion()
+                );
 
                 selectStatement.setCriteriaArguments(commonTableExpression.getParametersAndArguments());
 
