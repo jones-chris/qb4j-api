@@ -1,8 +1,9 @@
-package net.querybuilder4j.util;
+package net.querybuilder4j.dao.database.metadata;
 
 import net.querybuilder4j.exceptions.CacheRefreshException;
 import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.sql.statement.column.Column;
+import net.querybuilder4j.sql.statement.database.Database;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
 
@@ -11,8 +12,51 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public class DatabaseMetadataCrawler {
+/**
+ * This class is responsible for crawling a {@link List<net.querybuilder4j.config.QbConfig.TargetDataSource>} and building
+ * a {@link Set<Database>} from the metadata.
+ */
+public class DatabaseMetadataCrawlerDao {
+
+    /**
+     * A convience method that crawls/traverses the {@link net.querybuilder4j.config.QbConfig.TargetDataSource}s that are passed into it and returns
+     * a {@link List<Database>} with the database metadata.  This method is the equivalent of calling the {@link this#getSchemas(QbConfig.TargetDataSource)},
+     * {@link this#getTablesAndViews(QbConfig.TargetDataSource, String)}, and {@link this#getColumns(QbConfig.TargetDataSource, String, String)}
+     * if you desire a {@link List<Database>} encapsulating all this metadata.  If you would like to store the data in a
+     * different structure, then call each of these methods separately.
+     *
+     * @param targetDataSources A {@link List<net.querybuilder4j.config.QbConfig.TargetDataSource>} to retrieve database
+     *                          metadata for.
+     * @return {@link List<Database>}
+     */
+    public List<Database> getTargetDataSourceMetadata(List<QbConfig.TargetDataSource> targetDataSources) {
+        List<Database> databases = new ArrayList<>();
+
+        for (QbConfig.TargetDataSource targetDataSource : targetDataSources) {
+            // Get schemas
+            List<Schema> schemas = getSchemas(targetDataSource);
+            Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());
+            database.setSchemas(schemas);
+
+            // Get tables
+            for (Schema schema : database.getSchemas()) {
+                List<Table> tables = getTablesAndViews(targetDataSource, schema.getSchemaName());
+                schema.setTables(tables);
+
+                // Get columns
+                for (Table table : schema.getTables()) {
+                    List<Column> columns = getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
+                    table.setColumns(columns);
+                }
+            }
+
+            databases.add(database);
+        }
+
+        return databases;
+    }
 
     /**
      * Queries the target SQL database for schemas (excluding schemas defined in the `excludeObjects#schemas` of the
@@ -22,7 +66,7 @@ public class DatabaseMetadataCrawler {
      * @return {@link List <Schema>} A list of the database schemas.
      * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
      */
-    public static List<Schema> getSchemas(QbConfig.TargetDataSource targetDataSource) throws CacheRefreshException {
+    public List<Schema> getSchemas(QbConfig.TargetDataSource targetDataSource) throws CacheRefreshException {
         List<Schema> schemas = new ArrayList<>();
         String databaseName = targetDataSource.getName();
 
@@ -61,7 +105,7 @@ public class DatabaseMetadataCrawler {
      * @return {@link List<Table>} A list of the database tables and views.
      * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
      */
-    public static List<Table> getTablesAndViews(QbConfig.TargetDataSource targetDataSource, String schema) throws CacheRefreshException {
+    public List<Table> getTablesAndViews(QbConfig.TargetDataSource targetDataSource, String schema) throws CacheRefreshException {
         List<Table> tables = new ArrayList<>();
         String databaseName = targetDataSource.getName();
 
@@ -96,7 +140,7 @@ public class DatabaseMetadataCrawler {
      * @return {@link List<Column>} A list of the database columns.
      * @throws CacheRefreshException If a {@link SQLException} is thrown while querying the database.
      */
-    public static List<Column> getColumns(QbConfig.TargetDataSource targetDataSource, String schema, String table) throws CacheRefreshException {
+    public List<Column> getColumns(QbConfig.TargetDataSource targetDataSource, String schema, String table) throws CacheRefreshException {
         List<Column> columns = new ArrayList<>();
         String databaseName = targetDataSource.getName();
 

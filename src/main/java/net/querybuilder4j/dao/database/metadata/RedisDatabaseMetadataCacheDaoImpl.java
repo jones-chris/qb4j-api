@@ -6,7 +6,6 @@ import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
-import net.querybuilder4j.util.DatabaseMetadataCrawler;
 import net.querybuilder4j.util.Utils;
 import redis.clients.jedis.Jedis;
 
@@ -42,12 +41,21 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
     private final QbConfig qbConfig;
 
     /**
-     * The Redis/Jedis client.
+     * The Redis client.
      */
     private final Jedis jedis;
 
-    public RedisDatabaseMetadataCacheDaoImpl(QbConfig qbConfig) {
+    /**
+     * The class responsible for reading metadata from the target databases.
+     */
+    private final DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao;
+
+    public RedisDatabaseMetadataCacheDaoImpl(
+            QbConfig qbConfig,
+            DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao
+    ) {
         this.qbConfig = qbConfig;
+        this.databaseMetadataCrawlerDao = databaseMetadataCrawlerDao;
 
         // I know this constructor could just take `host` and `port` as parameters, but I think passing the QbConfig
         // parameter makes it clearer that this class'/constructor's parameters originate from the QbConfig bean and,
@@ -82,19 +90,19 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
             this.jedis.set(database.getFullyQualifiedName(), database.toString());
 
             // Get schema metadata and write to Redis.
-            List<Schema> schemas = DatabaseMetadataCrawler.getSchemas(targetDataSource);
+            List<Schema> schemas = this.databaseMetadataCrawlerDao.getSchemas(targetDataSource);
             this.jedis.select(this.SCHEMA_REDIS_DB);
             schemas.forEach(schema -> this.jedis.set(schema.getFullyQualifiedName(), schema.toString()));
 
             // Get tables metadata and write to Redis.
             for (Schema schema : schemas) {
-                List<Table> tables = DatabaseMetadataCrawler.getTablesAndViews(targetDataSource, schema.getSchemaName());
+                List<Table> tables = this.databaseMetadataCrawlerDao.getTablesAndViews(targetDataSource, schema.getSchemaName());
                 this.jedis.select(this.TABLE_REDIS_DB);
                 tables.forEach(table -> this.jedis.set(table.getFullyQualifiedName(), table.toString()));
 
                 // Get columns
                 for (Table table : tables) {
-                    List<Column> columns = DatabaseMetadataCrawler.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
+                    List<Column> columns = this.databaseMetadataCrawlerDao.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
                     this.jedis.select(this.COLUMN_REDIS_DB);
                     columns.forEach(column -> this.jedis.set(column.getFullyQualifiedName(), column.toString()));
                 }

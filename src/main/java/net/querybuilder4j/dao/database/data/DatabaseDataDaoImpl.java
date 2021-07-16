@@ -106,15 +106,7 @@ public class DatabaseDataDaoImpl implements DatabaseDataDao {
                 .buildSql();
 
         // Query the database.
-        DataSource dataSource = qbConfig.getTargetDataSourceAsDataSource(databaseName);
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
-            return new QueryResult(rs, null);
-        } catch (SQLException ex) {
-            throw new QueryFailureException(ex);
-        }
-
+        return this.executeQuery(databaseName, sql);
     }
 
 }

@@ -2,6 +2,7 @@ package net.querybuilder4j.sql.statement;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import net.querybuilder4j.util.CriteriaDeserializer;
 import net.querybuilder4j.sql.statement.column.Column;
@@ -11,6 +12,7 @@ import net.querybuilder4j.sql.statement.criterion.CriterionParameter;
 import net.querybuilder4j.sql.statement.join.Join;
 import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
 import net.querybuilder4j.sql.statement.table.Table;
+import net.querybuilder4j.util.CriteriaSerializer;
 
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ public class SelectStatement {
      * The criteria in the WHERE SQL clause.
      */
     @JsonDeserialize(using = CriteriaDeserializer.class)
+    @JsonSerialize(using = CriteriaSerializer.class)
     @JsonProperty(value = "criteria")
     private final List<Criterion> criteria = new ArrayList<>();
 

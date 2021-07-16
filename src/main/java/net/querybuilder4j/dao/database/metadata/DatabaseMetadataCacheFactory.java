@@ -14,6 +14,8 @@ public class DatabaseMetadataCacheFactory extends AbstractFactoryBean<DatabaseMe
 
     private final QbConfig qbConfig;
 
+    private final DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao = new DatabaseMetadataCrawlerDao();
+
     @Autowired
     public DatabaseMetadataCacheFactory(QbConfig qbConfig) {
         this.qbConfig = qbConfig;
@@ -29,10 +31,16 @@ public class DatabaseMetadataCacheFactory extends AbstractFactoryBean<DatabaseMe
     protected DatabaseMetadataCacheDao createInstance() {
         CacheType cacheType = this.qbConfig.getDatabaseMetadataCacheSource().getCacheType();
 
-        if (cacheType.equals(IN_MEMORY)) {
-            return new InMemoryDatabaseMetadataCacheDaoImpl(this.qbConfig);
-        } else if (cacheType.equals(REDIS)) {
-            return new RedisDatabaseMetadataCacheDaoImpl(this.qbConfig);
+        if (IN_MEMORY.equals(cacheType)) {
+            return new InMemoryDatabaseMetadataCacheDaoImpl(
+                    this.qbConfig,
+                    this.databaseMetadataCrawlerDao
+            );
+        } else if (REDIS.equals(cacheType)) {
+            return new RedisDatabaseMetadataCacheDaoImpl(
+                    this.qbConfig,
+                    this.databaseMetadataCrawlerDao
+            );
         } else {
             throw new CacheTypeNotRecognizedException(cacheType + " is not a recognized database metadata cache type");
         }

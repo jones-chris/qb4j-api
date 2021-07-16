@@ -21,6 +21,7 @@ public class Criterion implements SqlRepresentation {
 
     private int id;
 
+    @ToString.Exclude
     private Criterion parentCriterion;
 
     private Parenthesis openingParenthesis = Parenthesis.Empty;
@@ -35,6 +36,7 @@ public class Criterion implements SqlRepresentation {
 
     private List<Parenthesis> closingParenthesis = new ArrayList<>();
 
+    @ToString.Exclude
     private List<Criterion> childCriteria = new ArrayList<>();
 
     public Criterion(int id, Criterion parentCriterion, Conjunction conjunction, Column column, Operator operator, Filter filter,
