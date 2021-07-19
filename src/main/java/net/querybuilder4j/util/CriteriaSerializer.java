@@ -1,11 +1,9 @@
 package net.querybuilder4j.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import net.querybuilder4j.exceptions.JsonSerializationException;
 import net.querybuilder4j.sql.statement.criterion.CriteriaTreeFlattener;
 import net.querybuilder4j.sql.statement.criterion.Criterion;
 
@@ -33,9 +31,10 @@ public class CriteriaSerializer extends StdSerializer<List<Criterion>> {
             SerializerProvider serializerProvider
     ) throws IOException {
         Map<Integer, List<Criterion>> flattenedCriteria = CriteriaTreeFlattener.flattenCriteria(criterionList, new HashMap<>());
+
         jsonGenerator.writeStartArray();
 
-        // Flatten criteria values.
+        // Flatten criteria values, which is are all List<Criterion>.
         List<Criterion> flattenedCriteriaValues = flattenedCriteria.values()
                 .stream()
                 .flatMap(Collection::stream)
@@ -44,9 +43,38 @@ public class CriteriaSerializer extends StdSerializer<List<Criterion>> {
         // Write each criterion to the jsonGenerator.
         flattenedCriteriaValues.forEach(criterion -> {
             try {
-                jsonGenerator.writeObject(criterion);
+                jsonGenerator.writeStartObject();
+
+                // Id
+                jsonGenerator.writeNumberField("id", criterion.getId());
+
+                // Parent Id
+                Criterion parentCriterion = criterion.getParentCriterion();
+                if (parentCriterion != null) {
+                    jsonGenerator.writeNumberField("parentId", parentCriterion.getId());
+                }
+
+                // Conjunction
+                jsonGenerator.writeStringField("conjunction", criterion.getConjunction().toString());
+
+                // Column
+                jsonGenerator.writeObjectField("column", criterion.getColumn());
+
+                // Operator
+                jsonGenerator.writeStringField("operator", criterion.getOperator().toString());
+
+                // Filter object with Values array
+                jsonGenerator.writeObjectFieldStart("filter");
+                jsonGenerator.writeArrayFieldStart("values");
+                for (String filterValue : criterion.getFilter().getValues()) {
+                    jsonGenerator.writeString(filterValue);
+                }
+                jsonGenerator.writeEndArray();
+                jsonGenerator.writeEndObject();
+
+                jsonGenerator.writeEndObject();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new JsonSerializationException(e);
             }
         });
 

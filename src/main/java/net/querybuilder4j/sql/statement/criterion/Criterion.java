@@ -1,5 +1,6 @@
 package net.querybuilder4j.sql.statement.criterion;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import net.querybuilder4j.sql.builder.SqlValidator;
@@ -22,6 +23,7 @@ public class Criterion implements SqlRepresentation {
     private int id;
 
     @ToString.Exclude
+    @JsonIgnore
     private Criterion parentCriterion;
 
     private Parenthesis openingParenthesis = Parenthesis.Empty;
@@ -37,6 +39,7 @@ public class Criterion implements SqlRepresentation {
     private List<Parenthesis> closingParenthesis = new ArrayList<>();
 
     @ToString.Exclude
+    @JsonIgnore
     private List<Criterion> childCriteria = new ArrayList<>();
 
     public Criterion(int id, Criterion parentCriterion, Conjunction conjunction, Column column, Operator operator, Filter filter,

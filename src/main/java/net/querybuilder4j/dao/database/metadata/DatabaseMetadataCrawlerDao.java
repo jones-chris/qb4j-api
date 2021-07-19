@@ -21,7 +21,7 @@ import java.util.Set;
 public class DatabaseMetadataCrawlerDao {
 
     /**
-     * A convience method that crawls/traverses the {@link net.querybuilder4j.config.QbConfig.TargetDataSource}s that are passed into it and returns
+     * A convenience method that crawls/traverses the {@link net.querybuilder4j.config.QbConfig.TargetDataSource}s that are passed into it and returns
      * a {@link List<Database>} with the database metadata.  This method is the equivalent of calling the {@link this#getSchemas(QbConfig.TargetDataSource)},
      * {@link this#getTablesAndViews(QbConfig.TargetDataSource, String)}, and {@link this#getColumns(QbConfig.TargetDataSource, String, String)}
      * if you desire a {@link List<Database>} encapsulating all this metadata.  If you would like to store the data in a
@@ -75,10 +75,11 @@ public class DatabaseMetadataCrawlerDao {
 
             while (rs.next()) {
                 String schemaName = rs.getString("TABLE_SCHEM");
-                Schema schema = new Schema(databaseName, (schemaName == null) ? "null" : schemaName);
+                schemaName = (schemaName == null) ? "null" : schemaName.toLowerCase();
+                Schema schema = new Schema(databaseName, schemaName);
 
                 // Add the schema if it is not an excluded schema.
-                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schema.getSchemaName().toLowerCase())) {
+                if (! targetDataSource.getExcludeObjects().getSchemas().contains(schemaName)) {
                     schemas.add(schema);
                 }
             }
@@ -114,11 +115,12 @@ public class DatabaseMetadataCrawlerDao {
 
             while (rs.next()) {
                 String schemaName = rs.getString("TABLE_SCHEM");
-                String tableName = rs.getString("TABLE_NAME");
-                Table table = new Table(databaseName, (schemaName == null) ? "null" : schemaName, tableName);
+                schemaName = (schemaName == null) ? "null" : schemaName.toLowerCase();
+                String tableName = rs.getString("TABLE_NAME").toLowerCase();
 
                 // Add the table if it is not an excluded table.
-                if (! targetDataSource.getExcludeObjects().getTables().contains(table.getFullyQualifiedName().toLowerCase())) {
+                if (! targetDataSource.getExcludeObjects().getTables().contains(schemaName + "." + tableName)) {
+                    Table table = new Table(databaseName, schemaName, tableName);
                     tables.add(table);
                 }
             }
@@ -149,14 +151,14 @@ public class DatabaseMetadataCrawlerDao {
 
             while (rs.next()) {
                 String schemaName = rs.getString("TABLE_SCHEM");
-                String tableName = rs.getString("TABLE_NAME");
-                String columnName = rs.getString("COLUMN_NAME");
+                schemaName = (schemaName == null) ? "null" : schemaName.toLowerCase();
+                String tableName = rs.getString("TABLE_NAME").toLowerCase();
+                String columnName = rs.getString("COLUMN_NAME").toLowerCase();
                 int dataType = rs.getInt("DATA_TYPE");
 
-                Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
-
                 // Add the column if it is not an excluded column.
-                if (! targetDataSource.getExcludeObjects().getColumns().contains(column.getFullyQualifiedName().toLowerCase())) {
+                if (! targetDataSource.getExcludeObjects().getColumns().contains(schemaName + "." + tableName + "." + columnName)) {
+                    Column column = new Column(databaseName, schemaName, tableName, columnName, dataType, null);
                     columns.add(column);
                 }
             }

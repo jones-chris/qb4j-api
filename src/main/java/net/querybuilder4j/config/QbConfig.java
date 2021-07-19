@@ -81,7 +81,7 @@ public class QbConfig {
 
         @Getter
         @Setter
-        private ExcludeObjects excludeObjects;
+        private ExcludeObjects excludeObjects = new ExcludeObjects();
 
         private DataSource dataSource;
 
