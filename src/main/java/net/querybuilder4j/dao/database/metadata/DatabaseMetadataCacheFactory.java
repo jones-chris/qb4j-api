@@ -5,6 +5,7 @@ import net.querybuilder4j.exceptions.CacheTypeNotRecognizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.annotation.Configuration;
+import redis.clients.jedis.Jedis;
 
 import static net.querybuilder4j.dao.database.metadata.CacheType.IN_MEMORY;
 import static net.querybuilder4j.dao.database.metadata.CacheType.REDIS;
@@ -39,10 +40,34 @@ public class DatabaseMetadataCacheFactory extends AbstractFactoryBean<DatabaseMe
         } else if (REDIS.equals(cacheType)) {
             return new RedisDatabaseMetadataCacheDaoImpl(
                     this.qbConfig,
-                    this.databaseMetadataCrawlerDao
+                    this.databaseMetadataCrawlerDao,
+                    this.getRedisClient()
             );
         } else {
             throw new CacheTypeNotRecognizedException(cacheType + " is not a recognized database metadata cache type");
         }
+    }
+
+    /**
+     * Instantiates a {@link Jedis} client for interacting with a Redis instance.
+     *
+     * @return {@link Jedis}
+     */
+    private Jedis getRedisClient() {
+        final String host = this.qbConfig.getDatabaseMetadataCacheSource().getHost();
+        final int port = this.qbConfig.getDatabaseMetadataCacheSource().getPort();
+        final Jedis jedis = new Jedis(host, port);
+
+        final String password = this.qbConfig.getDatabaseMetadataCacheSource().getPassword();
+        final String username = this.qbConfig.getDatabaseMetadataCacheSource().getUsername();
+        if (password != null) {
+            if (username == null) {
+                jedis.auth(password);
+            } else {
+                jedis.auth(username, password);
+            }
+        }
+
+        return jedis;
     }
 }
