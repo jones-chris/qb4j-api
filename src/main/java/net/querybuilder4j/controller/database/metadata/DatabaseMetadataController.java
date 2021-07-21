@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
+@CrossOrigin(origins = { "http://localhost:3000" }) // Intended for local development.
 @RequestMapping("/metadata")
 public class DatabaseMetadataController {
 
@@ -26,7 +26,7 @@ public class DatabaseMetadataController {
     }
 
     /**
-     * Returns all QueryBuilder4J target data sources.
+     * Returns all qb target data sources.
      *
      * @return A ResponseEntity containing a List of Database objects.
      */
@@ -42,8 +42,8 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Schema objects.
      */
     @GetMapping(value = "/{database}/schema")
-    public ResponseEntity<List<Schema>> getSchemas(@PathVariable String database) throws Exception {
-        List<Schema> schemas = databaseMetaDataService.getSchemas(database);
+    public ResponseEntity<List<Schema>> getSchemas(@PathVariable String database) {
+        List<Schema> schemas = this.databaseMetaDataService.getSchemas(database);
         return ResponseEntity.ok(schemas);
     }
 
@@ -55,12 +55,14 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Table objects.
      */
     @GetMapping(value = "/{database}/{schemas}/table-and-view")
-    public ResponseEntity<List<Table>> getTablesAndViews(@PathVariable String database,
-                                                         @PathVariable String schemas) throws Exception {
+    public ResponseEntity<List<Table>> getTablesAndViews(
+            @PathVariable String database,
+            @PathVariable String schemas
+    ) {
         String[] splitSchemas = schemas.split("&");
         List<Table> allTables = new ArrayList<>();
         for (String schema : splitSchemas) {
-            List<Table> tables = databaseMetaDataService.getTablesAndViews(database, schema);
+            List<Table> tables = this.databaseMetaDataService.getTablesAndViews(database, schema);
             allTables.addAll(tables);
         }
 
@@ -74,10 +76,10 @@ public class DatabaseMetadataController {
      * @return A ResponseEntity containing a List of Column objects.
      */
     @PostMapping(value = "/{database}/{schema}/{tables}/column")
-    public ResponseEntity<List<Column>> getColumns(@RequestBody List<Table> tables) throws Exception {
+    public ResponseEntity<List<Column>> getColumns(@RequestBody List<Table> tables) {
         List<Column> allColumns = new ArrayList<>();
         for (Table table : tables) {
-            List<Column> columns = databaseMetaDataService.getColumns(table.getDatabaseName(), table.getSchemaName(), table.getTableName());
+            List<Column> columns = this.databaseMetaDataService.getColumns(table.getDatabaseName(), table.getSchemaName(), table.getTableName());
             allColumns.addAll(columns);
         }
 

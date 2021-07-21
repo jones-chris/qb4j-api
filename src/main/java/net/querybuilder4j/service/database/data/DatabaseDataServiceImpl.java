@@ -16,19 +16,21 @@ public class DatabaseDataServiceImpl implements DatabaseDataService {
     }
 
     @Override
-    public QueryResult executeQuery(String databaseName, String sql) throws Exception {
+    public QueryResult executeQuery(String databaseName, String sql) {
         return databaseDataDao.executeQuery(databaseName, sql);
     }
 
     @Override
-    public QueryResult getColumnMembers(String databaseName,
-                                        String schema,
-                                        String table,
-                                        String column,
-                                        int limit,
-                                        int offset,
-                                        boolean ascending,
-                                        String search) throws Exception {
+    public QueryResult getColumnMembers(
+            String databaseName,
+            String schema,
+            String table,
+            String column,
+            int limit,
+            int offset,
+            boolean ascending,
+            String search
+    ) {
         return databaseDataDao.getColumnMembers(databaseName, schema, table, column, limit, offset, ascending, search);
     }
 

@@ -12,12 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
+@CrossOrigin(origins = { "http://localhost:3000" }) // Intended for local development,
 @RequestMapping("/query-template")
 public class QueryTemplateController {
 
     private QueryTemplateService queryTemplateService;
-
 
     @Autowired
     public QueryTemplateController(QueryTemplateService queryTemplateService) {
@@ -43,8 +42,10 @@ public class QueryTemplateController {
      * @return The {@link SelectStatement} object with the name parameter.
      */
     @GetMapping("/{name}")
-    public ResponseEntity<SelectStatement> getQueryTemplateById(@PathVariable String name,
-                                                                @RequestParam int version) {
+    public ResponseEntity<SelectStatement> getQueryTemplateById(
+            @PathVariable String name,
+            @RequestParam int version
+    ) {
         SelectStatement queryTemplate = queryTemplateService.findByName(name, version);
         return ResponseEntity.ok(queryTemplate);
     }
@@ -77,8 +78,10 @@ public class QueryTemplateController {
     }
 
     @GetMapping("{name}/metadata")
-    public ResponseEntity<SelectStatement.Metadata> getQueryTemplateMetadata(@PathVariable String name,
-                                                                             @RequestParam int version) {
+    public ResponseEntity<SelectStatement.Metadata> getQueryTemplateMetadata(
+            @PathVariable String name,
+            @RequestParam int version
+    ) {
         SelectStatement.Metadata metadata = this.queryTemplateService.getMetadata(name, version);
         return ResponseEntity.ok(metadata);
     }

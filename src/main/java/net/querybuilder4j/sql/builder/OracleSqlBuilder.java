@@ -16,15 +16,12 @@ public class OracleSqlBuilder extends SqlBuilder {
         this.createCommonTableExpressionClause();
         this.createSelectClause();
         this.createFromClause();
+        this.createJoinClause();
         this.createWhereClause();
 
         // Limit is a WHERE clause in Oracle SQL.
-        if (! this.selectStatement.getCriteria().isEmpty()) {
-            this.stringBuilder.append(" AND ");
-        } else {
-            this.stringBuilder.append(" WHERE ");
-        }
         this.createLimitClause();
+
         this.createGroupByClause();
         this.createOrderByClause();
         this.createOffsetClause();
@@ -37,7 +34,12 @@ public class OracleSqlBuilder extends SqlBuilder {
         Long limit = this.selectStatement.getLimit();
 
         if (limit != null) {
-            this.stringBuilder.append(" ROWNUM < ").append(limit);
+            if (this.selectStatement.getCriteria().isEmpty()) {
+                this.stringBuilder.append(" WHERE ROWNUM < ").append(limit);
+            } else {
+                this.stringBuilder.append(" AND ROWNUM < ").append(limit);
+            }
+
         }
     }
 

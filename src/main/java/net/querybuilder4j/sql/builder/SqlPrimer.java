@@ -10,7 +10,6 @@ import net.querybuilder4j.sql.statement.join.Join;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.querybuilder4j.sql.statement.join.Join.JoinType.*;
 

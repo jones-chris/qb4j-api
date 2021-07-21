@@ -2,6 +2,7 @@ package net.querybuilder4j.sql.statement;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import net.querybuilder4j.util.CriteriaDeserializer;
 import net.querybuilder4j.sql.statement.column.Column;
@@ -11,6 +12,7 @@ import net.querybuilder4j.sql.statement.criterion.CriterionParameter;
 import net.querybuilder4j.sql.statement.join.Join;
 import net.querybuilder4j.sql.statement.cte.CommonTableExpression;
 import net.querybuilder4j.sql.statement.table.Table;
+import net.querybuilder4j.util.CriteriaSerializer;
 
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -42,13 +44,13 @@ public class SelectStatement {
      * A {@link List<CommonTableExpression>} or also known as WITH statements.
      */
     @JsonProperty(value = "commonTableExpressions")
-    private List<CommonTableExpression> commonTableExpressions = new ArrayList<>();
+    private final List<CommonTableExpression> commonTableExpressions = new ArrayList<>();
 
     /**
      * The columns in the SELECT SQL clause.
      */
     @JsonProperty(value = "columns", required = true)
-    private List<Column> columns = new ArrayList<>();
+    private final List<Column> columns = new ArrayList<>();
 
     /**
      * The table in the FROM SQL clause.
@@ -60,14 +62,15 @@ public class SelectStatement {
      * The criteria in the WHERE SQL clause.
      */
     @JsonDeserialize(using = CriteriaDeserializer.class)
+    @JsonSerialize(using = CriteriaSerializer.class)
     @JsonProperty(value = "criteria")
-    private List<Criterion> criteria = new ArrayList<>();
+    private final List<Criterion> criteria = new ArrayList<>();
 
     /**
      * The joins in the JOIN SQL clause.
      */
     @JsonProperty(value = "joins")
-    private List<Join> joins = new ArrayList<>();
+    private final List<Join> joins = new ArrayList<>();
 
     /**
      * Whether to include DISTINCT in the SELECT SQL clause

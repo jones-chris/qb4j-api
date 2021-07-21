@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.querybuilder4j</groupId>
     <artifactId>qb</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-dev</version>
     <packaging>jar</packaging>
 
     <name>qb</name>
@@ -125,6 +125,26 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <extensions>
@@ -223,14 +243,6 @@
             <version>3.2.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
@@ -278,6 +290,22 @@
             <groupId>org.springframework.hateoas</groupId>
             <artifactId>spring-hateoas</artifactId>
             <version>1.2.3</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>2.2.3.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

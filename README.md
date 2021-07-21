@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/jones-chris/qb.svg?branch=master)](https://travis-ci.com/jones-chris/qb)
+[![codecov](https://codecov.io/gh/jones-chris/qb/branch/master/graph/badge.svg?token=5RR0T33VWS)](https://codecov.io/gh/jones-chris/qb)
 
 # qb (Query Builder)
 

@@ -1,7 +1,6 @@
 package net.querybuilder4j.controller.database.data;
 
 import net.querybuilder4j.service.database.data.DatabaseDataService;
-import net.querybuilder4j.sql.builder.SqlBuilder;
 import net.querybuilder4j.sql.builder.SqlBuilderFactory;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.util.QueryResult;
@@ -10,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = { "http://localhost:3000", "http://querybuilder4j.net" })
+@CrossOrigin(origins = { "http://localhost:3000" }) // Intended for local development.
 @RequestMapping("/data")
 public class DatabaseDataController {
 
@@ -38,14 +37,16 @@ public class DatabaseDataController {
      * @return A ResponseEntity containing
      */
     @GetMapping(value = "/{database}/{schema}/{table}/{column}/column-member")
-    public ResponseEntity<QueryResult> getColumnMembers(@PathVariable String database,
-                                                        @PathVariable String schema,
-                                                        @PathVariable String table,
-                                                        @PathVariable String column,
-                                                        @RequestParam int limit,
-                                                        @RequestParam int offset,
-                                                        @RequestParam boolean ascending,
-                                                        @RequestParam(required = false) String search) throws Exception {
+    public ResponseEntity<QueryResult> getColumnMembers(
+            @PathVariable String database,
+            @PathVariable String schema,
+            @PathVariable String table,
+            @PathVariable String column,
+            @RequestParam int limit,
+            @RequestParam int offset,
+            @RequestParam boolean ascending,
+            @RequestParam(required = false) String search
+    ) throws Exception {
         QueryResult columnMembers = databaseDataService.getColumnMembers(database, schema, table, column, limit, offset, ascending, search);
         return ResponseEntity.ok(columnMembers);
     }
@@ -58,8 +59,10 @@ public class DatabaseDataController {
      * @return A {@link ResponseEntity} containing a {@link QueryResult}.
      */
     @PostMapping(value = "/{database}/query")
-    public ResponseEntity<QueryResult> getQueryResults(@PathVariable String database,
-                                                       @RequestBody SelectStatement selectStatement) throws Exception {
+    public ResponseEntity<QueryResult> getQueryResults(
+            @PathVariable String database,
+            @RequestBody SelectStatement selectStatement
+    ) throws Exception {
         String sql = this.sqlBuilderFactory
                 .buildSqlBuilder(selectStatement)
                 .buildSql();

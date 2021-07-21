@@ -23,8 +23,10 @@ public class QbConfig {
     private QueryTemplateDataSource queryTemplateDataSource;
     private DatabaseMetadataCacheSource databaseMetadataCacheSource;
 
-    public QbConfig(List<TargetDataSource> targetDataSources,
-                      QueryTemplateDataSource  queryTemplateDataSource) {
+    public QbConfig(
+            List<TargetDataSource> targetDataSources,
+            QueryTemplateDataSource  queryTemplateDataSource
+    ) {
         this.targetDataSources = targetDataSources;
         this.queryTemplateDataSource = queryTemplateDataSource;
     }
@@ -81,7 +83,7 @@ public class QbConfig {
 
         @Getter
         @Setter
-        private ExcludeObjects excludeObjects;
+        private ExcludeObjects excludeObjects = new ExcludeObjects();
 
         private DataSource dataSource;
 

@@ -1,19 +1,14 @@
 package net.querybuilder4j.dao.database.metadata;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.querybuilder4j.config.QbConfig;
-import net.querybuilder4j.exceptions.CacheJsonDeserializationException;
 import net.querybuilder4j.exceptions.CacheMissException;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
-import net.querybuilder4j.util.DatabaseMetadataCrawler;
 import net.querybuilder4j.util.Utils;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,22 +18,22 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
     /**
      * The Redis database index that will hold database metadata.
      */
-    private final int DATABASE_REDIS_DB = 0;
+    static final int DATABASE_REDIS_DB = 0;
 
     /**
      * The Redis database index that will hold schema metadata.
      */
-    private final int SCHEMA_REDIS_DB = 1;
+    static final int SCHEMA_REDIS_DB = 1;
 
     /**
      * The Redis database index that will hold table/view metadata.
      */
-    private final int TABLE_REDIS_DB = 2;
+    static final int TABLE_REDIS_DB = 2;
 
     /**
      * The Redis database index that will hold column metadata.
      */
-    private final int COLUMN_REDIS_DB = 3;
+    static final int COLUMN_REDIS_DB = 3;
 
     /**
      * The {@link QbConfig} encapsulating the application context.
@@ -46,34 +41,27 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
     private final QbConfig qbConfig;
 
     /**
-     * The Redis/Jedis client.
+     * The Redis client.
      */
     private final Jedis jedis;
 
-    public RedisDatabaseMetadataCacheDaoImpl(QbConfig qbConfig) {
+    /**
+     * The class responsible for reading metadata from the target databases.
+     */
+    private final DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao;
+
+    public RedisDatabaseMetadataCacheDaoImpl(
+            QbConfig qbConfig,
+            DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao,
+            Jedis jedis
+    ) {
         this.qbConfig = qbConfig;
-
-        // I know this constructor could just take `host` and `port` as parameters, but I think passing the QbConfig
-        // parameter makes it clearer that this class'/constructor's parameters originate from the QbConfig bean and,
-        // therefore, it's related qb4j.yml file.
-        String host = this.qbConfig.getDatabaseMetadataCacheSource().getHost();
-        int port = this.qbConfig.getDatabaseMetadataCacheSource().getPort();
-        this.jedis = new Jedis(host, port);
-
-        String password = this.qbConfig.getDatabaseMetadataCacheSource().getPassword();
-        String username = this.qbConfig.getDatabaseMetadataCacheSource().getUsername();
-        if (password != null) {
-            if (username == null) {
-                this.jedis.auth(password);
-            } else {
-                this.jedis.auth(username, password);
-            }
-        }
-
+        this.databaseMetadataCrawlerDao = databaseMetadataCrawlerDao;
+        this.jedis = jedis;
     }
 
     @Override
-    public void refreshCache() throws Exception {
+    public void refreshCache() {
         // Clear all Redis databases.
         this.jedis.flushAll();
 
@@ -81,25 +69,25 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
         // TODO:  Make this loop asynchronous for each database?
         for (QbConfig.TargetDataSource targetDataSource : this.qbConfig.getTargetDataSources()) {
             // Write the database metadata to Redis.
-            this.jedis.select(this.DATABASE_REDIS_DB);
+            this.jedis.select(DATABASE_REDIS_DB);
             Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());
             this.jedis.set(database.getFullyQualifiedName(), database.toString());
 
             // Get schema metadata and write to Redis.
-            List<Schema> schemas = DatabaseMetadataCrawler.getSchemas(targetDataSource);
-            this.jedis.select(this.SCHEMA_REDIS_DB);
+            List<Schema> schemas = this.databaseMetadataCrawlerDao.getSchemas(targetDataSource);
+            this.jedis.select(SCHEMA_REDIS_DB);
             schemas.forEach(schema -> this.jedis.set(schema.getFullyQualifiedName(), schema.toString()));
 
             // Get tables metadata and write to Redis.
             for (Schema schema : schemas) {
-                List<Table> tables = DatabaseMetadataCrawler.getTablesAndViews(targetDataSource, schema.getSchemaName());
-                this.jedis.select(this.TABLE_REDIS_DB);
+                List<Table> tables = this.databaseMetadataCrawlerDao.getTablesAndViews(targetDataSource, schema.getSchemaName());
+                this.jedis.select(TABLE_REDIS_DB);
                 tables.forEach(table -> this.jedis.set(table.getFullyQualifiedName(), table.toString()));
 
                 // Get columns
                 for (Table table : tables) {
-                    List<Column> columns = DatabaseMetadataCrawler.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
-                    this.jedis.select(this.COLUMN_REDIS_DB);
+                    List<Column> columns = this.databaseMetadataCrawlerDao.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
+                    this.jedis.select(COLUMN_REDIS_DB);
                     columns.forEach(column -> this.jedis.set(column.getFullyQualifiedName(), column.toString()));
                 }
             }
@@ -116,7 +104,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public Database findDatabases(String databaseName) {
-        this.jedis.select(this.DATABASE_REDIS_DB);
+        this.jedis.select(DATABASE_REDIS_DB);
 
         String databaseJson = this.jedis.get(databaseName);
         return Utils.deserializeJson(databaseJson, Database.class);
@@ -124,9 +112,9 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public List<Schema> findSchemas(String databaseName) {
-        this.jedis.select(this.SCHEMA_REDIS_DB);
+        this.jedis.select(SCHEMA_REDIS_DB);
 
-        // Get all Redis keys that start with `{datbabaseName}.*` (notice the trailing period before `*`.
+        // Get all Redis keys that start with `{databaseName}.*` (notice the trailing period before `*`.
         String databaseKeyPattern = databaseName + ".*";
         Set<String> schemasRedisKeys = this.jedis.keys(databaseKeyPattern);
 
@@ -144,7 +132,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public List<Table> findTables(String databaseName, String schemaName) {
-        this.jedis.select(this.TABLE_REDIS_DB);
+        this.jedis.select(TABLE_REDIS_DB);
 
         String tableKeyPattern = String.format("%s.%s.*", databaseName, schemaName);
         Set<String> tablesRedisKeys = this.jedis.keys(tableKeyPattern);
@@ -163,7 +151,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public List<Column> findColumns(String databaseName, String schemaName, String tableName) {
-        this.jedis.select(this.COLUMN_REDIS_DB);
+        this.jedis.select(COLUMN_REDIS_DB);
 
         String columnKeyPattern = String.format("%s.%s.%s.*", databaseName, schemaName, tableName);
         Set<String> columnsRedisKeys = this.jedis.keys(columnKeyPattern);
@@ -182,7 +170,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public int getColumnDataType(Column column) {
-        this.jedis.select(this.COLUMN_REDIS_DB);
+        this.jedis.select(COLUMN_REDIS_DB);
 
         String fullyQualifiedColumnName = String.format("%s.%s.%s.%s",
                 column.getDatabaseName(), column.getSchemaName(), column.getTableName(), column.getColumnName()
@@ -195,7 +183,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public boolean columnExists(Column column) {
-        this.jedis.select(this.COLUMN_REDIS_DB);
+        this.jedis.select(COLUMN_REDIS_DB);
 
         String fullyQualifiedColumnName = String.format("%s.%s.%s.%s",
                 column.getDatabaseName(), column.getSchemaName(), column.getTableName(), column.getColumnName()
@@ -205,15 +193,16 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public boolean columnsExist(List<Column> columns) {
-        this.jedis.select(this.COLUMN_REDIS_DB);
+        this.jedis.select(COLUMN_REDIS_DB);
 
-        String[] fullyQualifiedColumnNames = (String[]) columns.stream()
-                .map(column -> {
-                    return String.format("%s.%s.%s.%s",
-                            column.getDatabaseName(), column.getSchemaName(), column.getTableName(), column.getColumnName()
-                    );
-                })
-                .toArray();
+        String[] fullyQualifiedColumnNames = columns.stream()
+                .map(column ->
+                        String.format(
+                                "%s.%s.%s.%s",
+                                column.getDatabaseName(), column.getSchemaName(), column.getTableName(), column.getColumnName()
+                        )
+                )
+                .toArray(String[]::new);
 
         long numberOfExistingKeys = this.jedis.exists(fullyQualifiedColumnNames);
 
@@ -222,7 +211,7 @@ public class RedisDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCacheD
 
     @Override
     public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) {
-        this.jedis.select(this.COLUMN_REDIS_DB);
+        this.jedis.select(COLUMN_REDIS_DB);
 
         String fullyQualifiedColumnName = String.format("%s.%s.%s.%s", databaseName, schemaName, tableName, columnName);
         String columnJson = this.jedis.get(fullyQualifiedColumnName);

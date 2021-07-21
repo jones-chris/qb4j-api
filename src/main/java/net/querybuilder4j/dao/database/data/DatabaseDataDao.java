@@ -4,7 +4,7 @@ import net.querybuilder4j.util.QueryResult;
 
 public interface DatabaseDataDao {
 
-    QueryResult executeQuery(String databaseName, String sql) throws Exception;
-    QueryResult getColumnMembers(String databaseName, String schema, String table, String column, int limit, int offset, boolean ascending, String search) throws Exception;
+    QueryResult executeQuery(String databaseName, String sql);
+    QueryResult getColumnMembers(String databaseName, String schema, String table, String column, int limit, int offset, boolean ascending, String search);
 
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.constants.DatabaseType;
 import net.querybuilder4j.exceptions.JsonDeserializationException;
+import net.querybuilder4j.exceptions.QueryTemplateNotFoundException;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.util.Utils;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -125,7 +126,9 @@ public class SqlDatabaseQueryTemplateDaoImpl implements QueryTemplateDao {
                 String.class
         );
 
-        Objects.requireNonNull(json, "Did not find JSON string for query template with name, " + name);
+        if (json == null) {
+            throw new QueryTemplateNotFoundException(name, version);
+        }
 
         try {
             return this.objectMapper.readValue(json, SelectStatement.class);

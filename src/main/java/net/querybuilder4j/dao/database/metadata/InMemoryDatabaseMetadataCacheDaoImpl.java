@@ -1,15 +1,15 @@
 package net.querybuilder4j.dao.database.metadata;
 
+import lombok.Getter;
 import net.querybuilder4j.config.QbConfig;
+import net.querybuilder4j.exceptions.CacheMissException;
 import net.querybuilder4j.exceptions.CacheRefreshException;
 import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
-import net.querybuilder4j.util.DatabaseMetadataCrawler;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,53 +18,38 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
 
     private final QbConfig qbConfig;
 
-    private Set<Database> cache = new HashSet<>();
+    private final DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao;
 
-    public Set<Database> getCache() {
-        return cache;
-    }
+    @Getter
+    private final Set<Database> cache = new HashSet<>();
 
-    public InMemoryDatabaseMetadataCacheDaoImpl(QbConfig qbConfig) {
+    public InMemoryDatabaseMetadataCacheDaoImpl(
+            QbConfig qbConfig,
+            DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao
+    ) {
         this.qbConfig = qbConfig;
-        refreshCache();  // Populate cache on cache instantiation - which should occur at app start up.
+        this.databaseMetadataCrawlerDao = databaseMetadataCrawlerDao;
+
+        this.refreshCache();
     }
 
     /**
-     * Run every 24 hours thereafter.  This method walks the qb4j target databases that are included in the qbConfig
-     * and saves the target database metadata (databases, schemas, tables, and columns) to this class' `cache` field.
+     * Run every 24 hours thereafter.  This method calls {@link DatabaseMetadataCrawlerDao#getTargetDataSourceMetadata(List)}
+     * which retrieves database metadata (schemas, tables, and columns) and persists the metadata to this class' `cache` field.
      * This class eager loads this metadata.
      *
      * @throws CacheRefreshException If an exception is raised when querying one of the target data sources.
      */
     @Override
-    @Scheduled(fixedRate = 8640000000L)
+    @Scheduled(fixedRate = 8640000000L) // todo:  Try parameterize this somehow and/or create an API endpoint that admin clients can hit to initiate a cache refresh.
     public void refreshCache() throws CacheRefreshException {
-        List<Database> databases = new ArrayList<>();
-
-        for (QbConfig.TargetDataSource targetDataSource : this.qbConfig.getTargetDataSources()) {
-            // Get schemas
-            List<Schema> schemas = DatabaseMetadataCrawler.getSchemas(targetDataSource);
-            Database database = new Database(targetDataSource.getName(), targetDataSource.getDatabaseType());
-            database.setSchemas(schemas);
-
-            // Get tables
-            for (Schema schema : database.getSchemas()) {
-                List<Table> tables = DatabaseMetadataCrawler.getTablesAndViews(targetDataSource, schema.getSchemaName());
-                schema.setTables(tables);
-
-                // Get columns
-                for (Table table : schema.getTables()) {
-                    List<Column> columns = DatabaseMetadataCrawler.getColumns(targetDataSource, table.getSchemaName(), table.getTableName());
-                    table.setColumns(columns);
-                }
-            }
-
-            databases.add(database);
-        }
-
+        // Populate cache on cache instantiation - which should occur at app start up.
         // Clear cache all at once and save new database metadata list to cache.
-        cache.clear();
-        cache.addAll(databases);
+        List<QbConfig.TargetDataSource> targetDataSources = this.qbConfig.getTargetDataSources();
+        List<Database> databases = this.databaseMetadataCrawlerDao.getTargetDataSourceMetadata(targetDataSources);
+
+        this.cache.clear();
+        this.cache.addAll(databases);
     }
 
     /**
@@ -81,7 +66,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
         return this.cache.stream()
                 .filter(database -> database.getDatabaseName().equals(databaseName))
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -95,7 +80,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
                 .filter(schema -> schema.getSchemaName().equals(schemaName))
                 .map(Schema::getTables)
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -104,7 +89,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
                 .filter(table -> table.getTableName().equals(tableName))
                 .map(Table::getColumns) // todo: sort alphabetically.
                 .findAny()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -118,7 +103,7 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
                 .filter(col -> col.getColumnName().equals(columnName))
                 .map(Column::getDataType)
                 .findFirst()
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(CacheMissException::new);
     }
 
     @Override
@@ -128,13 +113,8 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
         String tableName = column.getTableName();
         String columnName = column.getColumnName();
 
-        try {
-            return this.findColumns(databaseName, schemaName, tableName).stream()
-                    .anyMatch(col -> col.getColumnName().equals(columnName));
-        } catch (Exception ex) {
-            return false;
-        }
-
+        return this.findColumns(databaseName, schemaName, tableName).stream()
+                .anyMatch(col -> col.getColumnName().equals(columnName));
     }
 
     @Override
@@ -149,12 +129,12 @@ public class InMemoryDatabaseMetadataCacheDaoImpl implements DatabaseMetadataCac
     }
 
     @Override
-    public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) throws Exception {
+    public Column findColumnByName(String databaseName, String schemaName, String tableName, String columnName) {
         return this.findColumns(databaseName, schemaName, tableName)
                 .stream()
                 .filter(column -> column.getColumnName().equals(columnName))
                 .findFirst()
-                .orElseThrow(Exception::new);
+                .orElseThrow(CacheMissException::new);
     }
 
 }

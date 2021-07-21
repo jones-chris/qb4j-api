@@ -24,7 +24,7 @@ public class QueryTemplateDaoFactory extends AbstractFactoryBean<QueryTemplateDa
     }
 
     @Override
-    protected QueryTemplateDao createInstance() throws Exception {
+    protected QueryTemplateDao createInstance() {
         QueryTemplateRepositoryType repositoryType = this.qbConfig.getQueryTemplateDataSource().getRepositoryType();
 
         if (repositoryType.equals(QueryTemplateRepositoryType.IN_MEMORY)) {

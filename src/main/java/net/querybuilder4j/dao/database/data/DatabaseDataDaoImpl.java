@@ -3,6 +3,7 @@ package net.querybuilder4j.dao.database.data;
 import net.querybuilder4j.config.QbConfig;
 import net.querybuilder4j.constants.DatabaseType;
 import net.querybuilder4j.dao.database.metadata.DatabaseMetadataCacheDao;
+import net.querybuilder4j.exceptions.QueryFailureException;
 import net.querybuilder4j.sql.builder.SqlBuilderFactory;
 import net.querybuilder4j.sql.statement.SelectStatement;
 import net.querybuilder4j.sql.statement.column.Column;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 @Repository
@@ -41,29 +43,50 @@ public class DatabaseDataDaoImpl implements DatabaseDataDao {
     }
 
     @Override
-    public QueryResult executeQuery(String databaseName, String sql) throws Exception {
+    public QueryResult executeQuery(String databaseName, String sql) {
         DataSource dataSource = qbConfig.getTargetDataSourceAsDataSource(databaseName);
 
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery(sql);
             return new QueryResult(rs, sql);
+        } catch (SQLException ex) {
+            throw new QueryFailureException(ex);
         }
 
     }
 
     @Override
-    public QueryResult getColumnMembers(String databaseName, String schemaName, String tableName, String columnName, int limit, int offset,
-                                        boolean ascending, String search) throws Exception {
+    public QueryResult getColumnMembers(
+            String databaseName,
+            String schemaName,
+            String tableName,
+            String columnName,
+            int limit,
+            int offset,
+            boolean ascending,
+            String search
+    ) {
+        // todo:  Consider caching this select statement object so that it can just be modified and not instantiated anew upon each request.
         SelectStatement selectStatement = new SelectStatement();
+
+        // Set database.
         DatabaseType databaseType = this.databaseMetadataCacheDao.findDatabases(databaseName).getDatabaseType();
         selectStatement.setDatabase(new Database(databaseName, databaseType));
+
+        // Set distinct.
         selectStatement.setDistinct(true);
+
+        // Create column
         int columnDataType = this.databaseMetadataCacheDao.findColumnByName(databaseName, schemaName, tableName, columnName)
                 .getDataType();
         Column column = new Column(databaseName, schemaName, tableName, columnName, columnDataType, null);
         selectStatement.getColumns().add(column);
+
+        // Create table.
         selectStatement.setTable(new Table(databaseName, schemaName, tableName));
+
+        // Create criterion.
         if (search != null) {
             Filter filter = new Filter();
             filter.getValues().add(search);
@@ -71,21 +94,19 @@ public class DatabaseDataDaoImpl implements DatabaseDataDao {
             Criterion criterion = new Criterion(0, null, null, column, Operator.like, filter, null);
             selectStatement.getCriteria().add(criterion);
         }
+
+        // Set limit, offset, order by, and ascending.
         selectStatement.setLimit(Integer.toUnsignedLong(limit));
         selectStatement.setOffset(Integer.toUnsignedLong(offset));
         selectStatement.setOrderBy(true);
         selectStatement.setAscending(ascending);
 
+        // Build the SQL string.
         String sql = this.sqlBuilderFactory.buildSqlBuilder(selectStatement)
                 .buildSql();
 
-        DataSource dataSource = qbConfig.getTargetDataSourceAsDataSource(databaseName);
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
-            return new QueryResult(rs, null);
-        }
-
+        // Query the database.
+        return this.executeQuery(databaseName, sql);
     }
 
 }

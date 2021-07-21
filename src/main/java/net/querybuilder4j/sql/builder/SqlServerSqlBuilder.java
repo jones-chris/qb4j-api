@@ -16,6 +16,7 @@ public class SqlServerSqlBuilder extends SqlBuilder {
         this.createCommonTableExpressionClause();
         this.createSelectClause();
         this.createFromClause();
+        this.createJoinClause();
         this.createWhereClause();
         this.createGroupByClause();
         this.createOrderByClause();

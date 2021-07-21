@@ -45,9 +45,9 @@ public class SqlValidator {
 
     public static void assertIsValid(SelectStatement selectStatement, DatabaseMetadataCacheDao databaseMetadataCacheDao) {
         // Validate columns.
-        if (selectStatement.getColumns() == null) {
-            throw new IllegalArgumentException("Columns cannot be null");
-        }
+//        if (selectStatement.getColumns() == null) {
+//            throw new IllegalArgumentException("Columns cannot be null");
+//        }
 
         if (selectStatement.getColumns().isEmpty()) {
             throw new IllegalArgumentException("Columns is empty");
@@ -61,14 +61,14 @@ public class SqlValidator {
         }
 
         // Validate joins.
-        if (selectStatement.getJoins() == null) {
-            throw new IllegalArgumentException("Joins cannot be null");
-        }
+//        if (selectStatement.getJoins() == null) {
+//            throw new IllegalArgumentException("Joins cannot be null");
+//        }
 
         // Validate criteria.
-        if (selectStatement.getCriteria() == null) {
-            throw new IllegalArgumentException("The Criteria cannot be null");
-        }
+//        if (selectStatement.getCriteria() == null) {
+//            throw new IllegalArgumentException("The Criteria cannot be null");
+//        }
 
         for (Criterion criterion : selectStatement.getCriteria()) {
             assertIsValid(criterion);
@@ -117,9 +117,7 @@ public class SqlValidator {
         }
         else if (jdbcDataType == Types.BOOLEAN) {
             for (String value : criterion.getFilter().getValues()) {
-                try {
-                    Boolean.valueOf(value);
-                } catch (NumberFormatException e) {
+                if (! Boolean.TRUE.toString().toLowerCase().equals(value) || ! Boolean.FALSE.toString().toLowerCase().equals(value)) {
                     throw new CriterionColumnDataTypeAndFilterMismatchException("BOOLEAN", value);
                 }
             }
@@ -186,7 +184,7 @@ public class SqlValidator {
         }
     }
 
-    public static void assertSqlIsClean(Criterion criterion) throws IllegalArgumentException {
+    public static void assertSqlIsClean(Criterion criterion) {
         // Only perform this validation on the criterion's filter's values.  Therefore, we assume the criterion's filter's
         // sub queries and parameters have been interpolated into the criterion's filter's values already.
         List<String> values = criterion.getFilter().getValues();
