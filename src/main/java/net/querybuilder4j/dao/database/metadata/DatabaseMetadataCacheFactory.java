@@ -15,11 +15,15 @@ public class DatabaseMetadataCacheFactory extends AbstractFactoryBean<DatabaseMe
 
     private final QbConfig qbConfig;
 
-    private final DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao = new DatabaseMetadataCrawlerDao();
+    private final DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao;
 
     @Autowired
-    public DatabaseMetadataCacheFactory(QbConfig qbConfig) {
+    public DatabaseMetadataCacheFactory(
+            QbConfig qbConfig,
+            DatabaseMetadataCrawlerDao databaseMetadataCrawlerDao
+    ) {
         this.qbConfig = qbConfig;
+        this.databaseMetadataCrawlerDao = databaseMetadataCrawlerDao;
         this.setSingleton(true);  // Always create singletons regardless of the DatabaseMetadataCacheDao implementation.
     }
 

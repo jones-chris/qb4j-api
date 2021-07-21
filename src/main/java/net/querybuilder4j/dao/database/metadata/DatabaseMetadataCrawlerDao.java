@@ -6,6 +6,7 @@ import net.querybuilder4j.sql.statement.column.Column;
 import net.querybuilder4j.sql.statement.database.Database;
 import net.querybuilder4j.sql.statement.schema.Schema;
 import net.querybuilder4j.sql.statement.table.Table;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -18,6 +19,7 @@ import java.util.Set;
  * This class is responsible for crawling a {@link List<net.querybuilder4j.config.QbConfig.TargetDataSource>} and building
  * a {@link Set<Database>} from the metadata.
  */
+@Repository
 public class DatabaseMetadataCrawlerDao {
 
     /**
